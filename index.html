@@ -1,0 +1,1861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>PUFFLOG</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
+}
+
+html,body{
+    margin:0;
+    padding:0;
+    background:#050505;
+    color:#fff;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+}
+
+body{
+    min-height:100vh;
+    padding-bottom:30px;
+}
+
+.app{
+    width:100%;
+    max-width:520px;
+    margin:auto;
+    padding:18px 14px 30px;
+}
+
+.header{
+    text-align:center;
+    padding:8px 0 18px;
+}
+
+.logo{
+    font-size:34px;
+    font-weight:900;
+    letter-spacing:5px;
+}
+
+.subtitle{
+    color:#777;
+    font-size:12px;
+    letter-spacing:2px;
+    margin-top:4px;
+}
+
+.card{
+    background:#0d0d0d;
+    border:1px solid #222;
+    border-radius:18px;
+    padding:16px;
+    margin-bottom:14px;
+    box-shadow:0 8px 30px rgba(0,0,0,.35);
+}
+
+.section-title{
+    font-size:12px;
+    color:#777;
+    letter-spacing:2px;
+    font-weight:800;
+    margin-bottom:12px;
+}
+
+.buttons{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+}
+
+button{
+    border:0;
+    border-radius:14px;
+    padding:16px 10px;
+    background:#fff;
+    color:#000;
+    font-size:15px;
+    font-weight:800;
+    cursor:pointer;
+    touch-action:manipulation;
+}
+
+button:active{
+    transform:scale(.97);
+}
+
+button.dark{
+    background:#181818;
+    color:#fff;
+    border:1px solid #292929;
+}
+
+button.danger{
+    background:#171717;
+    color:#ff7777;
+    border:1px solid #392020;
+}
+
+.counter{
+    font-size:38px;
+    font-weight:900;
+    text-align:center;
+    margin:8px 0 14px;
+}
+
+.stats{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+}
+
+.stat{
+    background:#121212;
+    border:1px solid #222;
+    border-radius:14px;
+    padding:14px;
+    text-align:center;
+}
+
+.stat-number{
+    font-size:25px;
+    font-weight:900;
+}
+
+.stat-label{
+    font-size:10px;
+    color:#777;
+    letter-spacing:1px;
+    margin-top:3px;
+}
+
+.timer{
+    font-size:40px;
+    font-weight:900;
+    text-align:center;
+    letter-spacing:2px;
+    margin:5px 0 15px;
+}
+
+.timer-status{
+    text-align:center;
+    color:#777;
+    font-size:12px;
+    margin-bottom:12px;
+}
+
+.lung-wrap{
+    display:flex;
+    justify-content:center;
+    padding:5px 0 10px;
+}
+
+.lungs{
+    position:relative;
+    width:190px;
+    height:135px;
+    display:flex;
+    gap:8px;
+    justify-content:center;
+    align-items:center;
+}
+
+.lung{
+    width:72px;
+    height:105px;
+    border:4px solid #777;
+    border-radius:48% 48% 45% 45%;
+    position:relative;
+    overflow:hidden;
+    background:#111;
+}
+
+.lung:after{
+    content:"";
+    position:absolute;
+    left:50%;
+    top:0;
+    width:4px;
+    height:100%;
+    background:#555;
+    transform:translateX(-50%);
+}
+
+.lung-fill{
+    position:absolute;
+    left:0;
+    bottom:0;
+    width:100%;
+    height:0%;
+    background:#666;
+    transition:height .5s ease;
+}
+
+.trachea{
+    position:absolute;
+    top:0;
+    left:50%;
+    transform:translateX(-50%);
+    width:12px;
+    height:35px;
+    border-radius:8px;
+    background:#777;
+}
+
+.impact{
+    text-align:center;
+    font-size:30px;
+    font-weight:900;
+    margin-top:5px;
+}
+
+.impact-label{
+    text-align:center;
+    color:#777;
+    font-size:11px;
+    letter-spacing:1px;
+}
+
+.warning{
+    display:none;
+    text-align:center;
+    margin-top:12px;
+    padding:10px;
+    border-radius:10px;
+    background:#211616;
+    color:#ff7777;
+    border:1px solid #432222;
+    font-size:12px;
+    font-weight:700;
+}
+
+.history{
+    display:flex;
+    flex-direction:column;
+    gap:7px;
+}
+
+.history-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:#121212;
+    border-radius:10px;
+    padding:11px 12px;
+    font-size:12px;
+}
+
+.history-date{
+    color:#aaa;
+}
+
+.history-count{
+    font-weight:800;
+}
+
+.streak{
+    text-align:center;
+    font-size:32px;
+    font-weight:900;
+}
+
+.streak-text{
+    text-align:center;
+    color:#777;
+    font-size:11px;
+}
+
+/* GAME */
+
+.game-card{
+    padding:12px;
+}
+
+.game-title{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:10px;
+}
+
+.game-name{
+    font-size:16px;
+    font-weight:900;
+    letter-spacing:1px;
+}
+
+.game-high{
+    font-size:11px;
+    color:#777;
+}
+
+.game-box{
+    position:relative;
+    width:100%;
+    overflow:hidden;
+    border:1px solid #292929;
+    border-radius:14px;
+    background:#080808;
+    touch-action:none;
+}
+
+#gameCanvas{
+    display:block;
+    width:100%;
+    height:210px;
+}
+
+.game-message{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    pointer-events:none;
+    text-align:center;
+}
+
+.game-message-title{
+    font-size:22px;
+    font-weight:900;
+    letter-spacing:2px;
+}
+
+.game-message-sub{
+    color:#777;
+    font-size:11px;
+    margin-top:6px;
+}
+
+.game-score{
+    position:absolute;
+    top:10px;
+    right:12px;
+    font-size:12px;
+    font-weight:800;
+    pointer-events:none;
+}
+
+.game-help{
+    text-align:center;
+    color:#666;
+    font-size:10px;
+    margin-top:8px;
+}
+
+.footer{
+    text-align:center;
+    color:#444;
+    font-size:10px;
+    margin-top:22px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <div class="header">
+        <div class="logo">PUFFLOG</div>
+        <div class="subtitle">PERSONAL SESSION TRACKER</div>
+    </div>
+
+    <!-- GAME -->
+    <div class="card game-card">
+
+        <div class="game-title">
+            <div class="game-name">JOINT RUNNER</div>
+            <div class="game-high">
+                HIGH SCORE: <span id="highScore">0</span>
+            </div>
+        </div>
+
+        <div class="game-box" id="gameBox">
+            <canvas id="gameCanvas"></canvas>
+
+            <div class="game-score">
+                SCORE: <span id="gameScore">0</span>
+            </div>
+
+            <div class="game-message" id="gameMessage">
+                <div class="game-message-title">TAP TO START</div>
+                <div class="game-message-sub">TAP TO JUMP</div>
+            </div>
+        </div>
+
+        <div class="game-help">
+            Avoid the obstacles • Tap anywhere to jump
+        </div>
+
+    </div>
+
+    <!-- COUNTERS -->
+    <div class="card">
+
+        <div class="section-title">SESSION TRACKER</div>
+
+        <div class="buttons">
+
+            <button onclick="addJoint()">
+                + JOINT
+            </button>
+
+            <button onclick="addBong()">
+                + BONG
+            </button>
+
+        </div>
+
+        <div class="stats" style="margin-top:12px;">
+
+            <div class="stat">
+                <div class="stat-number" id="todayJoints">0</div>
+                <div class="stat-label">TODAY JOINTS</div>
+            </div>
+
+            <div class="stat">
+                <div class="stat-number" id="todayBongs">0</div>
+                <div class="stat-label">TODAY BONGS</div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- TIMER -->
+    <div class="card">
+
+        <div class="section-title">LIVE SESSION</div>
+
+        <div class="timer" id="timer">
+            00:00
+        </div>
+
+        <div class="timer-status" id="timerStatus">
+            SESSION NOT STARTED
+        </div>
+
+        <div class="buttons">
+
+            <button onclick="startTimer()">
+                START
+            </button>
+
+            <button class="dark" onclick="stopTimer()">
+                STOP
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- LUNGS -->
+    <div class="card">
+
+        <div class="section-title">
+            FICTIONAL IMPACT VISUALIZER
+        </div>
+
+        <div class="lung-wrap">
+
+            <div class="lungs">
+
+                <div class="trachea"></div>
+
+                <div class="lung">
+                    <div class="lung-fill" id="leftLung"></div>
+                </div>
+
+                <div class="lung">
+                    <div class="lung-fill" id="rightLung"></div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="impact">
+            <span id="impactPercent">0</span>%
+        </div>
+
+        <div class="impact-label">
+            FICTIONAL APP IMPACT SCORE
+        </div>
+
+        <div class="warning" id="warning">
+            ⚠ HIGH APP IMPACT SCORE
+        </div>
+
+    </div>
+
+    <!-- TODAY -->
+    <div class="card">
+
+        <div class="section-title">
+            TODAY
+        </div>
+
+        <div class="stats">
+
+            <div class="stat">
+                <div class="stat-number" id="totalToday">0</div>
+                <div class="stat-label">TOTAL SESSIONS</div>
+            </div>
+
+            <div class="stat">
+                <div class="stat-number" id="todayImpact">0%</div>
+                <div class="stat-label">IMPACT SCORE</div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ALL TIME -->
+    <div class="card">
+
+        <div class="section-title">
+            ALL TIME
+        </div>
+
+        <div class="stats">
+
+            <div class="stat">
+                <div class="stat-number" id="allJoints">0</div>
+                <div class="stat-label">JOINTS</div>
+            </div>
+
+            <div class="stat">
+                <div class="stat-number" id="allBongs">0</div>
+                <div class="stat-label">BONGS</div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- STREAK -->
+    <div class="card">
+
+        <div class="section-title">
+            7 DAY STREAK
+        </div>
+
+        <div class="streak">
+            🔥 <span id="streak">0</span>
+        </div>
+
+        <div class="streak-text">
+            CONSECUTIVE DAYS LOGGED
+        </div>
+
+    </div>
+
+    <!-- HISTORY -->
+    <div class="card">
+
+        <div class="section-title">
+            7 DAY HISTORY
+        </div>
+
+        <div class="history" id="history">
+        </div>
+
+    </div>
+
+    <!-- RESET -->
+    <div class="card">
+
+        <button class="danger" onclick="resetToday()" style="width:100%;">
+            RESET TODAY
+        </button>
+
+    </div>
+
+    <div class="footer">
+        PUFFLOG • TRACK YOUR SESSIONS
+    </div>
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   PUFFLOG DATA
+========================================================= */
+
+const STORAGE_KEY = "pufflog_data_v3";
+
+let data = JSON.parse(
+    localStorage.getItem(STORAGE_KEY) || "{}"
+);
+
+if(!data.days){
+    data.days = {};
+}
+
+if(!data.totalJoints){
+    data.totalJoints = 0;
+}
+
+if(!data.totalBongs){
+    data.totalBongs = 0;
+}
+
+function saveData(){
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(data)
+    );
+}
+
+function todayKey(){
+
+    const d = new Date();
+
+    return d.getFullYear() + "-" +
+        String(d.getMonth()+1).padStart(2,"0") + "-" +
+        String(d.getDate()).padStart(2,"0");
+
+}
+
+function getToday(){
+
+    const key = todayKey();
+
+    if(!data.days[key]){
+
+        data.days[key] = {
+            joints:0,
+            bongs:0
+        };
+
+    }
+
+    return data.days[key];
+
+}
+
+
+/* =========================================================
+   TRACKING
+========================================================= */
+
+function addJoint(){
+
+    const today = getToday();
+
+    today.joints++;
+
+    data.totalJoints++;
+
+    saveData();
+
+    updateUI();
+
+}
+
+function addBong(){
+
+    const today = getToday();
+
+    today.bongs++;
+
+    data.totalBongs++;
+
+    saveData();
+
+    updateUI();
+
+}
+
+
+/* =========================================================
+   IMPACT SCORE
+   FICTIONAL APP SCORE ONLY
+========================================================= */
+
+function getImpact(){
+
+    const today = getToday();
+
+    let score =
+        today.joints * 7 +
+        today.bongs * 10;
+
+    return Math.min(score,100);
+
+}
+
+
+/* =========================================================
+   UI
+========================================================= */
+
+function updateUI(){
+
+    const today = getToday();
+
+    document.getElementById("todayJoints").textContent =
+        today.joints;
+
+    document.getElementById("todayBongs").textContent =
+        today.bongs;
+
+    document.getElementById("allJoints").textContent =
+        data.totalJoints;
+
+    document.getElementById("allBongs").textContent =
+        data.totalBongs;
+
+    const total =
+        today.joints +
+        today.bongs;
+
+    document.getElementById("totalToday").textContent =
+        total;
+
+    const impact = getImpact();
+
+    document.getElementById("impactPercent").textContent =
+        impact;
+
+    document.getElementById("todayImpact").textContent =
+        impact + "%";
+
+    document.getElementById("leftLung").style.height =
+        impact + "%";
+
+    document.getElementById("rightLung").style.height =
+        impact + "%";
+
+    const warning =
+        document.getElementById("warning");
+
+    warning.style.display =
+        impact >= 60 ? "block" : "none";
+
+    updateHistory();
+
+    updateStreak();
+
+}
+
+
+/* =========================================================
+   HISTORY
+========================================================= */
+
+function dateKeyOffset(offset){
+
+    const d = new Date();
+
+    d.setDate(d.getDate() + offset);
+
+    return d.getFullYear() + "-" +
+        String(d.getMonth()+1).padStart(2,"0") + "-" +
+        String(d.getDate()).padStart(2,"0");
+
+}
+
+
+function prettyDate(offset){
+
+    if(offset === 0){
+        return "Today";
+    }
+
+    if(offset === -1){
+        return "Yesterday";
+    }
+
+    const d = new Date();
+
+    d.setDate(d.getDate() + offset);
+
+    return d.toLocaleDateString(
+        undefined,
+        {
+            weekday:"short",
+            month:"short",
+            day:"numeric"
+        }
+    );
+
+}
+
+
+function updateHistory(){
+
+    const box =
+        document.getElementById("history");
+
+    box.innerHTML = "";
+
+    for(let i=0;i<7;i++){
+
+        const offset = -i;
+
+        const key = dateKeyOffset(offset);
+
+        const day =
+            data.days[key] ||
+            {
+                joints:0,
+                bongs:0
+            };
+
+        const total =
+            day.joints +
+            day.bongs;
+
+        const row =
+            document.createElement("div");
+
+        row.className = "history-row";
+
+        row.innerHTML = `
+            <span class="history-date">
+                ${prettyDate(offset)}
+            </span>
+
+            <span class="history-count">
+                ${total} sessions
+            </span>
+        `;
+
+        box.appendChild(row);
+
+    }
+
+}
+
+
+/* =========================================================
+   STREAK
+========================================================= */
+
+function updateStreak(){
+
+    let streak = 0;
+
+    for(let i=0;i<7;i++){
+
+        const key = dateKeyOffset(-i);
+
+        const day = data.days[key];
+
+        if(
+            day &&
+            (day.joints > 0 || day.bongs > 0)
+        ){
+
+            streak++;
+
+        }else{
+
+            break;
+
+        }
+
+    }
+
+    document.getElementById("streak").textContent =
+        streak;
+
+}
+
+
+/* =========================================================
+   RESET TODAY
+========================================================= */
+
+function resetToday(){
+
+    if(!confirm("Reset today's PUFFLOG data?")){
+        return;
+    }
+
+    const key = todayKey();
+
+    const old =
+        data.days[key] ||
+        {
+            joints:0,
+            bongs:0
+        };
+
+    data.totalJoints =
+        Math.max(
+            0,
+            data.totalJoints - old.joints
+        );
+
+    data.totalBongs =
+        Math.max(
+            0,
+            data.totalBongs - old.bongs
+        );
+
+    delete data.days[key];
+
+    saveData();
+
+    updateUI();
+
+}
+
+
+/* =========================================================
+   TIMER
+========================================================= */
+
+let timerInterval = null;
+
+let timerSeconds = 0;
+
+function renderTimer(){
+
+    const minutes =
+        Math.floor(timerSeconds / 60);
+
+    const seconds =
+        timerSeconds % 60;
+
+    document.getElementById("timer").textContent =
+        String(minutes).padStart(2,"0") +
+        ":" +
+        String(seconds).padStart(2,"0");
+
+}
+
+
+function startTimer(){
+
+    if(timerInterval){
+        return;
+    }
+
+    document.getElementById("timerStatus").textContent =
+        "SESSION RUNNING";
+
+    timerInterval =
+        setInterval(function(){
+
+            timerSeconds++;
+
+            renderTimer();
+
+        },1000);
+
+}
+
+
+function stopTimer(){
+
+    clearInterval(timerInterval);
+
+    timerInterval = null;
+
+    document.getElementById("timerStatus").textContent =
+        "SESSION STOPPED";
+
+}
+
+
+/* =========================================================
+   JOINT RUNNER GAME
+   FULL CANVAS VERSION
+========================================================= */
+
+const canvas =
+    document.getElementById("gameCanvas");
+
+const ctx =
+    canvas.getContext("2d");
+
+const gameBox =
+    document.getElementById("gameBox");
+
+const gameMessage =
+    document.getElementById("gameMessage");
+
+const scoreText =
+    document.getElementById("gameScore");
+
+const highScoreText =
+    document.getElementById("highScore");
+
+
+let canvasWidth = 0;
+let canvasHeight = 0;
+
+let gameStarted = false;
+let gameOver = false;
+
+let score = 0;
+
+let highScore =
+    Number(
+        localStorage.getItem("pufflog_highscore") || 0
+    );
+
+let animationFrame = null;
+let lastFrameTime = 0;
+
+
+/* PLAYER */
+
+const player = {
+
+    x: 55,
+
+    y: 0,
+
+    width: 58,
+
+    height: 18,
+
+    velocityY: 0,
+
+    grounded: true
+
+};
+
+
+/* PHYSICS */
+
+const GRAVITY = 1900;
+
+const JUMP_POWER = 700;
+
+
+/* GAME SPEED */
+
+let gameSpeed = 300;
+
+
+/* OBSTACLES */
+
+let obstacles = [];
+
+let obstacleTimer = 0;
+
+let nextObstacleTime = 1.15;
+
+
+/* =========================================================
+   CANVAS RESIZE
+========================================================= */
+
+function resizeGame(){
+
+    const rect =
+        gameBox.getBoundingClientRect();
+
+    const width =
+        Math.max(
+            280,
+            Math.floor(rect.width)
+        );
+
+    const height = 210;
+
+    const dpr =
+        Math.min(
+            window.devicePixelRatio || 1,
+            2
+        );
+
+    canvasWidth = width;
+
+    canvasHeight = height;
+
+    canvas.width =
+        Math.floor(width * dpr);
+
+    canvas.height =
+        Math.floor(height * dpr);
+
+    canvas.style.width =
+        width + "px";
+
+    canvas.style.height =
+        height + "px";
+
+    ctx.setTransform(
+        dpr,
+        0,
+        0,
+        dpr,
+        0,
+        0
+    );
+
+    player.x =
+        Math.min(
+            55,
+            canvasWidth * .18
+        );
+
+    if(!gameStarted){
+
+        player.y =
+            getGroundY() -
+            player.height;
+
+    }
+
+    drawGame();
+
+}
+
+window.addEventListener(
+    "resize",
+    resizeGame
+);
+
+
+/* =========================================================
+   GROUND
+========================================================= */
+
+function getGroundY(){
+
+    return canvasHeight - 32;
+
+}
+
+
+/* =========================================================
+   START GAME
+========================================================= */
+
+function startGame(){
+
+    gameStarted = true;
+
+    gameOver = false;
+
+    score = 0;
+
+    gameSpeed = 300;
+
+    obstacles = [];
+
+    obstacleTimer = 0;
+
+    nextObstacleTime =
+        1.0 + Math.random() * .7;
+
+    player.y =
+        getGroundY() -
+        player.height;
+
+    player.velocityY = 0;
+
+    player.grounded = true;
+
+    lastFrameTime =
+        performance.now();
+
+    gameMessage.style.display =
+        "none";
+
+    updateGameScore();
+
+    if(animationFrame){
+        cancelAnimationFrame(animationFrame);
+    }
+
+    animationFrame =
+        requestAnimationFrame(gameLoop);
+
+}
+
+
+/* =========================================================
+   JUMP
+========================================================= */
+
+function jump(){
+
+    if(!gameStarted){
+
+        startGame();
+
+        return;
+
+    }
+
+    if(gameOver){
+
+        startGame();
+
+        return;
+
+    }
+
+    if(player.grounded){
+
+        player.velocityY =
+            -JUMP_POWER;
+
+        player.grounded =
+            false;
+
+    }
+
+}
+
+
+/* =========================================================
+   INPUT
+========================================================= */
+
+canvas.addEventListener(
+    "pointerdown",
+    function(e){
+
+        e.preventDefault();
+
+        jump();
+
+    }
+);
+
+gameBox.addEventListener(
+    "pointerdown",
+    function(e){
+
+        if(e.target === canvas){
+            return;
+        }
+
+        e.preventDefault();
+
+        jump();
+
+    }
+);
+
+document.addEventListener(
+    "keydown",
+    function(e){
+
+        if(
+            e.code === "Space" ||
+            e.code === "ArrowUp"
+        ){
+
+            e.preventDefault();
+
+            jump();
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   CREATE OBSTACLE
+========================================================= */
+
+function createObstacle(){
+
+    const tall =
+        Math.random() > .45;
+
+    const width =
+        tall ? 20 : 27;
+
+    const height =
+        tall
+            ? 45 + Math.random()*25
+            : 28 + Math.random()*18;
+
+    obstacles.push({
+
+        x:canvasWidth + 20,
+
+        y:getGroundY() - height,
+
+        width:width,
+
+        height:height
+
+    });
+
+}
+
+
+/* =========================================================
+   COLLISION
+========================================================= */
+
+function isColliding(a,b){
+
+    const padding = 5;
+
+    return (
+
+        a.x + padding <
+        b.x + b.width - padding &&
+
+        a.x + a.width - padding >
+        b.x + padding &&
+
+        a.y + padding <
+        b.y + b.height - padding &&
+
+        a.y + a.height - padding >
+        b.y + padding
+
+    );
+
+}
+
+
+/* =========================================================
+   GAME LOOP
+========================================================= */
+
+function gameLoop(timestamp){
+
+    if(!gameStarted){
+        return;
+    }
+
+    const delta =
+        Math.min(
+            (timestamp - lastFrameTime) / 1000,
+            0.035
+        );
+
+    lastFrameTime =
+        timestamp;
+
+
+    /* GRAVITY */
+
+    player.velocityY +=
+        GRAVITY * delta;
+
+    player.y +=
+        player.velocityY * delta;
+
+
+    /* GROUND */
+
+    const ground =
+        getGroundY() -
+        player.height;
+
+    if(player.y >= ground){
+
+        player.y = ground;
+
+        player.velocityY = 0;
+
+        player.grounded = true;
+
+    }else{
+
+        player.grounded = false;
+
+    }
+
+
+    /* OBSTACLE TIMER */
+
+    obstacleTimer += delta;
+
+    if(
+        obstacleTimer >=
+        nextObstacleTime
+    ){
+
+        createObstacle();
+
+        obstacleTimer = 0;
+
+        nextObstacleTime =
+            1.05 +
+            Math.random() * .9;
+
+    }
+
+
+    /* MOVE OBSTACLES */
+
+    for(
+        let i = obstacles.length - 1;
+        i >= 0;
+        i--
+    ){
+
+        const obstacle =
+            obstacles[i];
+
+        obstacle.x -=
+            gameSpeed * delta;
+
+        if(
+            !obstacle.passed &&
+            obstacle.x + obstacle.width <
+            player.x
+        ){
+
+            obstacle.passed = true;
+
+            score++;
+
+            updateGameScore();
+
+        }
+
+        if(
+            obstacle.x +
+            obstacle.width <
+            -30
+        ){
+
+            obstacles.splice(i,1);
+
+            continue;
+
+        }
+
+        if(
+            isColliding(
+                player,
+                obstacle
+            )
+        ){
+
+            endGame();
+
+            return;
+
+        }
+
+    }
+
+
+    /* INCREASE SPEED */
+
+    gameSpeed =
+        Math.min(
+            560,
+            300 + score * 7
+        );
+
+
+    drawGame();
+
+
+    animationFrame =
+        requestAnimationFrame(gameLoop);
+
+}
+
+
+/* =========================================================
+   END GAME
+========================================================= */
+
+function endGame(){
+
+    gameOver = true;
+
+    gameStarted = false;
+
+    if(score > highScore){
+
+        highScore = score;
+
+        localStorage.setItem(
+            "pufflog_highscore",
+            String(highScore)
+        );
+
+    }
+
+    highScoreText.textContent =
+        highScore;
+
+    gameMessage.innerHTML = `
+        <div class="game-message-title">
+            GAME OVER
+        </div>
+        <div class="game-message-sub">
+            SCORE ${score} • TAP TO RESTART
+        </div>
+    `;
+
+    gameMessage.style.display =
+        "flex";
+
+    drawGame();
+
+}
+
+
+/* =========================================================
+   SCORE
+========================================================= */
+
+function updateGameScore(){
+
+    scoreText.textContent =
+        score;
+
+    highScoreText.textContent =
+        highScore;
+
+}
+
+
+/* =========================================================
+   DRAW BACKGROUND
+========================================================= */
+
+function drawGame(){
+
+    if(!canvasWidth){
+        return;
+    }
+
+    ctx.clearRect(
+        0,
+        0,
+        canvasWidth,
+        canvasHeight
+    );
+
+
+    /* BACKGROUND */
+
+    ctx.fillStyle = "#080808";
+
+    ctx.fillRect(
+        0,
+        0,
+        canvasWidth,
+        canvasHeight
+    );
+
+
+    /* LITTLE SKY DOTS */
+
+    ctx.fillStyle = "#202020";
+
+    for(
+        let i=0;
+        i<8;
+        i++
+    ){
+
+        const x =
+            ((i * 97) + 30) %
+            canvasWidth;
+
+        const y =
+            25 + (i * 17) %
+            65;
+
+        ctx.fillRect(
+            x,
+            y,
+            2,
+            2
+        );
+
+    }
+
+
+    /* GROUND */
+
+    const ground =
+        getGroundY();
+
+    ctx.strokeStyle =
+        "#444";
+
+    ctx.lineWidth = 2;
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        0,
+        ground
+    );
+
+    ctx.lineTo(
+        canvasWidth,
+        ground
+    );
+
+    ctx.stroke();
+
+
+    /* GROUND PIXELS */
+
+    ctx.fillStyle =
+        "#242424";
+
+    for(
+        let x=0;
+        x<canvasWidth;
+        x+=18
+    ){
+
+        ctx.fillRect(
+            x,
+            ground + 7,
+            9,
+            2
+        );
+
+    }
+
+
+    /* OBSTACLES */
+
+    for(
+        const obstacle of obstacles
+    ){
+
+        drawObstacle(obstacle);
+
+    }
+
+
+    /* PLAYER */
+
+    drawJoint();
+
+}
+
+
+/* =========================================================
+   DRAW JOINT
+========================================================= */
+
+function drawJoint(){
+
+    const x = player.x;
+
+    const y = player.y;
+
+    const w = player.width;
+
+    const h = player.height;
+
+
+    ctx.save();
+
+    /* Slight rotation while airborne */
+
+    let angle = 0;
+
+    if(!player.grounded){
+
+        angle =
+            Math.sin(
+                performance.now() / 80
+            ) * 0.08;
+
+    }
+
+    ctx.translate(
+        x + w/2,
+        y + h/2
+    );
+
+    ctx.rotate(angle);
+
+
+    /* JOINT BODY */
+
+    ctx.fillStyle =
+        "#eeeeee";
+
+    ctx.beginPath();
+
+    ctx.roundRect(
+        -w/2,
+        -h/2,
+        w - 10,
+        h,
+        h/2
+    );
+
+    ctx.fill();
+
+
+    /* FILTER */
+
+    ctx.fillStyle =
+        "#777";
+
+    ctx.beginPath();
+
+    ctx.roundRect(
+        w/2 - 10 - w/2,
+        -h/2,
+        10,
+        h,
+        3
+    );
+
+    ctx.fill();
+
+
+    /* TIP */
+
+    ctx.fillStyle =
+        "#555";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        -w/2,
+        0,
+        h/2,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+
+    /* LITTLE BURNING TIP */
+
+    ctx.fillStyle =
+        "#aaa";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        -w/2 - 2,
+        0,
+        3,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+
+    ctx.restore();
+
+}
+
+
+/* =========================================================
+   DRAW OBSTACLE
+========================================================= */
+
+function drawObstacle(obstacle){
+
+    const x =
+        obstacle.x;
+
+    const y =
+        obstacle.y;
+
+    const w =
+        obstacle.width;
+
+    const h =
+        obstacle.height;
+
+
+    ctx.fillStyle =
+        "#dddddd";
+
+
+    /* MAIN BLOCK */
+
+    ctx.fillRect(
+        x,
+        y,
+        w,
+        h
+    );
+
+
+    /* SPIKES */
+
+    ctx.fillStyle =
+        "#777";
+
+    const spikeCount =
+        Math.max(
+            2,
+            Math.floor(w / 8)
+        );
+
+    const spikeWidth =
+        w / spikeCount;
+
+    for(
+        let i=0;
+        i<spikeCount;
+        i++
+    ){
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            x + i * spikeWidth,
+            y
+        );
+
+        ctx.lineTo(
+            x + (i+.5) * spikeWidth,
+            y - 7
+        );
+
+        ctx.lineTo(
+            x + (i+1) * spikeWidth,
+            y
+        );
+
+        ctx.closePath();
+
+        ctx.fill();
+
+    }
+
+}
+
+
+/* =========================================================
+   INITIALIZE GAME
+========================================================= */
+
+highScoreText.textContent =
+    highScore;
+
+resizeGame();
+
+updateUI();
+
+renderTimer();
+
+</script>
+
+</body>
+</html>
