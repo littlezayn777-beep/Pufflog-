@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>PUFFLOG</title>
+
+<style>
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
+body{
+  margin:0;
+  background:#080808;
+  color:#fff;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+
+.app{
+  width:100%;
+  max-width:520px;
+  margin:auto;
+  padding:16px 14px 90px;
+}
+
+/* HEADER */
+.header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:14px;
+}
+
+.logo{
+  font-size:26px;
+  font-weight:900;
+  letter-spacing:5px;
+}
+
+.pro-small{
+  border:1px solid #444;
+  background:#151515;
+  color:#fff;
+  border-radius:18px;
+  padding:8px 12px;
+  font-size:12px;
+  font-weight:800;
+}
+
+/* CARDS */
+.card{
+  background:#111;
+  border:1px solid #242424;
+  border-radius:20px;
+  padding:16px;
+  margin-bottom:12px;
+  box-shadow:0 8px 30px rgba(0,0,0,.25);
+}
+
+.card-title{
+  font-size:13px;
+  color:#aaa;
+  text-transform:uppercase;
+  letter-spacing:1.5px;
+  font-weight:800;
+  margin-bottom:10px;
+}
+
+/* GAME */
+.game-card{
+  padding:10px;
+}
+
+.game-top{
+  display:flex;
+  justify-content:space-between;
+  padding:4px 5px 9px;
+}
+
+.game-title{
+  font-weight:900;
+}
+
+.game-score{
+  color:#aaa;
+  font-size:13px;
+}
+
+#gameBox{
+  position:relative;
+  width:100%;
+  height:180px;
+  overflow:hidden;
+  border-radius:15px;
+  background:
+    linear-gradient(#101010,#0b0b0b);
+  border:1px solid #252525;
+}
+
+#gameCanvas{
+  width:100%;
+  height:100%;
+  display:block;
+}
+
+.game-hint{
+  text-align:center;
+  color:#777;
+  font-size:11px;
+  margin-top:7px;
+}
+
+/* LUNGS */
+.lung-wrap{
+  display:flex;
+  align-items:center;
+  gap:18px;
+}
+
+.lungs{
+  width:145px;
+  height:120px;
+  position:relative;
+  flex-shrink:0;
+}
+
+.lung{
+  position:absolute;
+  top:22px;
+  width:55px;
+  height:76px;
+  border-radius:50% 48% 45% 45%;
+  background:#d8d8d8;
+  box-shadow:inset 0 0 18px rgba(0,0,0,.35);
+  transition:.5s;
+}
+
+.lung.left{
+  left:13px;
+  transform:rotate(8deg);
+}
+
+.lung.right{
+  right:13px;
+  transform:rotate(-8deg);
+}
+
+.trachea{
+  position:absolute;
+  left:67px;
+  top:5px;
+  width:11px;
+  height:40px;
+  background:#bbb;
+  border-radius:10px;
+}
+
+.bronchus{
+  position:absolute;
+  width:34px;
+  height:6px;
+  background:#aaa;
+  top:38px;
+  border-radius:5px;
+}
+
+.bronchus.one{
+  left:49px;
+  transform:rotate(25deg);
+}
+
+.bronchus.two{
+  right:49px;
+  transform:rotate(-25deg);
+}
+
+.lung-info{
+  flex:1;
+}
+
+.lung-number{
+  font-size:36px;
+  font-weight:900;
+}
+
+.lung-label{
+  color:#aaa;
+  font-size:12px;
+  line-height:1.4;
+}
+
+.warning{
+  margin-top:8px;
+  font-size:11px;
+  color:#aaa;
+}
+
+/* COUNTERS */
+.counter-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.counter{
+  background:#181818;
+  border:1px solid #292929;
+  border-radius:16px;
+  padding:15px;
+  text-align:center;
+}
+
+.counter-icon{
+  font-size:25px;
+}
+
+.counter-number{
+  font-size:30px;
+  font-weight:900;
+  margin:3px 0;
+}
+
+.counter-name{
+  color:#999;
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:1px;
+}
+
+.counter button{
+  width:100%;
+  margin-top:10px;
+  border:0;
+  border-radius:12px;
+  background:#fff;
+  color:#000;
+  padding:10px;
+  font-weight:900;
+}
+
+/* TIMER */
+.timer{
+  text-align:center;
+}
+
+.timer-number{
+  font-size:43px;
+  font-weight:900;
+  letter-spacing:2px;
+}
+
+.timer button{
+  margin-top:10px;
+  border:1px solid #444;
+  background:#191919;
+  color:#fff;
+  padding:11px 20px;
+  border-radius:13px;
+  font-weight:800;
+}
+
+/* STATS */
+.stats-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+
+.stat{
+  background:#181818;
+  border-radius:14px;
+  padding:13px;
+}
+
+.stat-value{
+  font-size:25px;
+  font-weight:900;
+}
+
+.stat-label{
+  font-size:10px;
+  color:#888;
+  text-transform:uppercase;
+}
+
+/* HISTORY */
+.history-row{
+  display:flex;
+  justify-content:space-between;
+  padding:10px 0;
+  border-bottom:1px solid #222;
+  font-size:13px;
+}
+
+.history-row:last-child{
+  border-bottom:0;
+}
+
+.streak{
+  background:#181818;
+  border-radius:14px;
+  padding:14px;
+  margin-bottom:10px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.streak-number{
+  font-size:28px;
+  font-weight:900;
+}
+
+.reset{
+  width:100%;
+  border:1px solid #333;
+  background:#101010;
+  color:#aaa;
+  padding:12px;
+  border-radius:13px;
+  font-weight:700;
+}
+
+/* PRO MODAL */
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.78);
+  backdrop-filter:blur(8px);
+  display:none;
+  align-items:flex-end;
+  justify-content:center;
+  z-index:100;
+}
+
+.modal.show{
+  display:flex;
+}
+
+.modal-box{
+  width:100%;
+  max-width:520px;
+  background:#151515;
+  border:1px solid #333;
+  border-radius:25px 25px 0 0;
+  padding:22px;
+  animation:slideUp .25s ease;
+}
+
+@keyframes slideUp{
+  from{transform:translateY(100%)}
+  to{transform:translateY(0)}
+}
+
+.modal-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.modal-title{
+  font-size:24px;
+  font-weight:900;
+}
+
+.close{
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  border:0;
+  background:#292929;
+  color:#fff;
+  font-size:18px;
+}
+
+.price{
+  font-size:38px;
+  font-weight:900;
+  margin:15px 0;
+}
+
+.price span{
+  font-size:13px;
+  color:#888;
+  font-weight:500;
+}
+
+.pro-feature{
+  padding:10px 0;
+  color:#ccc;
+  border-bottom:1px solid #292929;
+}
+
+.upgrade{
+  width:100%;
+  margin-top:17px;
+  padding:14px;
+  border:0;
+  border-radius:14px;
+  background:#fff;
+  color:#000;
+  font-weight:900;
+}
+
+/* FOOTER */
+.footer{
+  text-align:center;
+  color:#555;
+  font-size:10px;
+  margin-top:20px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <!-- LOGO -->
+  <header class="header">
+    <div class="logo">PUFFLOG</div>
+    <button class="pro-small" onclick="openPro()">⚡ PRO</button>
+  </header>
+
+  <!-- JOINT RUNNER -->
+  <section class="card game-card">
+    <div class="game-top">
+      <div class="game-title">JOINT RUNNER</div>
+      <div class="game-score">
+        SCORE <span id="score">0</span>
+        · BEST <span id="best">0</span>
+      </div>
+    </div>
+
+    <div id="gameBox">
+      <canvas id="gameCanvas"></canvas>
+    </div>
+
+    <div class="game-hint">
+      TAP TO JUMP · AVOID THE BLOCKS
+    </div>
+  </section>
+
+  <!-- LUNGS -->
+  <section class="card">
+    <div class="card-title">Lung visualization</div>
+
+    <div class="lung-wrap">
+
+      <div class="lungs">
+        <div class="trachea"></div>
+        <div class="bronchus one"></div>
+        <div class="bronchus two"></div>
+        <div class="lung left"></div>
+        <div class="lung right"></div>
+      </div>
+
+      <div class="lung-info">
+        <div class="lung-number" id="lungScore">100%</div>
+        <div class="lung-label">
+          Illustrative PUFFLOG wellness score based on your logged sessions.
+        </div>
+        <div class="warning" id="warning">
+          No recent activity logged.
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- JOINT + BONG -->
+  <section class="card">
+    <div class="card-title">Today's sessions</div>
+
+    <div class="counter-grid">
+
+      <div class="counter">
+        <div class="counter-icon">〰</div>
+        <div class="counter-number" id="jointCount">0</div>
+        <div class="counter-name">Joint</div>
+        <button onclick="addJoint()">+ ADD JOINT</button>
+      </div>
+
+      <div class="counter">
+        <div class="counter-icon">◉</div>
+        <div class="counter-number" id="bongCount">0</div>
+        <div class="counter-name">Bong Session</div>
+        <button onclick="addBong()">+ ADD BONG</button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- TIMER -->
+  <section class="card timer">
+    <div class="card-title">Session timer</div>
+
+    <div class="timer-number" id="timer">00:00</div>
+
+    <button onclick="toggleTimer()" id="timerBtn">
+      START SESSION
+    </button>
+  </section>
+
+  <!-- STATS -->
+  <section class="card">
+    <div class="card-title">Stats</div>
+
+    <div class="stats-grid">
+
+      <div class="stat">
+        <div class="stat-value" id="todayTotal">0</div>
+        <div class="stat-label">Today</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-value" id="allTotal">0</div>
+        <div class="stat-label">All time</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-value" id="sessionTotal">0</div>
+        <div class="stat-label">Sessions</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-value" id="streakTop">0</div>
+        <div class="stat-label">Day streak</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- HISTORY -->
+  <section class="card">
+    <div class="card-title">7-day history</div>
+
+    <div class="streak">
+      <div>
+        <div style="color:#888;font-size:11px;">CURRENT STREAK</div>
+        <div style="font-weight:800;">Consistency</div>
+      </div>
+      <div class="streak-number" id="streak">0🔥</div>
+    </div>
+
+    <div id="history"></div>
+
+    <button class="reset" onclick="resetToday()">
+      RESET TODAY
+    </button>
+  </section>
+
+  <div class="footer">
+    PUFFLOG · Personal tracking tool · Not medical advice
+  </div>
+
+</div>
+
+<!-- PRO MODAL -->
+<div class="modal" id="proModal" onclick="closeOutside(event)">
+  <div class="modal-box">
+
+    <div class="modal-head">
+      <div class="modal-title">PUFFLOG PRO</div>
+      <button class="close" onclick="closePro()">×</button>
+    </div>
+
+    <div style="color:#999;margin-top:6px;">
+      Unlock the next level of your dashboard.
+    </div>
+
+    <div class="price">
+      ₹49 <span>/ month</span>
+    </div>
+
+    <div class="pro-feature">✓ Advanced statistics</div>
+    <div class="pro-feature">✓ Unlimited history</div>
+    <div class="pro-feature">✓ Extra themes</div>
+    <div class="pro-feature">✓ More game modes</div>
+    <div class="pro-feature">✓ Data export</div>
+
+    <button class="upgrade" onclick="upgrade()">
+      UPGRADE TO PRO
+    </button>
+
+  </div>
+</div>
+
+<script>
+
+/* =========================
+   STORAGE
+========================= */
+
+const STORAGE_KEY = "pufflogData";
+
+let data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
+  days:{},
+  totalJoints:0,
+  totalBongs:0,
+  sessions:0,
+  highScore:0
+};
+
+function todayKey(){
+  const d = new Date();
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+
+function getToday(){
+
+  const key = todayKey();
+
+  if(!data.days[key]){
+    data.days[key] = {
+      joints:0,
+      bongs:0
+    };
+  }
+
+  return data.days[key];
+}
+
+function save(){
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
+}
+
+/* =========================
+   COUNTERS
+========================= */
+
+function addJoint(){
+
+  const day = getToday();
+
+  day.joints++;
+  data.totalJoints++;
+  data.sessions++;
+
+  save();
+  updateUI();
+}
+
+function addBong(){
+
+  const day = getToday();
+
+  day.bongs++;
+  data.totalBongs++;
+  data.sessions++;
+
+  save();
+  updateUI();
+}
+
+/* =========================
+   STATS
+========================= */
+
+function calculateStreak(){
+
+  let streak=0;
+  let date=new Date();
+
+  for(let i=0;i<7;i++){
+
+    const key =
+      date.getFullYear()+"-"+
+      String(date.getMonth()+1).padStart(2,"0")+"-"+
+      String(date.getDate()).padStart(2,"0");
+
+    const day=data.days[key];
+
+    if(day && (day.joints>0 || day.bongs>0)){
+      streak++;
+    }else{
+      break;
+    }
+
+    date.setDate(date.getDate()-1);
+  }
+
+  return streak;
+}
+
+function updateLungs(){
+
+  const day=getToday();
+
+  const activity =
+    day.joints + day.bongs;
+
+  let score=100-(activity*7);
+
+  if(score<0) score=0;
+
+  document.getElementById("lungScore").textContent=score+"%";
+
+  const lungs=document.querySelectorAll(".lung");
+
+  const opacity=Math.max(.35,score/100);
+
+  lungs.forEach(l=>{
+    l.style.opacity=opacity;
+  });
+
+  if(activity===0){
+    document.getElementById("warning").textContent=
+      "No recent activity logged.";
+  }else if(score>60){
+    document.getElementById("warning").textContent=
+      "Illustrative score is above the warning level.";
+  }else{
+    document.getElementById("warning").textContent=
+      "Warning level reached — this is only an app visualization.";
+  }
+}
+
+function updateHistory(){
+
+  const box=document.getElementById("history");
+  box.innerHTML="";
+
+  const date=new Date();
+
+  for(let i=0;i<7;i++){
+
+    const key =
+      date.getFullYear()+"-"+
+      String(date.getMonth()+1).padStart(2,"0")+"-"+
+      String(date.getDate()).padStart(2,"0");
+
+    const day=data.days[key] || {joints:0,bongs:0};
+
+    const row=document.createElement("div");
+    row.className="history-row";
+
+    row.innerHTML=`
+      <span>${i===0?"Today":key}</span>
+      <span>${day.joints} joints · ${day.bongs} bong</span>
+    `;
+
+    box.appendChild(row);
+
+    date.setDate(date.getDate()-1);
+  }
+}
+
+function updateUI(){
+
+  const day=getToday();
+
+  document.getElementById("jointCount").textContent=day.joints;
+  document.getElementById("bongCount").textContent=day.bongs;
+
+  document.getElementById("todayTotal").textContent=
+    day.joints+day.bongs;
+
+  document.getElementById("allTotal").textContent=
+    data.totalJoints+data.totalBongs;
+
+  document.getElementById("sessionTotal").textContent=
+    data.sessions;
+
+  const streak=calculateStreak();
+
+  document.getElementById("streak").textContent=streak+"🔥";
+  document.getElementById("streakTop").textContent=streak;
+
+  document.getElementById("best").textContent=data.highScore;
+
+  updateLungs();
+  updateHistory();
+}
+
+function resetToday(){
+
+  if(!confirm("Reset today's PUFFLOG stats?")) return;
+
+  const day=getToday();
+
+  data.totalJoints-=day.joints;
+  data.totalBongs-=day.bongs;
+  data.sessions-=day.joints+day.bongs;
+
+  data.days[todayKey()] = {
+    joints:0,
+    bongs:0
+  };
+
+  save();
+  updateUI();
+}
+
+/* =========================
+   TIMER
+========================= */
+
+let timerSeconds=0;
+let timerRunning=false;
+let timerInterval=null;
+
+function updateTimer(){
+
+  const min=Math.floor(timerSeconds/60);
+  const sec=timerSeconds%60;
+
+  document.getElementById("timer").textContent=
+    String(min).padStart(2,"0")+":"+
+    String(sec).padStart(2,"0");
+}
+
+function toggleTimer(){
+
+  if(timerRunning){
+
+    clearInterval(timerInterval);
+    timerRunning=false;
+
+    document.getElementById("timerBtn").textContent=
+      "START SESSION";
+
+  }else{
+
+    timerRunning=true;
+
+    document.getElementById("timerBtn").textContent=
+      "STOP SESSION";
+
+    timerInterval=setInterval(()=>{
+      timerSeconds++;
+      updateTimer();
+    },1000);
+  }
+}
+
+/* =========================
+   PRO
+========================= */
+
+function openPro(){
+  document.getElementById("proModal").classList.add("show");
+}
+
+function closePro(){
+  document.getElementById("proModal").classList.remove("show");
+}
+
+function closeOutside(e){
+
+  if(e.target.id==="proModal"){
+    closePro();
+  }
+}
+
+function upgrade(){
+
+  alert(
+    "PRO payments are being connected next. This button does not charge you yet."
+  );
+}
+
+/* =========================
+   JOINT RUNNER
+========================= */
+
+const canvas=document.getElementById("gameCanvas");
+const ctx=canvas.getContext("2d");
+const gameBox=document.getElementById("gameBox");
+
+let gameWidth=0;
+let gameHeight=0;
+
+function resizeCanvas(){
+
+  const rect=gameBox.getBoundingClientRect();
+
+  const dpr=window.devicePixelRatio || 1;
+
+  gameWidth=rect.width;
+  gameHeight=rect.height;
+
+  canvas.width=gameWidth*dpr;
+  canvas.height=gameHeight*dpr;
+
+  canvas.style.width=gameWidth+"px";
+  canvas.style.height=gameHeight+"px";
+
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+
+resizeCanvas();
+window.addEventListener("resize",resizeCanvas);
+
+const player={
+  x:48,
+  y:0,
+  width:72,
+  height:22,
+  velocityY:0,
+  grounded:true
+};
+
+const GRAVITY=1900;
+const JUMP_POWER=700;
+
+let obstacles=[];
+let gameRunning=false;
+let gameOver=false;
+
+let score=0;
+let gameSpeed=300;
+let obstacleTimer=0;
+let nextObstacleTime=1.2;
+
+let lastTime=0;
+
+/* SMOKE */
+
+let smokeParticles=[];
+
+function createSmoke(){
+
+  if(Math.random()>0.12) return;
+
+  smokeParticles.push({
+    x:player.x+player.width-2,
+    y:player.y-2,
+    life:0,
+    maxLife:.8+Math.random()*.6,
+    size:2+Math.random()*2,
+    drift:(Math.random()-.5)*14
+  });
+}
+
+function updateSmoke(dt){
+
+  for(let i=smokeParticles.length-1;i>=0;i--){
+
+    const p=smokeParticles[i];
+
+    p.life+=dt;
+    p.y-=18*dt;
+    p.x+=p.drift*dt;
+
+    if(p.life>=p.maxLife){
+      smokeParticles.splice(i,1);
+    }
+  }
+}
+
+function drawSmoke(){
+
+  for(const p of smokeParticles){
+
+    const alpha=
+      Math.max(0,1-p.life/p.maxLife)*.28;
+
+    ctx.beginPath();
+
+    ctx.fillStyle=`rgba(220,220,220,${alpha})`;
+
+    ctx.arc(
+      p.x,
+      p.y,
+      p.size,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+  }
+}
+
+/* JOINT */
+
+function drawJoint(){
+
+  const x=player.x;
+  const y=player.y;
+
+  ctx.save();
+
+  let angle=0;
+
+  if(!player.grounded){
+    angle=Math.sin(performance.now()/100)*.09;
+  }
+
+  ctx.translate(
+    x+player.width/2,
+    y+player.height/2
+  );
+
+  ctx.rotate(angle);
+
+  /*
+     STYLIZED ROLLED-JOINT AVATAR
+  */
+
+  /* paper body */
+
+  const bodyW=49;
+  const bodyH=16;
+
+  const start=-player.width/2+10;
+  const end=start+bodyW;
+
+  ctx.beginPath();
+
+  ctx.moveTo(start,-bodyH/2);
+  ctx.lineTo(end-6,-bodyH/2);
+  ctx.lineTo(end,0);
+  ctx.lineTo(end-6,bodyH/2);
+  ctx.lineTo(start,bodyH/2);
+  ctx.closePath();
+
+  ctx.fillStyle="#e5e0d5";
+  ctx.fill();
+
+  /* paper seam */
+
+  ctx.beginPath();
+  ctx.moveTo(start+7,-bodyH/2+2);
+  ctx.lineTo(end-7,-bodyH/2+2);
+  ctx.strokeStyle="rgba(80,80,80,.28)";
+  ctx.lineWidth=1;
+  ctx.stroke();
+
+  /* subtle paper lines */
+
+  for(let i=0;i<3;i++){
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+      start+13+i*8,
+      -5
+    );
+
+    ctx.lineTo(
+      start+17+i*8,
+      5
+    );
+
+    ctx.strokeStyle="rgba(80,80,80,.12)";
+    ctx.lineWidth=1;
+    ctx.stroke();
+  }
+
+  /* filter */
+
+  ctx.beginPath();
+
+  ctx.roundRect(
+    end-1,
+    -bodyH/2,
+    13,
+    bodyH,
+    3
+  );
+
+  ctx.fillStyle="#b58a5a";
+  ctx.fill();
+
+  /* filter lines */
+
+  ctx.strokeStyle="rgba(70,40,20,.25)";
+  ctx.lineWidth=1;
+
+  for(let i=0;i<3;i++){
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+      end+2+i*3,
+      -5
+    );
+
+    ctx.lineTo(
+      end+2+i*3,
+      5
+    );
+
+    ctx.stroke();
+  }
+
+  /* twisted tip */
+
+  ctx.beginPath();
+
+  ctx.moveTo(start,-bodyH/2);
+  ctx.lineTo(start-9,-2);
+  ctx.lineTo(start-7,bodyH/2);
+  ctx.lineTo(start,bodyH/2);
+  ctx.closePath();
+
+  ctx.fillStyle="#eeeae0";
+  ctx.fill();
+
+  /* tiny ember */
+
+  ctx.beginPath();
+
+  ctx.fillStyle="#e86b3a";
+
+  ctx.arc(
+    start-7,
+    0,
+    2.2,
+    0,
+    Math.PI*2
+  );
+
+  ctx.fill();
+
+  ctx.restore();
+}
+
+/* OBSTACLES */
+
+function createObstacle(){
+
+  const h=22+Math.random()*24;
+  const w=17+Math.random()*8;
+
+  obstacles.push({
+    x:gameWidth+20,
+    y:getGroundY()-h,
+    width:w,
+    height:h,
+    passed:false
+  });
+}
+
+function drawObstacle(o){
+
+  ctx.fillStyle="#d8d8d8";
+
+  ctx.fillRect(
+    o.x,
+    o.y,
+    o.width,
+    o.height
+  );
+
+  ctx.fillStyle="#777";
+
+  ctx.beginPath();
+
+  ctx.moveTo(o.x-3,o.y);
+  ctx.lineTo(o.x+o.width/2,o.y-8);
+  ctx.lineTo(o.x+o.width+3,o.y);
+
+  ctx.closePath();
+
+  ctx.fill();
+}
+
+/* GROUND */
+
+function getGroundY(){
+  return gameHeight-28;
+}
+
+function drawGround(){
+
+  ctx.strokeStyle="#333";
+  ctx.lineWidth=1;
+
+  ctx.beginPath();
+
+  ctx.moveTo(0,getGroundY());
+  ctx.lineTo(gameWidth,getGroundY());
+
+  ctx.stroke();
+
+  ctx.fillStyle="#252525";
+
+  for(let x=0;x<gameWidth;x+=35){
+
+    ctx.fillRect(
+      x,
+      getGroundY()+7,
+      18,
+      1
+    );
+  }
+}
+
+/* COLLISION */
+
+function isColliding(a,b){
+
+  const padding=7;
+
+  return(
+    a.x+padding <
+    b.x+b.width &&
+    a.x+a.width-padding >
+    b.x &&
+    a.y+padding <
+    b.y+b.height &&
+    a.y+a.height-padding >
+    b.y
+  );
+}
+
+/* GAME LOOP */
+
+function resetGame(){
+
+  player.y=getGroundY()-player.height;
+  player.velocityY=0;
+  player.grounded=true;
+
+  obstacles=[];
+  smokeParticles=[];
+
+  score=0;
+  gameSpeed=300;
+  obstacleTimer=0;
+  nextObstacleTime=1.2;
+
+  gameOver=false;
+  gameRunning=true;
+
+  document.getElementById("score").textContent="0";
+}
+
+function jump(){
+
+  if(!gameRunning || gameOver){
+
+    resetGame();
+    return;
+  }
+
+  if(player.grounded){
+
+    player.velocityY=-JUMP_POWER;
+    player.grounded=false;
+  }
+}
+
+function endGame(){
+
+  gameOver=true;
+  gameRunning=false;
+
+  if(score>data.highScore){
+
+    data.highScore=score;
+    save();
+
+    document.getElementById("best").textContent=score;
+  }
+}
+
+function updateGame(dt){
+
+  if(!gameRunning || gameOver) return;
+
+  player.velocityY+=GRAVITY*dt;
+  player.y+=player.velocityY*dt;
+
+  const ground=
+    getGroundY()-player.height;
+
+  if(player.y>=ground){
+
+    player.y=ground;
+    player.velocityY=0;
+    player.grounded=true;
+
+  }else{
+
+    player.grounded=false;
+  }
+
+  obstacleTimer+=dt;
+
+  if(obstacleTimer>=nextObstacleTime){
+
+    createObstacle();
+
+    obstacleTimer=0;
+
+    nextObstacleTime=
+      1.0+Math.random()*.8;
+  }
+
+  for(let i=obstacles.length-1;i>=0;i--){
+
+    const o=obstacles[i];
+
+    o.x-=gameSpeed*dt;
+
+    if(!o.passed &&
+       o.x+o.width<player.x){
+
+      o.passed=true;
+
+      score++;
+
+      document.getElementById("score")
+        .textContent=score;
+
+      gameSpeed+=7;
+    }
+
+    if(isColliding(player,o)){
+
+      endGame();
+    }
+
+    if(o.x+o.width<-30){
+
+      obstacles.splice(i,1);
+    }
+  }
+
+  createSmoke();
+  updateSmoke(dt);
+}
+
+function drawGame(){
+
+  ctx.clearRect(
+    0,
+    0,
+    gameWidth,
+    gameHeight
+  );
+
+  drawGround();
+
+  for(const o of obstacles){
+    drawObstacle(o);
+  }
+
+  drawSmoke();
+  drawJoint();
+
+  if(!gameRunning && !gameOver){
+
+    ctx.fillStyle="#aaa";
+    ctx.font="700 14px -apple-system";
+
+    ctx.textAlign="center";
+
+    ctx.fillText(
+      "TAP TO START",
+      gameWidth/2,
+      gameHeight/2
+    );
+  }
+
+  if(gameOver){
+
+    ctx.fillStyle="#fff";
+    ctx.font="900 18px -apple-system";
+    ctx.textAlign="center";
+
+    ctx.fillText(
+      "GAME OVER",
+      gameWidth/2,
+      gameHeight/2-8
+    );
+
+    ctx.fillStyle="#888";
+    ctx.font="12px -apple-system";
+
+    ctx.fillText(
+      "TAP TO RESTART",
+      gameWidth/2,
+      gameHeight/2+16
+    );
+  }
+}
+
+function gameLoop(time){
+
+  const delta=
+    Math.min((time-lastTime)/1000,.035);
+
+  lastTime=time;
+
+  updateGame(delta);
+  drawGame();
+
+  requestAnimationFrame(gameLoop);
+}
+
+canvas.addEventListener("pointerdown",function(e){
+
+  e.preventDefault();
+  jump();
+
+});
+
+gameBox.addEventListener("touchstart",function(e){
+
+  e.preventDefault();
+
+},{passive:false});
+
+player.y=getGroundY()-player.height;
+
+requestAnimationFrame(gameLoop);
+
+updateUI();
+
+</script>
+
+</body>
+</html>
