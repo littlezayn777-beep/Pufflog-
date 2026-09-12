@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#09090d">
+<title>Pufflog</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+margin:0;
+background:#09090d;
+color:white;
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif
+}
+
+.container{
+max-width:520px;
+margin:auto;
+padding:20px 16px 40px
+}
+
+.header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px
+}
+
+.logo{
+font-size:30px;
+font-weight:800
+}
+
+.subtitle{
+color:#888;
+font-size:13px
+}
+
+.card{
+background:#15151c;
+border:1px solid #252530;
+border-radius:22px;
+padding:20px;
+margin-bottom:14px
+}
+
+.title{
+text-align:center;
+color:#999;
+font-size:12px;
+text-transform:uppercase;
+letter-spacing:1px
+}
+
+.timer{
+text-align:center;
+font-size:46px;
+font-weight:700;
+margin:12px 0;
+font-variant-numeric:tabular-nums
+}
+
+.status{
+text-align:center;
+color:#999;
+font-size:13px;
+margin-bottom:15px
+}
+
+.buttons{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px
+}
+
+button{
+border:none;
+border-radius:15px;
+padding:15px;
+font-size:16px;
+font-weight:700;
+background:#292932;
+color:white
+}
+
+button.primary{
+background:white;
+color:black
+}
+
+button.stop{
+background:#391b20;
+color:#ffb8bf
+}
+
+.puff-icon{
+text-align:center;
+font-size:55px;
+margin:5px
+}
+
+.count{
+text-align:center;
+font-size:40px;
+font-weight:800
+}
+
+.puff-buttons{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+margin-top:15px
+}
+
+.lungs{
+display:flex;
+justify-content:center;
+align-items:center;
+gap:10px;
+height:170px;
+margin-top:10px
+}
+
+.lung{
+width:90px;
+height:115px;
+background:linear-gradient(#ff666f,#9c2029);
+border-radius:48% 48% 45% 45%;
+position:relative;
+box-shadow:
+inset 0 0 25px #47080d,
+0 0 25px rgba(255,70,80,.15);
+transition:.5s
+}
+
+.lung:after{
+content:"";
+position:absolute;
+width:9px;
+height:40px;
+background:#ddd;
+top:-14px;
+left:40px;
+border-radius:10px
+}
+
+.lungs.dirty .lung{
+filter:grayscale(.65) brightness(.65);
+box-shadow:inset 0 0 35px black
+}
+
+.lungs.danger .lung{
+filter:grayscale(.8) brightness(.45);
+background:#6e1118;
+box-shadow:
+inset 0 0 40px #000,
+0 0 25px rgba(255,0,0,.3)
+}
+
+.lung-text{
+text-align:center;
+color:#999;
+font-size:13px
+}
+
+.progress{
+height:9px;
+background:#292932;
+border-radius:10px;
+overflow:hidden;
+margin-top:12px
+}
+
+.progress-bar{
+height:100%;
+width:0%;
+background:#e95c65;
+transition:.3s
+}
+
+.warning{
+display:none;
+margin-top:15px;
+padding:15px;
+border-radius:15px;
+background:#35191d;
+border:1px solid #71333a;
+color:#ffb8bf;
+text-align:center;
+font-weight:700;
+line-height:1.5
+}
+
+.warning.high{
+background:#441519;
+border-color:#a32935;
+color:#ff8f99
+}
+
+.stats{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:8px
+}
+
+.stat{
+background:#101015;
+padding:14px 5px;
+border-radius:15px;
+text-align:center
+}
+
+.stat-number{
+font-size:22px;
+font-weight:800;
+display:block
+}
+
+.stat-label{
+color:#888;
+font-size:12px
+}
+
+.row{
+display:flex;
+justify-content:space-between;
+padding:11px 0;
+border-bottom:1px solid #292932
+}
+
+.row:last-child{
+border-bottom:none
+}
+
+.muted{
+color:#999
+}
+
+.footer{
+text-align:center;
+color:#666;
+font-size:11px;
+line-height:1.5;
+margin-top:20px
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="header">
+<div>
+<div class="logo">PUFFLOG</div>
+<div class="subtitle">Track • Understand • Reduce</div>
+</div>
+<div style="font-size:35px">🫁</div>
+</div>
+
+
+<!-- SESSION -->
+
+<div class="card">
+
+<div class="title">Current Session</div>
+
+<div id="timer" class="timer">
+00:00:00
+</div>
+
+<div id="status" class="status">
+No active session
+</div>
+
+<div class="buttons">
+
+<button class="primary" onclick="startSession()">
+Start Session
+</button>
+
+<button class="stop" onclick="stopSession()">
+Stop Session
+</button>
+
+</div>
+
+</div>
+
+
+<!-- PUFF COUNTER -->
+
+<div class="card">
+
+<div class="title">Puffs Today</div>
+
+<div class="puff-icon">🚬</div>
+
+<div id="puffCount" class="count">
+0
+</div>
+
+<div class="puff-buttons">
+
+<button onclick="addPuff()">
++ 1 Puff
+</button>
+
+<button onclick="undoPuff()">
+Undo
+</button>
+
+</div>
+
+</div>
+
+
+<!-- LUNG -->
+
+<div class="card">
+
+<div class="title">
+Lung Impact Visualizer
+</div>
+
+<div id="lungs" class="lungs">
+
+<div class="lung"></div>
+<div class="lung"></div>
+
+</div>
+
+<div id="lungText" class="lung-text">
+No puffs logged today.
+</div>
+
+<div class="progress">
+<div id="progressBar" class="progress-bar"></div>
+</div>
+
+<div id="lungWarning" class="warning">
+⚠️ WARNING<br>
+Your logged smoking level has crossed
+60% of today's target.
+<br>
+Consider stopping and giving your lungs a break.
+</div>
+
+</div>
+
+
+<!-- STATS -->
+
+<div class="card">
+
+<div class="title">
+Today's Stats
+</div>
+
+<br>
+
+<div class="stats">
+
+<div class="stat">
+<span id="todayPuffs" class="stat-number">0</span>
+<span class="stat-label">Puffs</span>
+</div>
+
+<div class="stat">
+<span id="todaySessions" class="stat-number">0</span>
+<span class="stat-label">Sessions</span>
+</div>
+
+<div class="stat">
+<span id="todayTime" class="stat-number">0m</span>
+<span class="stat-label">Time</span>
+</div>
+
+</div>
+
+</div>
+
+
+<!-- GOALS -->
+
+<div class="card">
+
+<div class="row">
+<span class="muted">Daily target</span>
+<b>20 puffs</b>
+</div>
+
+<div class="row">
+<span class="muted">Progress</span>
+<b id="percentage">0%</b>
+</div>
+
+<div class="row">
+<span class="muted">Current streak</span>
+<b id="streak">0 days</b>
+</div>
+
+<br>
+
+<button onclick="resetToday()">
+Reset Today's Puffs
+</button>
+
+</div>
+
+
+<div class="footer">
+
+Pufflog is a self-tracking tool.
+The lung animation is illustrative and does not
+measure actual lung capacity or lung damage.
+
+</div>
+
+</div>
+
+
+<script>
+
+let savedData =
+JSON.parse(localStorage.getItem("pufflogData"));
+
+if(!savedData){
+
+savedData={
+date:getToday(),
+puffs:0,
+sessions:[],
+activeSession:null,
+history:{}
+};
+
+}
+
+function getToday(){
+
+return new Date()
+.toISOString()
+.split("T")[0];
+
+}
+
+
+if(savedData.date!==getToday()){
+
+savedData.history[savedData.date]=
+savedData.puffs;
+
+savedData.date=getToday();
+
+savedData.puffs=0;
+
+savedData.sessions=[];
+
+savedData.activeSession=null;
+
+saveData();
+
+}
+
+
+function saveData(){
+
+localStorage.setItem(
+"pufflogData",
+JSON.stringify(savedData)
+);
+
+}
+
+
+function addPuff(){
+
+savedData.puffs++;
+
+saveData();
+
+updateUI();
+
+}
+
+
+function undoPuff(){
+
+if(savedData.puffs>0){
+
+savedData.puffs--;
+
+}
+
+saveData();
+
+updateUI();
+
+}
+
+
+function startSession(){
+
+if(savedData.activeSession){
+
+return;
+
+}
+
+savedData.activeSession={
+start:Date.now()
+};
+
+saveData();
+
+updateUI();
+
+}
+
+
+function stopSession(){
+
+if(!savedData.activeSession){
+
+return;
+
+}
+
+let duration=Math.floor(
+
+(Date.now()-
+savedData.activeSession.start)
+/1000
+
+);
+
+savedData.sessions.push({
+
+start:savedData.activeSession.start,
+duration:duration
+
+});
+
+savedData.activeSession=null;
+
+saveData();
+
+updateUI();
+
+}
+
+
+function formatTime(seconds){
+
+seconds=Math.max(
+0,
+Math.floor(seconds)
+);
+
+let hours=Math.floor(
+seconds/3600
+);
+
+let minutes=Math.floor(
+(seconds%3600)/60
+);
+
+let secs=seconds%60;
+
+return [
+
+hours,
+minutes,
+secs
+
+].map(
+
+x=>String(x).padStart(2,"0")
+
+).join(":");
+
+}
+
+
+function totalSessionTime(){
+
+let total=0;
+
+savedData.sessions.forEach(
+session=>{
+total+=session.duration;
+}
+);
+
+if(savedData.activeSession){
+
+total+=Math.floor(
+
+(Date.now()-
+savedData.activeSession.start)
+/1000
+
+);
+
+}
+
+return total;
+
+}
+
+
+function calculateStreak(){
+
+let streak=0;
+
+let date=new Date();
+
+while(true){
+
+let key=
+date.toISOString()
+.split("T")[0];
+
+let value;
+
+if(key===getToday()){
+
+value=savedData.puffs;
+
+}else{
+
+value=savedData.history[key]||0;
+
+}
+
+if(value<=0){
+
+break;
+
+}
+
+streak++;
+
+date.setDate(
+date.getDate()-1
+);
+
+if(streak>365){
+
+break;
+
+}
+
+}
+
+return streak;
+
+}
+
+
+function updateUI(){
+
+document.getElementById(
+"puffCount"
+).textContent=
+savedData.puffs;
+
+
+document.getElementById(
+"todayPuffs"
+).textContent=
+savedData.puffs;
+
+
+document.getElementById(
+"todaySessions"
+).textContent=
+savedData.sessions.length;
+
+
+let total=
+totalSessionTime();
+
+let minutes=
+Math.floor(total/60);
+
+if(minutes<60){
+
+document.getElementById(
+"todayTime"
+).textContent=
+minutes+"m";
+
+}else{
+
+let hours=
+Math.floor(minutes/60);
+
+document.getElementById(
+"todayTime"
+).textContent=
+hours+"h";
+
+}
+
+
+let percentage=Math.min(
+
+100,
+
+Math.round(
+savedData.puffs/20*100
+)
+
+);
+
+
+document.getElementById(
+"percentage"
+).textContent=
+percentage+"%";
+
+
+document.getElementById(
+"progressBar"
+).style.width=
+percentage+"%";
+
+
+let lungs=
+document.getElementById("lungs");
+
+
+let warning=
+document.getElementById(
+"lungWarning"
+);
+
+
+/* 60% WARNING */
+
+if(percentage>=60){
+
+warning.style.display="block";
+
+}else{
+
+warning.style.display="none";
+
+}
+
+
+/* HIGH WARNING */
+
+if(percentage>=100){
+
+warning.classList.add("high");
+
+}else{
+
+warning.classList.remove("high");
+
+}
+
+
+/* LUNG VISUAL */
+
+lungs.classList.toggle(
+"dirty",
+percentage>=40
+);
+
+lungs.classList.toggle(
+"danger",
+percentage>=80
+);
+
+
+let message;
+
+if(savedData.puffs===0){
+
+message=
+"No puffs logged today.";
+
+}else if(percentage<40){
+
+message=
+"Low logged use today.";
+
+}else if(percentage<60){
+
+message=
+"Approaching your warning level.";
+
+}else if(percentage<80){
+
+message=
+"Warning level reached.";
+
+}else if(percentage<100){
+
+message=
+"High logged use today.";
+
+}else{
+
+message=
+"Daily target exceeded.";
+
+}
+
+
+document.getElementById(
+"lungText"
+).textContent=
+message+
+" This is only a visual estimate.";
+
+
+if(savedData.activeSession){
+
+document.getElementById(
+"status"
+).textContent=
+"● Session running";
+
+}else{
+
+document.getElementById(
+"status"
+).textContent=
+"No active session";
+
+}
+
+
+document.getElementById(
+"streak"
+).textContent=
+calculateStreak()+" days";
+
+}
+
+
+function updateTimer(){
+
+let timer=
+document.getElementById("timer");
+
+if(!savedData.activeSession){
+
+timer.textContent=
+"00:00:00";
+
+return;
+
+}
+
+let seconds=Math.floor(
+
+(Date.now()-
+savedData.activeSession.start)
+/1000
+
+);
+
+timer.textContent=
+formatTime(seconds);
+
+}
+
+
+function resetToday(){
+
+let answer=
+confirm(
+"Reset today's puff count?"
+);
+
+if(!answer){
+
+return;
+
+}
+
+savedData.puffs=0;
+
+saveData();
+
+updateUI();
+
+}
+
+
+setInterval(
+updateTimer,
+1000
+);
+
+updateUI();
+
+updateTimer();
+
+</script>
+
+</body>
+</html>
