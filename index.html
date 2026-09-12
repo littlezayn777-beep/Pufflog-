@@ -26,7 +26,7 @@ const c=document.getElementById('game'),ctx=c.getContext('2d');
 let W=0,H=0,started=false,over=false,t=0,last=0,obs=[],parts=[];
 let p={x:55,y:0,w:96,h:44,vy:0,rot:0,ground:0};
 let spawnDistance=9999;
-const MIN_GAP=330, MAX_GAP=450;
+const MIN_GAP=300, MAX_GAP=430;
 function size(){let r=c.getBoundingClientRect(),d=devicePixelRatio||1;W=Math.max(280,r.width);H=Math.max(150,r.height);c.width=W*d;c.height=H*d;ctx.setTransform(d,0,0,d,0,0);p.ground=H-35;if(!started&&!over)p.y=p.ground-p.h}
 window.onresize=size;
 function rr(x,y,w,h,r){r=Math.min(r,w/2,h/2);ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
@@ -51,16 +51,28 @@ function drawBong(){
 }
 function drawWeedPlant(o){
   const cx=o.x+o.w/2, base=o.y+o.h;
+  const scale=o.h/50;
   ctx.save();
+  ctx.translate(cx,base);
+  ctx.scale(scale,scale);
   ctx.lineCap='round';ctx.lineJoin='round';
-  ctx.strokeStyle='#b7b7b7';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(cx,base);ctx.lineTo(cx,base-30);ctx.stroke();
-  ctx.fillStyle='#8d8d8d';ctx.beginPath();ctx.ellipse(cx,base+1,18,3,0,0,Math.PI*2);ctx.fill();
-  const leaves=[[-12,-27,-30,-37],[-5,-24,-10,-43],[0,-27,0,-47],[6,-24,12,-43],[12,-27,30,-37],[-8,-19,-25,-25],[8,-19,25,-25]];
-  leaves.forEach(([x1,y1,x2,y2])=>{
-    ctx.strokeStyle='#bdbdbd';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(cx+x1,base+y1);ctx.lineTo(cx+x2,base+y2);ctx.stroke();
-    ctx.fillStyle='#777';ctx.beginPath();ctx.ellipse(cx+x2,base+y2,5,2.5,Math.atan2(y2-y1,x2-x1),0,Math.PI*2);ctx.fill();
-  });
-  ctx.strokeStyle='#d5d5d5';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(cx,base-30);ctx.lineTo(cx,base-47);ctx.stroke();
+  // Original leafy cannabis-style plant silhouette — decorative game artwork.
+  const stem=ctx.createLinearGradient(-2,-52,2,0);
+  stem.addColorStop(0,'#9ee8a4');stem.addColorStop(1,'#4d9a58');
+  ctx.strokeStyle=stem;ctx.lineWidth=3.5;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(0,-52);ctx.stroke();
+  function leaf(x,y,ang,len,w){
+    ctx.save();ctx.translate(x,y);ctx.rotate(ang);
+    const g=ctx.createLinearGradient(0,0,len,0);g.addColorStop(0,'#4f9d59');g.addColorStop(.55,'#7dcc83');g.addColorStop(1,'#a7e8ac');
+    ctx.fillStyle=g;ctx.strokeStyle='rgba(210,255,215,.45)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(0,0);ctx.bezierCurveTo(len*.28,-w,len*.72,-w,len,0);ctx.bezierCurveTo(len*.72,w,len*.28,w,0,0);ctx.closePath();ctx.fill();ctx.stroke();
+    ctx.strokeStyle='rgba(30,75,35,.7)';ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(len*.84,0);ctx.stroke();
+    ctx.restore();
+  }
+  leaf(0,-45,-Math.PI/2,18,5);
+  leaf(0,-39,-2.55,25,6);leaf(0,-37,-.6,25,6);
+  leaf(0,-28,-2.8,29,7);leaf(0,-27,-.35,29,7);
+  leaf(0,-18,-2.95,22,6);leaf(0,-17,-.2,22,6);
+  ctx.fillStyle='#6dbb75';ctx.beginPath();ctx.ellipse(0,2,15,3.5,0,0,Math.PI*2);ctx.fill();
   ctx.restore();
 }
 function puffBurst(){
@@ -90,9 +102,15 @@ function maybeSpawn(){
   const lastObstacle=obs[obs.length-1];
   if(!lastObstacle || lastObstacle.x < W-MIN_GAP){
     const gap=MIN_GAP+Math.random()*(MAX_GAP-MIN_GAP);
-    const x=lastObstacle ? lastObstacle.x+lastObstacle.w+gap : W+260;
-    const h=50,w=34;
-    obs.push({x,y:p.ground-h,w,h});
+    const x=lastObstacle ? lastObstacle.x+lastObstacle.w+gap : W+320;
+    const count=Math.random()<.28?2:1;
+    let cursor=x;
+    for(let i=0;i<count;i++){
+      const h=42+Math.random()*32;
+      const w=34+Math.random()*13;
+      obs.push({x:cursor,y:p.ground-h,w,h});
+      cursor+=w+(count===2?(5+Math.random()*9):0);
+    }
   }
 }
 function loop(now){
@@ -100,7 +118,7 @@ function loop(now){
   let dt=Math.min(.033,(now-last)/1000||0);last=now;t+=dt;
   p.vy+=1800*dt;p.y+=p.vy*dt;
   if(p.y>p.ground-p.h){p.y=p.ground-p.h;p.vy=0;p.rot=0}else p.rot+=dt*1.1;
-  const speed=235+Math.min(115,t*3.2);
+  const speed=270+Math.min(260,t*5.2);
   maybeSpawn();
   obs.forEach(o=>o.x-=speed*dt);obs=obs.filter(o=>o.x>-40);
   parts.push({x:p.x-40,y:p.y+8,r:1.4+Math.random()*1.2,life:.7,vx:-22,vy:-12});parts.forEach(q=>{q.x+=q.vx*dt;q.y+=q.vy*dt;q.vy-=4*dt;q.life-=dt});parts=parts.filter(q=>q.life>0);
