@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#090b0f">
+<title>PUFFLOG</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:#07080b;color:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.app{max-width:480px;min-height:100vh;margin:auto;background:linear-gradient(180deg,#11151a,#08090c);padding-bottom:90px}
+header{padding:22px 18px 10px;display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:25px;font-weight:900;letter-spacing:3px}.date{font-size:11px;color:#858994}
+.card{margin:10px 15px;padding:17px;border:1px solid #282c33;background:#15181e;border-radius:21px}
+h2{font-size:16px;margin:0 0 12px}.muted{color:#858994;font-size:11px;line-height:1.5}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.stat{background:#0d0f13;border-radius:14px;padding:13px}.stat b{display:block;font-size:22px;margin-top:3px}.stat small{color:#777b86}
+.buttons{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+button{border:0;border-radius:15px;padding:14px;color:#fff;background:#272b33;font-weight:800;font-size:13px}
+button:active{transform:scale(.97)}.primary{background:#f0f0f0;color:#0b0b0d}.stop{background:#3b2026}
+.timer{text-align:center;font-size:50px;font-variant-numeric:tabular-nums;font-weight:900;letter-spacing:2px;margin:5px}
+.session{text-align:center;color:#969aa5;font-size:11px}
+.lungs{display:flex;justify-content:center;align-items:center;gap:12px;height:145px}
+.lung{width:80px;height:108px;border:4px solid #8b929e;border-radius:48% 48% 44% 44%;position:relative;background:radial-gradient(circle at 50% 35%,#6d748022 0 30%,transparent 31%),#262a31;transition:.5s}
+.lung:after{content:"";position:absolute;left:50%;top:-18px;height:32px;border-left:4px solid #8b929e}
+.lung.damaged{filter:grayscale(.25);opacity:.65;background:radial-gradient(circle at 30% 55%,#111 0 8%,transparent 9%),radial-gradient(circle at 65% 35%,#111 0 7%,transparent 8%),#20242a}
+.impact{text-align:center;font-size:12px}.impact strong{font-size:25px;display:block}
+.progress{height:8px;background:#292d35;border-radius:9px;overflow:hidden;margin:10px 0}.progress i{display:block;height:100%;width:0;background:#b9bec8;border-radius:9px;transition:.4s}
+.log{max-height:130px;overflow:auto;color:#aeb2bc;font-size:11px;line-height:1.7}
+.reward{display:flex;justify-content:space-between;align-items:center}.pill{padding:7px 10px;background:#252932;border-radius:99px;font-size:10px}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(480px,100%);display:grid;grid-template-columns:repeat(3,1fr);background:#111318ee;backdrop-filter:blur(16px);border-top:1px solid #292c33;padding:9px 8px calc(9px + env(safe-area-inset-bottom))}
+.nav button{background:transparent;color:#777b86;padding:8px}.nav button.active{color:#fff}
+.screen{display:none}.screen.active{display:block}
+.toast{position:fixed;top:18px;left:50%;transform:translateX(-50%);background:#eee;color:#111;padding:10px 15px;border-radius:99px;font-size:11px;font-weight:800;opacity:0;transition:.2s;z-index:9}.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="app">
+<header><div><div class="logo">PUFFLOG</div><div class="date">PRIVATE SESSION TRACKER</div></div><div class="pill">DAY <span id="day">1</span></div></header>
+
+<section id="home" class="screen active">
+<div class="card"><h2>Today's activity</h2><div class="stats">
+<div class="stat">🌿 <small>JOINTS</small><b id="joints">0</b></div>
+<div class="stat">💨 <small>BONG SESSIONS</small><b id="bongs">0</b></div>
+<div class="stat">⏱️ <small>SESSION TIME</small><b id="totalTime">00:00</b></div>
+<div class="stat">🔥 <small>SESSIONS</small><b id="sessions">0</b></div>
+</div></div>
+
+<div class="card"><h2>Session timer</h2><div class="timer" id="timer">00:00</div><div class="session" id="sessionStatus">No active session</div><br>
+<div class="buttons"><button class="primary" onclick="start('Joint')">🌿 Start Joint</button><button onclick="start('Bong')">💨 Start Bong</button><button class="stop" onclick="finish()">■ End Session</button><button onclick="quick('Joint')">+ Log Joint</button></div></div>
+
+<div class="card"><h2>Illustrative lung impact</h2>
+<div class="lungs"><div class="lung" id="lung1"></div><div class="lung" id="lung2"></div></div>
+<div class="impact"><strong id="impact">0%</strong> fictional impact meter</div>
+<div class="progress"><i id="impactBar"></i></div>
+<p class="muted">This animation is only a visual game-style indicator. It cannot measure how much your lungs are actually “burned” or damaged. Real lung effects cannot be calculated from joint/bong counts or session time.</p>
+</div>
+
+<div class="card"><h2>🏆 Weekly healthy challenge</h2><div class="reward"><span>Log honestly for 7 days</span><span class="pill" id="streak">0 / 7</span></div><p class="muted">For a real reward system, rewards should encourage logging, reduction or sober days—not more smoking.</p></div>
+<div class="card"><h2>Activity</h2><div class="log" id="log">Your activity will appear here.</div></div>
+</section>
+
+<section id="history" class="screen">
+<div class="card"><h2>📊 History</h2><div class="stats">
+<div class="stat">🌿 <small>TOTAL JOINTS</small><b id="allJoints">0</b></div>
+<div class="stat">💨 <small>TOTAL BONG</small><b id="allBongs">0</b></div>
+<div class="stat">⏱️ <small>TOTAL TIME</small><b id="allTime">00:00</b></div>
+<div class="stat">🔥 <small>TOTAL SESSIONS</small><b id="allSessions">0</b></div>
+</div></div>
+<div class="card"><h2>Last 7 days</h2><div id="week" class="log"></div></div>
+</section>
+
+<section id="settings" class="screen">
+<div class="card"><h2>⚙️ Privacy</h2><p class="muted">Your data is stored on this device using browser storage in this first version.</p><button onclick="save()">💾 Save locally</button><br><br><button class="stop" onclick="resetApp()">Reset all data</button></div>
+<div class="card"><h2>About</h2><p class="muted">PUFFLOG is a fictional prototype for tracking personal habits. The lung animation is not a medical measurement or diagnosis.</p></div>
+</section>
+
+<nav class="nav"><button class="active" onclick="show('home',this)">🏠<br>Today</button><button onclick="show('history',this)">📊<br>History</button><button onclick="show('settings',this)">⚙️<br>Settings</button></nav>
+<div id="toast" class="toast"></div>
+
+<script>
+let d=JSON.parse(localStorage.getItem('pufflog')||'null')||{joints:0,bongs:0,totalSeconds:0,sessions:0,days:1,streak:0,logs:[],history:[],avatar:0};
+let active=false,startAt=0,kind='';
+const $=x=>document.getElementById(x);
+function fmt(sec){sec=Math.max(0,Math.floor(sec));return String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0')}
+function impactValue(){return Math.min(100,d.joints*6+d.bongs*9+d.sessions*3)}
+function render(){
+$('joints').textContent=d.joints;$('bongs').textContent=d.bongs;$('sessions').textContent=d.sessions;$('totalTime').textContent=fmt(d.totalSeconds);$('day').textContent=d.days;
+$('impact').textContent=impactValue()+'%';$('impactBar').style.width=impactValue()+'%';
+$('lung1').className='lung '+(impactValue()>45?'damaged':'');$('lung2').className='lung '+(impactValue()>45?'damaged':'');
+$('allJoints').textContent=d.history.reduce((a,x)=>a+x.joints,0)+d.joints;$('allBongs').textContent=d.history.reduce((a,x)=>a+x.bongs,0)+d.bongs;$('allTime').textContent=fmt(d.history.reduce((a,x)=>a+x.time,0)+d.totalSeconds);$('allSessions').textContent=d.history.reduce((a,x)=>a+x.sessions,0)+d.sessions;
+$('streak').textContent=d.streak+' / 7';$('log').innerHTML=d.logs.slice(-12).reverse().map(x=>'• '+x).join('<br>')||'Your activity will appear here.';
+$('week').innerHTML=d.history.slice(-7).reverse().map(x=>x.date+' — 🌿 '+x.joints+' · 💨 '+x.bongs+' · ⏱ '+fmt(x.time)).join('<br>')||'No previous days yet.';
+}
+function save(){localStorage.setItem('pufflog',JSON.stringify(d));toast('Saved ✓')}
+function toast(x){$('toast').textContent=x;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),1400)}
+function start(k){if(active){toast('A session is already running');return}active=true;kind=k;startAt=Date.now();$('sessionStatus').textContent=k+' session running…';toast('Timer started')}
+function finish(){if(!active){toast('Start a session first');return}let sec=Math.max(1,Math.round((Date.now()-startAt)/1000));d.totalSeconds+=sec;d.sessions++;if(kind==='Joint')d.joints++;else d.bongs++;d.logs.push(kind+' session logged — '+fmt(sec));active=false;kind='';$('sessionStatus').textContent='Session saved';save();render()}
+function quick(k){if(k==='Joint')d.joints++;else d.bongs++;d.logs.push('Quick log: '+k);save();render();toast(k+' logged')}
+function show(id,btn){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));$(id).classList.add('active');document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));btn.classList.add('active')}
+function resetApp(){if(confirm('Delete all PUFFLOG data?')){localStorage.removeItem('pufflog');location.reload()}}
+setInterval(()=>{if(active)$('timer').textContent=fmt((Date.now()-startAt)/1000)},2500);
+render();
+</script>
+</div>
+</body>
+</html>
