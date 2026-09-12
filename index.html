@@ -1,0 +1,2128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>PUFFLOG</title>
+
+<style>
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
+body{
+  margin:0;
+  background:#08090b;
+  color:#f5f5f5;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",Arial,sans-serif;
+}
+
+.app{
+  max-width:520px;
+  margin:auto;
+  padding:18px 15px 40px;
+}
+
+header{
+  text-align:center;
+  padding:8px 0 18px;
+}
+
+.logo{
+  font-size:32px;
+  font-weight:900;
+  letter-spacing:5px;
+}
+
+.subtitle{
+  color:#777;
+  font-size:11px;
+  letter-spacing:1.5px;
+  margin-top:5px;
+}
+
+.card{
+  background:#111317;
+  border:1px solid #24272d;
+  border-radius:22px;
+  padding:17px;
+  margin-bottom:14px;
+  box-shadow:0 10px 30px rgba(0,0,0,.25);
+}
+
+.section-title{
+  color:#777;
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:1.5px;
+  margin-bottom:13px;
+}
+
+/* ================= GAME ================= */
+
+.game-card{
+  padding:12px;
+}
+
+.game-title{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:4px 5px 10px;
+}
+
+.game-name{
+  font-weight:900;
+  letter-spacing:1px;
+}
+
+.game-score{
+  color:#aaa;
+  font-size:12px;
+}
+
+.game{
+  position:relative;
+  width:100%;
+  height:190px;
+  background:
+    linear-gradient(
+      to bottom,
+      #0b0c0f 0%,
+      #101217 75%,
+      #17191e 75%,
+      #17191e 76%,
+      #101217 76%
+    );
+  border-radius:17px;
+  overflow:hidden;
+  touch-action:manipulation;
+  border:1px solid #25282e;
+}
+
+.game-message{
+  position:absolute;
+  z-index:20;
+  inset:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  pointer-events:none;
+}
+
+.game-message-inner{
+  background:rgba(8,9,11,.82);
+  border:1px solid #33363c;
+  padding:13px 20px;
+  border-radius:15px;
+  backdrop-filter:blur(5px);
+}
+
+.game-message-title{
+  font-weight:900;
+  font-size:16px;
+}
+
+.game-message-small{
+  color:#888;
+  font-size:11px;
+  margin-top:5px;
+}
+
+.joint-player{
+  position:absolute;
+  left:42px;
+  bottom:31px;
+  width:65px;
+  height:18px;
+  z-index:10;
+  transform:rotate(-8deg);
+  transition:transform .08s;
+}
+
+.joint-body{
+  position:absolute;
+  left:0;
+  top:2px;
+  width:54px;
+  height:14px;
+  border-radius:10px;
+  background:linear-gradient(90deg,#ddd,#999);
+  box-shadow:0 0 7px rgba(255,255,255,.12);
+}
+
+.joint-tip{
+  position:absolute;
+  left:52px;
+  top:5px;
+  width:13px;
+  height:8px;
+  border-radius:0 7px 7px 0;
+  background:#bbb;
+}
+
+.joint-filter{
+  position:absolute;
+  left:-7px;
+  top:3px;
+  width:12px;
+  height:12px;
+  border-radius:4px;
+  background:#b98758;
+}
+
+.joint-glow{
+  position:absolute;
+  right:-3px;
+  top:5px;
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:#ff8b4a;
+  box-shadow:0 0 9px #ff7040;
+  animation:ember .5s infinite alternate;
+}
+
+@keyframes ember{
+  from{opacity:.45;transform:scale(.8)}
+  to{opacity:1;transform:scale(1.2)}
+}
+
+.obstacle{
+  position:absolute;
+  bottom:31px;
+  width:25px;
+  height:38px;
+  background:#777;
+  border-radius:7px 7px 3px 3px;
+  border-bottom:5px solid #4d4f54;
+}
+
+.obstacle:before{
+  content:"";
+  position:absolute;
+  width:15px;
+  height:15px;
+  background:#62656b;
+  left:5px;
+  top:-8px;
+  border-radius:6px 6px 2px 2px;
+}
+
+.ground-line{
+  position:absolute;
+  bottom:30px;
+  left:0;
+  width:100%;
+  height:2px;
+  background:#363940;
+}
+
+.game-button{
+  width:100%;
+  margin-top:10px;
+  background:#f5f5f5;
+  color:#08090b;
+}
+
+.game-help{
+  text-align:center;
+  color:#666;
+  font-size:10px;
+  margin-top:8px;
+}
+
+/* ================= BUTTONS ================= */
+
+button{
+  border:0;
+  border-radius:14px;
+  padding:13px 16px;
+  font-size:15px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.add{
+  width:100%;
+  background:#f5f5f5;
+  color:#08090b;
+}
+
+.undo{
+  width:100%;
+  margin-top:8px;
+  background:#25282e;
+  color:#aaa;
+}
+
+/* ================= COUNTERS ================= */
+
+.counter-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+
+.counter{
+  background:#17191e;
+  border-radius:18px;
+  padding:17px 11px;
+  text-align:center;
+}
+
+.counter-icon{
+  font-size:29px;
+}
+
+.counter-name{
+  font-size:13px;
+  color:#aaa;
+  margin-top:4px;
+}
+
+.counter-number{
+  font-size:40px;
+  font-weight:800;
+  margin:4px 0 11px;
+}
+
+/* ================= TIMER ================= */
+
+.timer{
+  text-align:center;
+}
+
+.timer-number{
+  font-size:44px;
+  font-weight:800;
+  font-variant-numeric:tabular-nums;
+  margin:8px 0 15px;
+}
+
+.timer-buttons{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.start{
+  background:#f5f5f5;
+  color:#000;
+}
+
+.stop{
+  background:#292c32;
+  color:#fff;
+}
+
+/* ================= LUNGS ================= */
+
+.lung-wrap{
+  text-align:center;
+}
+
+.lung-container{
+  position:relative;
+  height:230px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  overflow:hidden;
+}
+
+.lungs{
+  position:relative;
+  width:210px;
+  height:185px;
+  display:flex;
+  justify-content:center;
+  gap:5px;
+  transition:.5s;
+}
+
+.lung{
+  width:82px;
+  height:145px;
+  background:linear-gradient(160deg,#d9dde2,#686d74);
+  border-radius:55% 45% 48% 52%;
+  position:relative;
+  transition:.7s;
+  animation:breath 3s ease-in-out infinite;
+}
+
+.lung.left{
+  transform:rotate(5deg);
+}
+
+.lung.right{
+  transform:rotate(-5deg);
+}
+
+.lung:after{
+  content:"";
+  position:absolute;
+  inset:15px;
+  border-radius:50%;
+  background:
+    radial-gradient(circle at 30% 30%,rgba(255,255,255,.35),transparent 25%),
+    radial-gradient(circle at 65% 60%,rgba(0,0,0,.25),transparent 28%),
+    radial-gradient(circle at 40% 75%,rgba(0,0,0,.2),transparent 22%);
+  opacity:.6;
+}
+
+.trachea{
+  position:absolute;
+  top:27px;
+  left:50%;
+  transform:translateX(-50%);
+  width:22px;
+  height:85px;
+  background:#9da2a8;
+  border-radius:15px;
+  z-index:3;
+}
+
+.branch{
+  position:absolute;
+  width:70px;
+  height:8px;
+  background:#9da2a8;
+  top:90px;
+  border-radius:10px;
+  z-index:3;
+}
+
+.branch.left{
+  left:50%;
+  transform:rotate(25deg);
+}
+
+.branch.right{
+  right:50%;
+  transform:rotate(-25deg);
+}
+
+@keyframes breath{
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.035)}
+}
+
+@keyframes dangerPulse{
+  0%,100%{
+    filter:drop-shadow(0 0 8px rgba(255,70,70,.15))
+  }
+  50%{
+    filter:drop-shadow(0 0 28px rgba(255,70,70,.5))
+  }
+}
+
+.impact-number{
+  font-size:42px;
+  font-weight:900;
+}
+
+.impact-label{
+  color:#888;
+  font-size:12px;
+}
+
+.progress{
+  height:9px;
+  background:#24272c;
+  border-radius:20px;
+  overflow:hidden;
+  margin:15px 0 8px;
+}
+
+.progress-fill{
+  height:100%;
+  width:0%;
+  background:#ddd;
+  border-radius:20px;
+  transition:.5s;
+}
+
+.warning{
+  display:none;
+  margin-top:14px;
+  padding:13px;
+  border-radius:14px;
+  background:#32191b;
+  border:1px solid #683034;
+  color:#ffb5b8;
+  font-size:13px;
+  line-height:1.4;
+}
+
+.warning.show{
+  display:block;
+}
+
+.disclaimer{
+  color:#666;
+  font-size:10px;
+  line-height:1.4;
+  margin-top:12px;
+}
+
+/* ================= STATS ================= */
+
+.stats-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.stat{
+  background:#17191e;
+  padding:15px;
+  border-radius:16px;
+}
+
+.stat-name{
+  color:#777;
+  font-size:10px;
+  text-transform:uppercase;
+}
+
+.stat-value{
+  font-size:25px;
+  font-weight:800;
+  margin-top:5px;
+}
+
+.streak{
+  text-align:center;
+  padding:18px;
+  background:#17191e;
+  border-radius:18px;
+}
+
+.streak-fire{
+  font-size:42px;
+}
+
+.streak-number{
+  font-size:36px;
+  font-weight:900;
+}
+
+.streak-text{
+  color:#888;
+  font-size:12px;
+}
+
+.history-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:#17191e;
+  padding:13px;
+  border-radius:14px;
+  margin-bottom:8px;
+}
+
+.history-date{
+  font-weight:700;
+}
+
+.history-small{
+  color:#777;
+  font-size:11px;
+  margin-top:3px;
+}
+
+.history-right{
+  text-align:right;
+  font-size:13px;
+}
+
+.reset{
+  width:100%;
+  background:#1c1e23;
+  color:#999;
+  margin-top:2px;
+}
+
+@media(max-width:370px){
+  .counter-number{
+    font-size:34px;
+  }
+
+  .timer-number{
+    font-size:38px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<header>
+  <div class="logo">PUFFLOG</div>
+  <div class="subtitle">PERSONAL SESSION TRACKER</div>
+</header>
+
+
+<!-- ================= GAME ================= -->
+
+<div class="card game-card">
+
+  <div class="game-title">
+    <div class="game-name">🚬 JOINT RUNNER</div>
+
+    <div class="game-score">
+      SCORE: <span id="gameScore">0</span>
+      · BEST: <span id="highScore">0</span>
+    </div>
+  </div>
+
+  <div
+    class="game"
+    id="game"
+    onclick="jump()"
+  >
+
+    <div class="ground-line"></div>
+
+    <div
+      class="joint-player"
+      id="player"
+    >
+      <div class="joint-filter"></div>
+      <div class="joint-body"></div>
+      <div class="joint-tip"></div>
+      <div class="joint-glow"></div>
+    </div>
+
+    <div
+      class="game-message"
+      id="gameMessage"
+    >
+      <div class="game-message-inner">
+        <div class="game-message-title">
+          🚬 JOINT RUNNER
+        </div>
+
+        <div class="game-message-small">
+          Tap to jump
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <button
+    class="game-button"
+    id="gameButton"
+    onclick="startGame(event)"
+  >
+    ▶ PLAY
+  </button>
+
+  <div class="game-help">
+    Tap the game to jump over the obstacles
+  </div>
+
+</div>
+
+
+<!-- ================= TRACKER ================= -->
+
+<div class="card">
+
+  <div class="section-title">
+    Today's use
+  </div>
+
+  <div class="counter-grid">
+
+    <div class="counter">
+
+      <div class="counter-icon">🚬</div>
+
+      <div class="counter-name">
+        Joints
+      </div>
+
+      <div
+        class="counter-number"
+        id="jointCount"
+      >
+        0
+      </div>
+
+      <button
+        class="add"
+        onclick="addJoint()"
+      >
+        + 1 Joint
+      </button>
+
+      <button
+        class="undo"
+        onclick="undoJoint()"
+      >
+        Undo
+      </button>
+
+    </div>
+
+
+    <div class="counter">
+
+      <div class="counter-icon">💨</div>
+
+      <div class="counter-name">
+        Bong Sessions
+      </div>
+
+      <div
+        class="counter-number"
+        id="bongCount"
+      >
+        0
+      </div>
+
+      <button
+        class="add"
+        onclick="addBong()"
+      >
+        + 1 Bong
+      </button>
+
+      <button
+        class="undo"
+        onclick="undoBong()"
+      >
+        Undo
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- ================= TIMER ================= -->
+
+<div class="card">
+
+  <div class="section-title">
+    Live session
+  </div>
+
+  <div class="timer">
+
+    <div
+      class="timer-number"
+      id="timer"
+    >
+      00:00:00
+    </div>
+
+    <div class="timer-buttons">
+
+      <button
+        class="start"
+        onclick="startSession()"
+      >
+        ▶ Start
+      </button>
+
+      <button
+        class="stop"
+        onclick="stopSession()"
+      >
+        ■ Stop
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- ================= LUNGS ================= -->
+
+<div class="card">
+
+  <div class="section-title">
+    Lung impact visual
+  </div>
+
+  <div class="lung-wrap">
+
+    <div class="lung-container">
+
+      <div
+        class="lungs"
+        id="lungs"
+      >
+
+        <div class="trachea"></div>
+
+        <div class="branch left"></div>
+
+        <div class="branch right"></div>
+
+        <div class="lung left"></div>
+
+        <div class="lung right"></div>
+
+      </div>
+
+    </div>
+
+    <div class="impact-number">
+      <span id="impact">0</span>%
+    </div>
+
+    <div class="impact-label">
+      Daily app impact score
+    </div>
+
+    <div class="progress">
+
+      <div
+        class="progress-fill"
+        id="progress"
+      ></div>
+
+    </div>
+
+    <div
+      class="warning"
+      id="warning"
+    >
+      ⚠️ Your app impact score has crossed 60%.
+      Consider taking a break and giving your lungs
+      some time without smoke.
+    </div>
+
+    <div class="disclaimer">
+      This is only a fictional tracking visualization.
+      It does NOT measure real lung capacity,
+      oxygen level, or actual lung damage.
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- ================= TODAY ================= -->
+
+<div class="card">
+
+  <div class="section-title">
+    Today's stats
+  </div>
+
+  <div class="stats-grid">
+
+    <div class="stat">
+      <div class="stat-name">Joints</div>
+      <div
+        class="stat-value"
+        id="todayJoints"
+      >
+        0
+      </div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-name">Bong</div>
+      <div
+        class="stat-value"
+        id="todayBong"
+      >
+        0
+      </div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-name">Sessions</div>
+      <div
+        class="stat-value"
+        id="todaySessions"
+      >
+        0
+      </div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-name">Session time</div>
+      <div
+        class="stat-value"
+        id="todayTime"
+      >
+        0m
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- ================= ALL TIME ================= -->
+
+<div class="card">
+
+  <div class="section-title">
+    All-time stats
+  </div>
+
+  <div class="stats-grid">
+
+    <div class="stat">
+      <div class="stat-name">Total joints</div>
+      <div
+        class="stat-value"
+        id="totalJoints"
+      >
+        0
+      </div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-name">Total bong</div>
+      <div
+        class="stat-value"
+        id="totalBong"
+      >
+        0
+      </div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-name">Total sessions</div>
+      <div
+        class="stat-value"
+        id="totalSessions"
+      >
+        0
+      </div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-name">Total time</div>
+      <div
+        class="stat-value"
+        id="totalTime"
+      >
+        0m
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- ================= STREAK ================= -->
+
+<div class="card">
+
+  <div class="section-title">
+    Consistency
+  </div>
+
+  <div class="streak">
+
+    <div class="streak-fire">
+      🔥
+    </div>
+
+    <div class="streak-number">
+      <span id="streak">0</span> days
+    </div>
+
+    <div class="streak-text">
+      Current tracking streak
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- ================= HISTORY ================= -->
+
+<div class="card">
+
+  <div class="section-title">
+    7-day history
+  </div>
+
+  <div id="history"></div>
+
+</div>
+
+
+<button
+  class="reset"
+  onclick="resetToday()"
+>
+  Reset today's data
+</button>
+
+</div>
+
+
+<script>
+
+/* =====================================================
+   PUFFLOG DATA
+===================================================== */
+
+const STORAGE_KEY="pufflog_v4";
+
+let data={
+  days:{},
+  currentDay:"",
+  sessionStart:null
+};
+
+let timerInterval=null;
+
+
+/* =====================================================
+   DATE
+===================================================== */
+
+function getDateKey(date=new Date()){
+
+  const y=date.getFullYear();
+
+  const m=String(
+    date.getMonth()+1
+  ).padStart(2,"0");
+
+  const d=String(
+    date.getDate()
+  ).padStart(2,"0");
+
+  return `${y}-${m}-${d}`;
+}
+
+
+/* =====================================================
+   CURRENT DAY
+===================================================== */
+
+function getDay(){
+
+  const key=getDateKey();
+
+  if(!data.days[key]){
+
+    data.days[key]={
+      joints:0,
+      bong:0,
+      sessions:0,
+      sessionTime:0
+    };
+
+  }
+
+  data.currentDay=key;
+
+  return data.days[key];
+
+}
+
+
+/* =====================================================
+   SAVE
+===================================================== */
+
+function save(){
+
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(data)
+  );
+
+}
+
+
+/* =====================================================
+   LOAD
+===================================================== */
+
+function load(){
+
+  const saved=
+    localStorage.getItem(
+      STORAGE_KEY
+    );
+
+  if(saved){
+
+    try{
+
+      data=JSON.parse(saved);
+
+    }catch(error){
+
+      data={
+        days:{},
+        currentDay:"",
+        sessionStart:null
+      };
+
+    }
+
+  }
+
+  getDay();
+
+  save();
+
+}
+
+
+/* =====================================================
+   JOINTS
+===================================================== */
+
+function addJoint(){
+
+  const day=getDay();
+
+  day.joints++;
+
+  save();
+
+  update();
+
+}
+
+
+function undoJoint(){
+
+  const day=getDay();
+
+  if(day.joints>0){
+
+    day.joints--;
+
+  }
+
+  save();
+
+  update();
+
+}
+
+
+/* =====================================================
+   BONG
+===================================================== */
+
+function addBong(){
+
+  const day=getDay();
+
+  day.bong++;
+
+  save();
+
+  update();
+
+}
+
+
+function undoBong(){
+
+  const day=getDay();
+
+  if(day.bong>0){
+
+    day.bong--;
+
+  }
+
+  save();
+
+  update();
+
+}
+
+
+/* =====================================================
+   SESSION TIMER
+===================================================== */
+
+function startSession(){
+
+  if(data.sessionStart){
+    return;
+  }
+
+  data.sessionStart=Date.now();
+
+  timerInterval=
+    setInterval(
+      updateTimer,
+      1000
+    );
+
+  updateTimer();
+
+  save();
+
+}
+
+
+function stopSession(){
+
+  if(!data.sessionStart){
+    return;
+  }
+
+  const duration=
+    Math.floor(
+      (Date.now()-
+      data.sessionStart)/1000
+    );
+
+  const day=getDay();
+
+  day.sessions++;
+
+  day.sessionTime+=duration;
+
+  data.sessionStart=null;
+
+  clearInterval(timerInterval);
+
+  document.getElementById(
+    "timer"
+  ).innerText="00:00:00";
+
+  save();
+
+  update();
+
+}
+
+
+function updateTimer(){
+
+  if(!data.sessionStart){
+    return;
+  }
+
+  const seconds=
+    Math.floor(
+      (Date.now()-
+      data.sessionStart)/1000
+    );
+
+  document.getElementById(
+    "timer"
+  ).innerText=
+    formatTime(seconds);
+
+}
+
+
+function formatTime(seconds){
+
+  const h=
+    Math.floor(
+      seconds/3600
+    );
+
+  const m=
+    Math.floor(
+      (seconds%3600)/60
+    );
+
+  const s=
+    seconds%60;
+
+  return(
+    String(h).padStart(2,"0")+
+    ":"+
+    String(m).padStart(2,"0")+
+    ":"+
+    String(s).padStart(2,"0")
+  );
+
+}
+
+
+function formatMinutes(seconds){
+
+  if(seconds<60){
+
+    return seconds+"s";
+
+  }
+
+  const hours=
+    Math.floor(
+      seconds/3600
+    );
+
+  const minutes=
+    Math.floor(
+      (seconds%3600)/60
+    );
+
+  if(hours>0){
+
+    return(
+      hours+"h "+
+      minutes+"m"
+    );
+
+  }
+
+  return minutes+"m";
+
+}
+
+
+/* =====================================================
+   LUNG VISUAL
+===================================================== */
+
+function calculateImpact(){
+
+  const day=getDay();
+
+  /*
+    This is a fictional app score.
+
+    Joint = 1 unit
+    Bong = 2 units
+
+    10 units = 100%
+
+    It is NOT a medical measurement.
+  */
+
+  const units=
+    day.joints+
+    day.bong*2;
+
+  return Math.min(
+    100,
+    Math.round(
+      units/10*100
+    )
+  );
+
+}
+
+
+function updateLungs(){
+
+  const impact=
+    calculateImpact();
+
+  document.getElementById(
+    "impact"
+  ).innerText=impact;
+
+  document.getElementById(
+    "progress"
+  ).style.width=
+    impact+"%";
+
+  const lungs=
+    document.getElementById(
+      "lungs"
+    );
+
+  const warning=
+    document.getElementById(
+      "warning"
+    );
+
+  const lungElements=
+    document.querySelectorAll(
+      ".lung"
+    );
+
+  if(impact>=80){
+
+    lungs.style.animation=
+      "dangerPulse 1.4s ease-in-out infinite";
+
+  }else{
+
+    lungs.style.animation="";
+
+  }
+
+  if(impact>=80){
+
+    lungElements.forEach(
+      lung=>{
+
+        lung.style.background=
+          "linear-gradient(160deg,#555,#151619)";
+
+      }
+    );
+
+  }else if(impact>=40){
+
+    lungElements.forEach(
+      lung=>{
+
+        lung.style.background=
+          "linear-gradient(160deg,#777,#292b30)";
+
+      }
+    );
+
+  }else{
+
+    lungElements.forEach(
+      lung=>{
+
+        lung.style.background=
+          "linear-gradient(160deg,#d9dde2,#686d74)";
+
+      }
+    );
+
+  }
+
+  if(impact>=60){
+
+    warning.classList.add(
+      "show"
+    );
+
+  }else{
+
+    warning.classList.remove(
+      "show"
+    );
+
+  }
+
+}
+
+
+/* =====================================================
+   TOTALS
+===================================================== */
+
+function getTotals(){
+
+  let joints=0;
+  let bong=0;
+  let sessions=0;
+  let time=0;
+
+  Object.values(
+    data.days
+  ).forEach(day=>{
+
+    joints+=
+      day.joints||0;
+
+    bong+=
+      day.bong||0;
+
+    sessions+=
+      day.sessions||0;
+
+    time+=
+      day.sessionTime||0;
+
+  });
+
+  return{
+    joints,
+    bong,
+    sessions,
+    time
+  };
+
+}
+
+
+/* =====================================================
+   STREAK
+===================================================== */
+
+function calculateStreak(){
+
+  let streak=0;
+
+  const today=
+    new Date();
+
+  for(let i=0;i<365;i++){
+
+    const date=
+      new Date(today);
+
+    date.setDate(
+      today.getDate()-i
+    );
+
+    const key=
+      getDateKey(date);
+
+    const day=
+      data.days[key];
+
+    if(
+      day &&
+      (
+        day.joints>0 ||
+        day.bong>0 ||
+        day.sessions>0
+      )
+    ){
+
+      streak++;
+
+    }else{
+
+      break;
+
+    }
+
+  }
+
+  return streak;
+
+}
+
+
+/* =====================================================
+   HISTORY
+===================================================== */
+
+function updateHistory(){
+
+  const container=
+    document.getElementById(
+      "history"
+    );
+
+  container.innerHTML="";
+
+  for(let i=0;i<7;i++){
+
+    const date=
+      new Date();
+
+    date.setDate(
+      date.getDate()-i
+    );
+
+    const key=
+      getDateKey(date);
+
+    const day=
+      data.days[key]||
+      {
+        joints:0,
+        bong:0,
+        sessions:0,
+        sessionTime:0
+      };
+
+    const row=
+      document.createElement(
+        "div"
+      );
+
+    row.className=
+      "history-row";
+
+    const label=
+      i===0
+      ?"Today"
+      :
+      date.toLocaleDateString(
+        "en-IN",
+        {
+          weekday:"short",
+          day:"numeric",
+          month:"short"
+        }
+      );
+
+    row.innerHTML=`
+
+      <div>
+
+        <div class="history-date">
+          ${label}
+        </div>
+
+        <div class="history-small">
+          ${day.sessions} sessions ·
+          ${formatMinutes(
+            day.sessionTime
+          )}
+        </div>
+
+      </div>
+
+      <div class="history-right">
+
+        🚬 ${day.joints}<br>
+
+        💨 ${day.bong}
+
+      </div>
+
+    `;
+
+    container.appendChild(
+      row
+    );
+
+  }
+
+}
+
+
+/* =====================================================
+   MAIN UPDATE
+===================================================== */
+
+function update(){
+
+  const day=getDay();
+
+  document.getElementById(
+    "jointCount"
+  ).innerText=
+    day.joints;
+
+  document.getElementById(
+    "bongCount"
+  ).innerText=
+    day.bong;
+
+
+  document.getElementById(
+    "todayJoints"
+  ).innerText=
+    day.joints;
+
+  document.getElementById(
+    "todayBong"
+  ).innerText=
+    day.bong;
+
+  document.getElementById(
+    "todaySessions"
+  ).innerText=
+    day.sessions;
+
+  document.getElementById(
+    "todayTime"
+  ).innerText=
+    formatMinutes(
+      day.sessionTime
+    );
+
+
+  const totals=
+    getTotals();
+
+  document.getElementById(
+    "totalJoints"
+  ).innerText=
+    totals.joints;
+
+  document.getElementById(
+    "totalBong"
+  ).innerText=
+    totals.bong;
+
+  document.getElementById(
+    "totalSessions"
+  ).innerText=
+    totals.sessions;
+
+  document.getElementById(
+    "totalTime"
+  ).innerText=
+    formatMinutes(
+      totals.time
+    );
+
+
+  document.getElementById(
+    "streak"
+  ).innerText=
+    calculateStreak();
+
+
+  updateLungs();
+
+  updateHistory();
+
+}
+
+
+/* =====================================================
+   RESET TODAY
+===================================================== */
+
+function resetToday(){
+
+  if(
+    !confirm(
+      "Reset all of today's PUFFLOG data?"
+    )
+  ){
+
+    return;
+
+  }
+
+  const key=
+    getDateKey();
+
+  data.days[key]={
+    joints:0,
+    bong:0,
+    sessions:0,
+    sessionTime:0
+  };
+
+  data.currentDay=key;
+
+  save();
+
+  update();
+
+}
+
+
+/* =====================================================
+   JOINT RUNNER GAME
+===================================================== */
+
+let gameRunning=false;
+let gameOver=false;
+
+let playerY=0;
+let velocity=0;
+
+let gameScore=0;
+let highScore=
+  Number(
+    localStorage.getItem(
+      "pufflog_highscore"
+    )
+  )||0;
+
+let obstacleX=0;
+let obstacleActive=false;
+
+let gameFrame=null;
+
+let lastTime=0;
+
+const gravity=0.00165;
+const jumpPower=-0.72;
+
+let gameSpeed=0.27;
+
+let nextObstacle=0;
+
+
+/* Display high score */
+
+document.getElementById(
+  "highScore"
+).innerText=
+  highScore;
+
+
+/* =====================================================
+   START GAME
+===================================================== */
+
+function startGame(event){
+
+  if(event){
+    event.stopPropagation();
+  }
+
+  gameRunning=true;
+  gameOver=false;
+
+  playerY=0;
+  velocity=0;
+
+  gameScore=0;
+
+  gameSpeed=0.27;
+
+  obstacleX=
+    document.getElementById(
+      "game"
+    ).offsetWidth+40;
+
+  obstacleActive=false;
+
+  nextObstacle=
+    700+Math.random()*600;
+
+  document.getElementById(
+    "gameScore"
+  ).innerText="0";
+
+  document.getElementById(
+    "gameMessage"
+  ).style.display="none";
+
+  document.getElementById(
+    "gameButton"
+  ).innerText=
+    "↻ RESTART";
+
+  lastTime=performance.now();
+
+  cancelAnimationFrame(
+    gameFrame
+  );
+
+  gameFrame=
+    requestAnimationFrame(
+      gameLoop
+    );
+
+}
+
+
+/* =====================================================
+   JUMP
+===================================================== */
+
+function jump(){
+
+  if(!gameRunning){
+
+    startGame();
+
+    return;
+
+  }
+
+  /*
+    Only allow jumping when
+    player is near the ground.
+  */
+
+  if(playerY<=1){
+
+    velocity=
+      jumpPower;
+
+  }
+
+}
+
+
+/* =====================================================
+   GAME LOOP
+===================================================== */
+
+function gameLoop(timestamp){
+
+  if(!gameRunning){
+    return;
+  }
+
+  const delta=
+    timestamp-lastTime;
+
+  lastTime=timestamp;
+
+
+  /* Player physics */
+
+  velocity+=
+    gravity*delta;
+
+  playerY+=
+    velocity*delta;
+
+
+  if(playerY<0){
+
+    playerY=0;
+    velocity=0;
+
+  }
+
+
+  const player=
+    document.getElementById(
+      "player"
+    );
+
+  player.style.bottom=
+    (31+playerY)+"px";
+
+
+  /* Create obstacle */
+
+  if(!obstacleActive){
+
+    nextObstacle-=delta;
+
+    if(nextObstacle<=0){
+
+      obstacleActive=true;
+
+      obstacleX=
+        document.getElementById(
+          "game"
+        ).offsetWidth+20;
+
+      createObstacle();
+
+    }
+
+  }
+
+
+  /* Move obstacle */
+
+  if(obstacleActive){
+
+    obstacleX-=
+      gameSpeed*delta;
+
+    const obstacle=
+      document.getElementById(
+        "gameObstacle"
+      );
+
+    if(obstacle){
+
+      obstacle.style.left=
+        obstacleX+"px";
+
+    }
+
+
+    /* Collision */
+
+    if(checkCollision()){
+
+      endGame();
+
+      return;
+
+    }
+
+
+    /* Passed obstacle */
+
+    if(obstacleX<-40){
+
+      obstacleActive=false;
+
+      if(obstacle){
+
+        obstacle.remove();
+
+      }
+
+      gameScore++;
+
+      document.getElementById(
+        "gameScore"
+      ).innerText=
+        gameScore;
+
+      gameSpeed=
+        Math.min(
+          .58,
+          .27+
+          gameScore*.008
+        );
+
+      nextObstacle=
+        650+
+        Math.random()*850;
+
+    }
+
+  }
+
+
+  gameFrame=
+    requestAnimationFrame(
+      gameLoop
+    );
+
+}
+
+
+/* =====================================================
+   CREATE OBSTACLE
+===================================================== */
+
+function createObstacle(){
+
+  const game=
+    document.getElementById(
+      "game"
+    );
+
+  const obstacle=
+    document.createElement(
+      "div"
+    );
+
+  obstacle.id=
+    "gameObstacle";
+
+  obstacle.className=
+    "obstacle";
+
+  obstacle.style.left=
+    obstacleX+"px";
+
+  game.appendChild(
+    obstacle
+  );
+
+}
+
+
+/* =====================================================
+   COLLISION
+===================================================== */
+
+function checkCollision(){
+
+  const player=
+    document.getElementById(
+      "player"
+    );
+
+  const obstacle=
+    document.getElementById(
+      "gameObstacle"
+    );
+
+  if(!obstacle){
+    return false;
+  }
+
+  const p=
+    player.getBoundingClientRect();
+
+  const o=
+    obstacle.getBoundingClientRect();
+
+  const padding=8;
+
+  return(
+    p.right-padding>o.left &&
+    p.left+padding<o.right &&
+    p.bottom-padding>o.top &&
+    p.top+padding<o.bottom
+  );
+
+}
+
+
+/* =====================================================
+   GAME OVER
+===================================================== */
+
+function endGame(){
+
+  gameRunning=false;
+  gameOver=true;
+
+  cancelAnimationFrame(
+    gameFrame
+  );
+
+  if(gameScore>highScore){
+
+    highScore=
+      gameScore;
+
+    localStorage.setItem(
+      "pufflog_highscore",
+      highScore
+    );
+
+  }
+
+  document.getElementById(
+    "highScore"
+  ).innerText=
+    highScore;
+
+  const message=
+    document.getElementById(
+      "gameMessage"
+    );
+
+  message.innerHTML=`
+
+    <div class="game-message-inner">
+
+      <div class="game-message-title">
+        💥 GAME OVER
+      </div>
+
+      <div class="game-message-small">
+        Score: ${gameScore}
+        · Best: ${highScore}
+      </div>
+
+    </div>
+
+  `;
+
+  message.style.display=
+    "flex";
+
+  document.getElementById(
+    "gameButton"
+  ).innerText=
+    "↻ PLAY AGAIN";
+
+}
+
+
+/* =====================================================
+   INITIALIZE
+===================================================== */
+
+load();
+
+update();
+
+</script>
+
+</body>
+</html>
