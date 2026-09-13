@@ -148,7 +148,7 @@ function answer(q){q=q.toLowerCase();if(q.includes('log')||q.includes('joint'))r
   function remaining(t){let ms=new Date(t)-Date.now();if(ms<=0)return 'expired';let h=Math.floor(ms/3600000),m=Math.floor((ms%3600000)/60000);return h?`${h}h ${m}m left`:`${m}m left`}
   async function refreshSocial(){
     const {data:{user}}=await supabaseClient.auth.getUser(); socialUser=user;
-    if(!user){setStatus('Not signed in • Sign in to use Social'); $('socialFeed').innerHTML='<div class="socialEmpty">🔐 Sign in to see people, Notes, Reels and DMs.</div>'; $('peopleList').innerHTML='<div class="socialEmpty">Sign in to discover people.</div>'; return;}
+    if(!user){setStatus('Not signed in • Starter Reels available'); $('peopleList').innerHTML='<div class="socialEmpty">Sign in to discover people.</div>'; await loadReels(); return;}
     setStatus(`Signed in as ${user.email}`); ['reelsAuth','dmAuth'].forEach(id=>{if($(id))$(id).textContent='🚪 Sign out'});
     await ensureProfile(user); await Promise.all([loadMyNote(),loadPeople(),loadReels()]);
   }
