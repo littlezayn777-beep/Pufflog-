@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#080b09">
+<title>PUFFLOG REELS</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;background:#000;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{overflow:hidden}
+.feed{width:100%;height:100%;overflow-y:auto;scroll-snap-type:y mandatory}
+.reel{position:relative;width:100%;height:100vh;min-height:100vh;background:#000;scroll-snap-align:start;overflow:hidden}
+.reel video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
+.top{position:fixed;z-index:20;top:0;left:0;right:0;padding:calc(14px + env(safe-area-inset-top)) 18px 18px;display:flex;justify-content:space-between;pointer-events:none;background:linear-gradient(#000c,transparent)}
+.logo{font-size:26px;font-weight:900;letter-spacing:-.5px}.sub{font-size:11px;font-weight:700;opacity:.7;margin-top:4px}.swipe{font-size:13px;font-weight:800;opacity:.75;margin-top:8px}
+.play{position:absolute;z-index:6;left:50%;top:50%;transform:translate(-50%,-50%);width:76px;height:76px;border:0;border-radius:50%;background:#000b;color:#fff;font-size:32px;padding-left:7px}
+.mute{position:absolute;z-index:7;right:15px;top:calc(72px + env(safe-area-inset-top));width:48px;height:48px;border:0;border-radius:50%;background:#000a;color:#fff;font-size:20px}
+.shade{position:absolute;z-index:2;inset:0;pointer-events:none;background:linear-gradient(transparent 45%,transparent 62%,#000d 100%)}
+.info{position:absolute;z-index:5;left:18px;right:78px;bottom:calc(30px + env(safe-area-inset-bottom));text-shadow:0 2px 6px #000}
+.user{font-size:17px;font-weight:900;margin-bottom:7px}.caption{font-size:15px;font-weight:600}.tag{display:inline-block;margin-top:10px;padding:6px 10px;border-radius:20px;background:#ffffff22;font-size:10px;font-weight:900}
+.actions{position:absolute;z-index:7;right:13px;bottom:calc(35px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:12px}
+.actions button{width:48px;height:48px;border:0;border-radius:50%;background:#000a;color:#fff;font-size:23px}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div><div class="logo">🌿 PUFFLOG REELS</div><div class="sub">TRACK • REFLECT • CONNECT</div></div>
+  <div class="swipe">SWIPE ↑</div>
+</div>
+
+<main class="feed" id="feed"></main>
+
+<script>
+const files = [
+  ["reel1.mp4","Welcome to PUFFLOG 🌿"],
+  ["reel2.mp4","Track • Reflect • Connect."],
+  ["reel3.mp4","Bong Runner • PUFFLOG Original 🎮"]
+];
+
+const feed = document.getElementById("feed");
+
+files.forEach((item,index)=>{
+  const card=document.createElement("section");
+  card.className="reel";
+
+  const video=document.createElement("video");
+  video.src=new URL(item[0],document.baseURI).href;
+  video.setAttribute("playsinline","");
+  video.setAttribute("webkit-playsinline","");
+  video.setAttribute("autoplay","");
+  video.setAttribute("controls","");
+  video.preload="auto";
+  video.muted=true;
+  video.defaultMuted=true;
+
+  const shade=document.createElement("div");
+  shade.className="shade";
+
+  const play=document.createElement("button");
+  play.className="play";
+  play.textContent="▶";
+  play.setAttribute("aria-label","Play video");
+
+  const mute=document.createElement("button");
+  mute.className="mute";
+  mute.textContent="🔇";
+
+  const info=document.createElement("div");
+  info.className="info";
+  info.innerHTML='<div class="user">@pufflog</div><div class="caption"></div><span class="tag">PUFFLOG REELS</span>';
+  info.querySelector(".caption").textContent=item[1];
+
+  const actions=document.createElement("div");
+  actions.className="actions";
+
+  const like=document.createElement("button");
+  like.textContent="♡";
+  like.onclick=()=>like.textContent=like.textContent==="♡"?"♥":"♡";
+
+  const share=document.createElement("button");
+  share.textContent="↗";
+  share.onclick=async()=>{
+    try{
+      if(navigator.share) await navigator.share({title:"PUFFLOG Reel",url:video.src});
+      else {await navigator.clipboard.writeText(video.src);alert("Video link copied");}
+    }catch(e){}
+  };
+
+  play.onclick=()=>{
+    video.play().then(()=>{
+      play.style.display="none";
+    }).catch(()=>{});
+  };
+
+  mute.onclick=()=>{
+    video.muted=!video.muted;
+    mute.textContent=video.muted?"🔇":"🔊";
+  };
+
+  video.addEventListener("play",()=>play.style.display="none");
+  video.addEventListener("pause",()=>{
+    if(video.currentTime>0 && !video.ended) play.style.display="block";
+  });
+  video.addEventListener("ended",()=>play.style.display="block");
+
+  actions.append(like,share);
+  card.append(video,shade,play,mute,info,actions);
+  feed.appendChild(card);
+});
+
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(entry=>{
+    const video=entry.target.querySelector("video");
+    if(entry.isIntersecting){
+      document.querySelectorAll(".reel video").forEach(v=>{
+        if(v!==video) v.pause();
+      });
+      video.muted=true;
+      video.play().then(()=>{
+        const btn=entry.target.querySelector(".play");
+        if(btn) btn.style.display="none";
+      }).catch(()=>{
+        const btn=entry.target.querySelector(".play");
+        if(btn) btn.style.display="block";
+      });
+    }else{
+      video.pause();
+    }
+  });
+},{threshold:0.65});
+
+document.querySelectorAll(".reel").forEach(card=>observer.observe(card));
+</script>
+</body>
+</html>
