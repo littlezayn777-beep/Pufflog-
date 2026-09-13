@@ -170,12 +170,235 @@ function answer(q){q=q.toLowerCase();if(q.includes('log')||q.includes('joint'))r
     document.querySelectorAll('[data-follow]').forEach(b=>b.onclick=()=>toggleFollow(b.dataset.follow,b.dataset.following==='true'));
     document.querySelectorAll('[data-dm]').forEach(b=>b.onclick=()=>openDM(b.dataset.dm));
   }
-  async function toggleFollow(id,isFollowing){if(isFollowing) await supabaseClient.from('follows').delete().eq('follower_id',socialUser.id).eq('following_id',id); else await supabaseClient.from('follows').insert({follower_id:socialUser.id,following_id:id}); await loadPeople();toast(isFollowing?'Unfollowed':'Following');}
-  async function loadReels(){
-    const {data:reels,error}=await supabaseClient.from('reels').select('id,video_url,caption,created_at,user_id,profiles(username,display_name)').order('created_at',{ascending:false}).limit(20);
-    if(error||!reels?.length){$('socialFeed').innerHTML='<div class="socialEmpty">🎬 No Reels yet.<br><span class="socialMini">Your Reels feed will appear here when people post videos.</span></div>';return;}
-    $('socialFeed').innerHTML=reels.map(r=>`<div class="reelCard"><video src="${esc(r.video_url)}" controls playsinline preload="metadata"></video><div class="reelOverlay"><b>@${esc(r.profiles?.username||'user')}</b><div>${esc(r.caption||'')}</div><div class="reelActions"><button>❤️ Like</button><button>💬 Comment</button><button>↗️ Share</button></div></div></div>`).join('');
+  async function toggleFollow(id,isFollowing){if(isFollowing) await supabaseClient.from('follows').delete().eq('follower_id',socialUser.id).eq('following_id',id); else await supabaseClient.from('follows').insert({follower_id:socialUser.id,following_id:id}); await loadPeople();toast(isFollowing?'Unfollowed':'async function loadReels(){
+  const feed=$('socialFeed');
+  if(!feed)return;
+
+  const styleId='pufflogReelsStyle';
+
+  if(!document.getElementById(styleId)){
+    const s=document.createElement('style');
+    s.id=styleId;
+    s.textContent=`
+      #socialFeed.pufflogReelsFeed{
+        display:flex;
+        flex-direction:column;
+        gap:14px;
+        padding:4px 0;
+      }
+
+      .puffReel{
+        position:relative;
+        width:100%;
+        aspect-ratio:9/16;
+        max-height:72vh;
+        overflow:hidden;
+        border-radius:22px;
+        background:#101510;
+        border:2px solid #315c32;
+        box-shadow:0 8px 22px rgba(0,0,0,.18);
+      }
+
+      .puffReel video{
+        width:100%;
+        height:100%;
+        display:block;
+        object-fit:cover;
+        background:#101510;
+      }
+
+      .puffReelShade{
+        position:absolute;
+        inset:0;
+        pointer-events:none;
+        background:linear-gradient(
+          to top,
+          rgba(0,0,0,.78) 0%,
+          rgba(0,0,0,.25) 35%,
+          transparent 65%
+        );
+      }
+
+      .puffReelInfo{
+        position:absolute;
+        left:14px;
+        right:68px;
+        bottom:16px;
+        color:white;
+        z-index:2;
+      }
+
+      .puffReelUser{
+        font-weight:1000;
+        font-size:15px;
+        margin-bottom:5px;
+      }
+
+      .puffReelCaption{
+        font-size:13px;
+        line-height:1.35;
+      }
+
+      .puffReelActions{
+        position:absolute;
+        right:10px;
+        bottom:14px;
+        display:flex;
+        flex-direction:column;
+        gap:8px;
+        z-index:3;
+      }
+
+      .puffReelActions button{
+        width:43px;
+        height:43px;
+        border:0;
+        border-radius:50%;
+        background:rgba(255,255,255,.16);
+        color:white;
+        font-size:18px;
+        backdrop-filter:blur(8px);
+      }
+
+      .puffReelMute{
+        position:absolute;
+        top:12px;
+        right:12px;
+        z-index:3;
+        width:40px;
+        height:40px;
+        border:0;
+        border-radius:50%;
+        background:rgba(0,0,0,.42);
+        color:white;
+        font-size:17px;
+      }
+
+      .puffReelTag{
+        display:inline-block;
+        margin-top:8px;
+        padding:4px 8px;
+        border-radius:20px;
+        background:rgba(255,255,255,.14);
+        font-size:10px;
+        font-weight:900;
+      }
+    `;
+    document.head.appendChild(s);
   }
+
+  feed.className='socialFeed pufflogReelsFeed';
+  feed.innerHTML='<div class="socialEmpty">Loading PUFFLOG Reels…</div>';
+
+  let remote=[];
+
+  if(socialUser){
+    const {data,error}=await supabaseClient
+      .from('reels')
+      .select('id,video_url,caption,created_at,user_id,profiles(username,display_name)')
+      .order('created_at',{ascending:false})
+      .limit(20);
+
+    if(!error&&Array.isArray(data))remote=data;
+  }
+
+  const starters=[
+    {
+      id:'starter-1',
+      video_url:'./reel1.mp4',
+      caption:'Welcome to PUFFLOG 🌿',
+      profiles:{username:'pufflog'}
+    },
+    {
+      id:'starter-2',
+      video_url:'./reel2.mp4',
+      caption:'Track • Reflect • Connect.',
+      profiles:{username:'pufflog'}
+    },
+    {
+      id:'starter-3',
+      video_url:'./reel3.mp4',
+      caption:'Bong Runner • PUFFLOG Original 🎮',
+      profiles:{username:'pufflog'}
+    }
+  ];
+
+  const all=[...remote,...starters];
+
+  if(!all.length){
+    feed.innerHTML='<div class="socialEmpty">🎬 No Reels yet.</div>';
+    return;
+  }
+
+  feed.innerHTML=all.map(r=>`
+    <article class="puffReel">
+      <video
+        src="${esc(r.video_url)}"
+        playsinline
+        muted
+        loop
+        preload="metadata"
+      ></video>
+
+      <div class="puffReelShade"></div>
+
+      <button class="puffReelMute" type="button">🔇</button>
+
+      <div class="puffReelInfo">
+        <div class="puffReelUser">
+          @${esc(r.profiles?.username||'user')}
+        </div>
+
+        <div class="puffReelCaption">
+          ${esc(r.caption||'')}
+        </div>
+
+        <span class="puffReelTag">PUFFLOG REELS</span>
+      </div>
+
+      <div class="puffReelActions">
+        <button type="button" data-reel-like>❤️</button>
+        <button type="button" data-reel-comment>💬</button>
+        <button type="button" data-reel-share>↗️</button>
+      </div>
+    </article>
+  `).join('');
+
+  document.querySelectorAll('.puffReel').forEach(card=>{
+    const video=card.querySelector('video');
+    const mute=card.querySelector('.puffReelMute');
+
+    video.play().catch(()=>{});
+
+    mute.onclick=()=>{
+      video.muted=!video.muted;
+      mute.textContent=video.muted?'🔇':'🔊';
+    };
+
+    card.querySelector('[data-reel-like]').onclick=()=>{
+      toast('❤️ Liked');
+    };
+
+    card.querySelector('[data-reel-comment]').onclick=()=>{
+      toast('💬 Comments coming soon');
+    };
+
+    card.querySelector('[data-reel-share]').onclick=async()=>{
+      try{
+        if(navigator.share){
+          await navigator.share({
+            title:'PUFFLOG Reel',
+            text:card.querySelector('.puffReelCaption')?.textContent||'PUFFLOG Reel',
+            url:location.href
+          });
+        }else{
+          await navigator.clipboard.writeText(location.href);
+          toast('🔗 Link copied');
+        }
+      }catch(e){}
+    };
+  });
+}
   async function openDM(partnerId){
     if(!socialUser)return openAuth();
     const {data:partner}=await supabaseClient.from('profiles').select('*').eq('id',partnerId).single(); if(!partner)return;
