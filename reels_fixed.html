@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b100c">
+<title>PUFFLOG Reels</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:#080b09;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{overflow:hidden}.feed{height:100vh;overflow-y:auto;scroll-snap-type:y mandatory}
+.reel{position:relative;width:100%;height:100vh;min-height:100vh;scroll-snap-align:start;background:#101510;overflow:hidden}
+.reel video{display:block;width:100%;height:100%;object-fit:contain;background:#000}
+.top{position:fixed;z-index:20;top:0;left:0;right:0;padding:calc(14px + env(safe-area-inset-top)) 16px 14px;display:flex;justify-content:space-between;pointer-events:none;background:linear-gradient(#080b09,transparent)}
+.logo{font-weight:900}.small{font-size:10px;opacity:.65;margin-top:3px}
+.mute{position:absolute;right:14px;top:calc(70px + env(safe-area-inset-top));z-index:5;width:46px;height:46px;border:0;border-radius:50%;background:#0009;color:#fff;font-size:19px}
+.bottom{position:absolute;z-index:4;left:16px;right:70px;bottom:calc(25px + env(safe-area-inset-bottom));text-shadow:0 1px 5px #000}
+.user{font-weight:900;margin-bottom:6px}.caption{font-size:14px}.tag{display:inline-block;margin-top:9px;padding:5px 9px;border-radius:15px;background:#ffffff22;font-size:10px;font-weight:800}
+.actions{position:absolute;right:12px;bottom:calc(28px + env(safe-area-inset-bottom));z-index:5;display:flex;flex-direction:column;gap:10px}.actions button{width:46px;height:46px;border:0;border-radius:50%;background:#0009;color:#fff;font-size:21px}
+.back{position:fixed;z-index:30;left:12px;bottom:calc(12px + env(safe-area-inset-bottom));border:0;border-radius:18px;padding:9px 13px;background:#000b;color:#fff;font-weight:900}
+</style>
+</head>
+<body>
+<div class="top"><div><div class="logo">🌿 PUFFLOG REELS</div><div class="small">TRACK • REFLECT • CONNECT</div></div><div class="small">SWIPE ↑</div></div>
+<main class="feed" id="feed"></main>
+<button class="back" onclick="history.back()">‹ PUFFLOG</button>
+
+<script>
+const BASE = new URL('./', window.location.href).href;
+const reels = [
+  {file:'reel1.mp4', caption:'Welcome to PUFFLOG 🌿'},
+  {file:'reel2.mp4', caption:'Track • Reflect • Connect.'},
+  {file:'reel3.mp4', caption:'Bong Runner • PUFFLOG Original 🎮'}
+];
+
+const feed=document.getElementById('feed');
+
+reels.forEach((r,i)=>{
+  const card=document.createElement('section');
+  card.className='reel';
+  const v=document.createElement('video');
+  v.src=new URL(r.file,BASE).href;
+  v.setAttribute('playsinline','');
+  v.setAttribute('webkit-playsinline','');
+  v.muted=true;
+  v.loop=true;
+  v.preload='auto';
+
+  const shade=document.createElement('div');
+  shade.style='position:absolute;inset:0;pointer-events:none;background:linear-gradient(transparent 55%,rgba(0,0,0,.8))';
+
+  const mute=document.createElement('button');
+  mute.className='mute'; mute.textContent='🔇';
+  mute.onclick=()=>{v.muted=!v.muted;mute.textContent=v.muted?'🔇':'🔊'};
+
+  const bottom=document.createElement('div');
+  bottom.className='bottom';
+  bottom.innerHTML='<div class="user">@pufflog</div><div class="caption"></div><span class="tag">PUFFLOG REELS</span>';
+  bottom.querySelector('.caption').textContent=r.caption;
+
+  const actions=document.createElement('div');
+  actions.className='actions';
+  const like=document.createElement('button'); like.textContent='♡';
+  like.onclick=()=>like.textContent=like.textContent==='♡'?'♥':'♡';
+  const share=document.createElement('button'); share.textContent='↗';
+  share.onclick=async()=>{try{if(navigator.share)await navigator.share({title:'PUFFLOG Reel',url:v.src});else{await navigator.clipboard.writeText(v.src);alert('Video link copied')}}catch(e){}};
+  actions.append(like,share);
+
+  card.append(v,shade,mute,bottom,actions);
+  feed.appendChild(card);
+});
+
+const videos=()=>Array.from(document.querySelectorAll('video'));
+
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(entry=>{
+    const v=entry.target;
+    if(entry.isIntersecting){
+      videos().forEach(x=>{if(x!==v)x.pause()});
+      v.play().catch(()=>{});
+    }else v.pause();
+  });
+},{threshold:.6});
+
+videos().forEach(v=>observer.observe(v));
+</script>
+</body>
+</html>
