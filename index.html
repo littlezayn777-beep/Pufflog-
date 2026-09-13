@@ -1,0 +1,334 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#4d963f"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="PUFFLOG"><link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="apple-touch-icon.png"><title>PUFFLOG</title><style>
+:root{--bg:#070a18;--card:#11162b;--card2:#18203a;--line:#2b3760;--txt:#f8fbff;--muted:#aab4d0;--green:#63f5a3;--red:#ff6b8a;--blue:#5aa9ff;--purple:#9b7bff;--yellow:#ffd45a;--cyan:#48e8ff;--pink:#ff6bd6}*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",Arial,sans-serif}body{padding-bottom:90px}.app{max-width:760px;margin:auto;padding:15px 13px 28px;background:radial-gradient(circle at 10% 0%,rgba(91,79,255,.18),transparent 30%),radial-gradient(circle at 100% 20%,rgba(0,220,255,.12),transparent 28%)}button,input{font:inherit}button{cursor:pointer;color:#fff}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.logo{font-size:25px;font-weight:900;letter-spacing:5px;background:linear-gradient(90deg,#63f5a3,#48e8ff,#9b7bff,#ff6bd6);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{font-size:9px;color:#8793b8;letter-spacing:2px;margin-top:2px}.pill{background:linear-gradient(135deg,#30206b,#123e67);border:1px solid #6d61d8;border-radius:99px;padding:8px 11px;font-size:11px;font-weight:800;box-shadow:0 4px 18px rgba(100,80,255,.22)}.hero,.card{background:linear-gradient(145deg,rgba(25,32,62,.96),rgba(13,18,37,.96));border:1px solid var(--line);border-radius:19px;padding:14px;margin-bottom:10px;box-shadow:0 8px 25px rgba(0,0,0,.18)}.hero{background:linear-gradient(135deg,#17295a,#25164b 55%,#102d3c)}h3{font-size:13px;margin:0 0 10px;color:#f4f7ff}.muted{font-size:11px;color:var(--muted)}.heroRow{display:flex;justify-content:space-between;align-items:end;margin-top:7px}.big{font-size:29px;font-weight:900}.label{font-size:10px;color:#777}.level{text-align:right;font-size:11px;color:#aaa}.bar{height:7px;width:130px;background:#222b49;border-radius:99px;overflow:hidden;margin-top:6px}.fill{height:100%;background:linear-gradient(90deg,#63f5a3,#48e8ff,#9b7bff);width:0;box-shadow:0 0 12px rgba(72,232,255,.45)}.gameStage{position:relative}.canvas{width:100%;height:180px;display:block;border-radius:14px;border:1px solid #222;background:#090909;touch-action:manipulation}.gamebar{display:flex;justify-content:space-between;color:#777;font-size:10px;margin-top:8px}.gamebar b{color:#fff}.lung{display:flex;gap:14px;align-items:center}.lungs{width:105px;height:78px;position:relative;flex:none}.lungpart{position:absolute;top:11px;width:43px;height:62px;border:3px solid #aaa;border-radius:55%;background:#181818}.left{left:7px}.right{right:7px}.trachea{position:absolute;left:47px;top:2px;width:11px;height:25px;border:3px solid #aaa;border-bottom:0;border-radius:9px}.lungscore{font-size:28px;font-weight:900}.lungscore span{font-size:11px;color:#777}.notice{font-size:9px;color:#666;line-height:1.4;margin-top:5px}.lungWarning{display:none;margin-top:8px;padding:9px 10px;border:1px solid #6b3434;border-radius:11px;background:#241010;color:#ff9b9b;font-size:10px;font-weight:800;line-height:1.4}.lungWarning.show{display:block}.counter{display:flex;justify-content:space-between;align-items:center;background:linear-gradient(135deg,#172342,#15162e);border:1px solid #33436f;border-radius:13px;padding:10px 11px;margin-top:7px}.counter b{font-size:12px}.num{font-size:20px;font-weight:900}.add{background:linear-gradient(135deg,#63f5a3,#48e8ff);color:#07111b;border:0;border-radius:10px;padding:8px 12px;font-weight:900;box-shadow:0 4px 12px rgba(72,232,255,.2)}.timer{text-align:center}.timerNum{font-size:37px;font-weight:900;letter-spacing:2px;margin:2px 0 10px}.buttons{display:flex;gap:7px}.buttons button,.action{flex:1;background:linear-gradient(135deg,#182542,#211a3e);border:1px solid #33436f;border-radius:11px;padding:10px;font-weight:800}.primary{background:linear-gradient(135deg,#63f5a3,#48e8ff)!important;color:#07111b!important;border-color:transparent!important}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.stat{background:linear-gradient(145deg,#182443,#211b3e);border:1px solid #303d68;border-radius:11px;text-align:center;padding:9px}.stat b{display:block;font-size:18px}.stat span{font-size:8px;color:#777}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}.history{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}.day{text-align:center}.dot{height:39px;background:#17213d;border:1px solid #2d3b63;border-radius:9px;display:grid;place-items:center;font-size:10px;font-weight:800}.dot.on{background:linear-gradient(135deg,#214f58,#40306c);border-color:#63d8d5}.day small{font-size:8px;color:#666;display:block;margin-top:4px}.missions{display:grid;gap:7px}.mission{display:flex;align-items:center;gap:9px;background:linear-gradient(135deg,#182844,#241b40);border:1px solid #34436d;border-radius:12px;padding:9px}.check{width:26px;height:26px;border:1px solid #444;border-radius:8px;display:grid;place-items:center}.mission.done .check{background:linear-gradient(135deg,#63f5a3,#48e8ff);color:#07111b;border-color:transparent}.missionText{flex:1;font-size:10px;color:#777}.missionText b{display:block;color:#fff;font-size:11px;margin-bottom:2px}.xp{font-size:9px;color:#aaa}.badges{display:flex;gap:7px;overflow:auto}.badge{min-width:92px;background:linear-gradient(145deg,#20274a,#2b1f4d);border:1px solid #3d4778;border-radius:12px;padding:9px}.badge .ico{font-size:19px}.badge b{font-size:9px;display:block;margin-top:4px}.badge span{font-size:8px;color:#777}.bottom{position:fixed;bottom:0;left:0;right:0;z-index:10;display:flex;justify-content:flex-end;gap:7px;padding:9px 13px calc(9px + env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(5,5,5,.96) 38%);pointer-events:none}.bottom button{pointer-events:auto}.modal{display:none;position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.75);backdrop-filter:blur(9px);align-items:flex-end}.modal.show{display:flex}.sheet{width:min(760px,100%);max-height:88vh;overflow:auto;background:linear-gradient(145deg,#111a35,#21163b);border:1px solid #3a4775;border-radius:23px 23px 0 0;padding:16px 14px calc(22px + env(safe-area-inset-bottom))}.sheettop{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.sheet h2{font-size:18px;margin:0}.close{width:34px;height:34px;border-radius:50%;background:#252d4d;border:1px solid #46547f}.field{width:100%;background:#121b35;color:#fff;border:1px solid #35446e;border-radius:11px;padding:11px;outline:0;margin-bottom:7px}.action{display:block;width:100%;text-align:left;margin-top:7px}.action b{display:block;font-size:11px}.action span{font-size:9px;color:#777}.danger{color:#ff8b8b}.chat{height:245px;overflow:auto;background:#0c1228;border:1px solid #2e3b66;border-radius:13px;padding:9px}.bubble{max-width:88%;padding:8px 10px;border-radius:11px;margin:5px 0;font-size:10px;line-height:1.4;background:#1c2748}.me{margin-left:auto;background:linear-gradient(135deg,#63f5a3,#48e8ff);color:#07111b}.chatrow{display:flex;gap:6px;margin-top:7px}.chatrow input{margin:0;flex:1}.chatrow button{background:linear-gradient(135deg,#9b7bff,#ff6bd6);color:#fff;border:0;border-radius:10px;padding:0 13px;font-weight:900}.toast{position:fixed;z-index:50;left:50%;bottom:76px;transform:translate(-50%,12px);opacity:0;background:linear-gradient(135deg,#63f5a3,#48e8ff);color:#07111b;border-radius:99px;padding:9px 12px;font-size:10px;font-weight:900;transition:.2s;box-shadow:0 8px 24px rgba(72,232,255,.25)}.toast.show{opacity:1;transform:translate(-50%,0)}@media(max-width:420px){.gameStage{position:relative}.canvas{height:165px}.logo{font-size:22px}}
+.milestone{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.75);padding:9px 14px;border:1px solid #555;border-radius:999px;background:rgba(15,15,15,.88);backdrop-filter:blur(8px);font-size:12px;font-weight:900;letter-spacing:.6px;opacity:0;pointer-events:none;z-index:3}.milestone.show{animation:milestonePop 1.25s ease-out}@keyframes milestonePop{0%{opacity:0;transform:translate(-50%,-50%) scale(.7)}18%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}70%{opacity:1;transform:translate(-50%,-58%) scale(1)}100%{opacity:0;transform:translate(-50%,-75%) scale(.92)}}
+
+/* PUFFLOG WEED-FARM THEME */
+:root{--bg:#102615;--card:#1c3a20;--card2:#254b29;--line:#4f7a43;--txt:#fffbea;--muted:#c4d6b6;--green:#8ee35b;--red:#ff6b5f;--blue:#5db7ff;--purple:#b78cff;--yellow:#ffd85c;--cyan:#64e6a1;--pink:#ff83b8}
+html,body{background:linear-gradient(#8bd5ff 0,#c9edff 20%,#6fbe55 20%,#2f7735 100%);background-attachment:fixed}
+body{color:var(--txt)}
+.app{background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(30,90,35,.18));}
+.logo{background:linear-gradient(90deg,#9cff58,#42d96d,#ffe36a);-webkit-background-clip:text;background-clip:text}
+.sub{color:#e5f3d8}
+.pill{background:linear-gradient(135deg,#2f6f35,#1d4d27);border-color:#8ac65b;box-shadow:0 4px 18px rgba(38,100,35,.35)}
+.hero,.card{background:linear-gradient(145deg,rgba(47,91,43,.97),rgba(25,59,29,.97));border-color:#6d9c50;box-shadow:0 8px 25px rgba(20,65,25,.3)}
+.hero{background:linear-gradient(135deg,#4d963f,#2f7437 55%,#24582f)}
+h3{color:#fffbea}.muted{color:#d0dfc5}.label{color:#b8c9ad}.level{color:#d7e5cd}
+.bar{background:#18331e}.fill{background:linear-gradient(90deg,#b7f35d,#62df70,#ffe066);box-shadow:0 0 12px rgba(142,227,91,.45)}
+.canvas{border-color:#6a984e;background:#8bd5ff;box-shadow:inset 0 -35px 0 #4e9a45}
+.gamebar{color:#d2e5c9}.gamebar b{color:#fffbea}
+.counter{background:linear-gradient(135deg,#315f31,#214828);border-color:#6d9c50}.add{background:linear-gradient(135deg,#b5ed58,#61d66c);box-shadow:0 4px 12px rgba(80,180,70,.25)}
+.buttons button,.action{background:linear-gradient(135deg,#315b32,#25482a);border-color:#648e4d}.primary{background:linear-gradient(135deg,#b5ed58,#61d66c)!important;color:#143019!important}
+.stat{background:linear-gradient(145deg,#315c32,#27482b);border-color:#5f8a4b}.stat span{color:#c3d2bb}
+.dot{background:#31582f;border-color:#5e884a}.dot.on{background:linear-gradient(135deg,#4d963f,#79bb4d);border-color:#b4e56b}.day small{color:#d0dfc5}
+.mission{background:linear-gradient(135deg,#315c32,#27482b);border-color:#638e4d}.mission.done .check{background:linear-gradient(135deg,#b5ed58,#61d66c);color:#143019}
+.lungpart{border-color:#b7d69b;background:#31502e}.trachea{border-color:#b7d69b}.lungscore span{color:#c3d2bb}
+.notice{color:#c4d6b6}.lungWarning{background:#4b241b;border-color:#a86a45;color:#ffe0b2}
+
+.dashboard{background:linear-gradient(145deg,#4a8f3e,#2b6534 58%,#24552d)}.dashgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.dashTile{background:rgba(18,61,25,.48);border:1px solid #78a85a;border-radius:13px;padding:9px;text-align:center}.dashTile span{display:block;font-size:18px}.dashTile b{display:block;font-size:18px;margin-top:3px}.dashTile small{font-size:7px;color:#d7e8cc}.weekly{margin-top:9px;background:rgba(18,61,25,.45);border:1px solid #78a85a;border-radius:12px;padding:9px}.weekly>div:first-child{display:flex;justify-content:space-between;font-size:10px}.weekly span{color:#d1e1c7}.weekbar{height:7px;background:#193b20;border-radius:99px;overflow:hidden;margin-top:7px}.weekbar div{height:100%;width:0;background:linear-gradient(90deg,#b7f35d,#ffe066);border-radius:99px}.dashActions{display:flex;gap:7px;margin-top:8px}.dashActions .action{margin:0}.profileCustomize{display:grid;grid-template-columns:1fr 1fr;gap:7px}.profileCustomize label{font-size:9px;color:#d0dfc5;display:block;margin:2px 0 4px}.profileCustomize .field{margin-bottom:0}
+
+body[data-style="sunset"]{background:linear-gradient(#ffb36b 0,#ffd79b 21%,#6fbf62 21%,#2f7735 100%)}body[data-style="night"]{background:linear-gradient(#142238 0,#27435a 21%,#173b25 21%,#102615 100%)}
+
+#splash{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 35%,#275f25 0,#102615 52%,#07100a 100%);transition:opacity .55s ease,visibility .55s ease}#splash.hide{opacity:0;visibility:hidden;pointer-events:none}.splashInner{text-align:center;animation:splashIn .7s cubic-bezier(.2,.8,.2,1)}.splashIcon{width:142px;height:142px;border-radius:32px;object-fit:cover;box-shadow:0 0 0 2px rgba(142,227,91,.75),0 0 38px rgba(99,245,100,.35);animation:splashPulse 1.4s ease-in-out infinite}.splashTitle{margin-top:17px;font-size:30px;font-weight:1000;letter-spacing:6px;color:#f7ffe9;text-shadow:0 0 18px rgba(142,227,91,.4)}.splashSub{margin-top:6px;font-size:10px;letter-spacing:3px;color:#b9d9a9}.splashBar{width:150px;height:4px;margin:18px auto 0;background:#29452a;border-radius:99px;overflow:hidden}.splashBar i{display:block;width:0;height:100%;background:linear-gradient(90deg,#8ee35b,#ffe066);animation:splashLoad 1.35s ease forwards}@keyframes splashIn{from{opacity:0;transform:translateY(18px) scale(.94)}to{opacity:1;transform:none}}@keyframes splashPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.035)}}@keyframes splashLoad{to{width:100%}}
+
+/* POLISH PASS — app-like micro-interactions */
+.top{position:sticky;top:0;z-index:8;padding:8px 0 10px;margin-bottom:8px;backdrop-filter:blur(12px);background:linear-gradient(rgba(25,70,31,.92),rgba(25,70,31,.72),transparent)}
+.topStatus{display:flex;align-items:center;gap:6px;background:rgba(20,55,25,.72);border:1px solid rgba(170,220,120,.42);border-radius:999px;padding:7px 9px;font-size:9px;font-weight:900;letter-spacing:.5px;box-shadow:0 5px 16px rgba(20,65,25,.18)}
+.statusDot{width:7px;height:7px;border-radius:50%;background:#b5ed58;box-shadow:0 0 9px rgba(181,237,88,.8);animation:statusPulse 1.8s ease-in-out infinite}
+@keyframes statusPulse{0%,100%{opacity:.55;transform:scale(.9)}50%{opacity:1;transform:scale(1.15)}}
+.card,.hero{animation:cardIn .45s ease both}
+.card:nth-of-type(2){animation-delay:.03s}.card:nth-of-type(3){animation-delay:.06s}.card:nth-of-type(4){animation-delay:.09s}.card:nth-of-type(5){animation-delay:.12s}
+@keyframes cardIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+button,.mission,.action{transition:transform .12s ease,filter .12s ease,box-shadow .12s ease}
+button:active,.mission:active,.action:active{transform:scale(.97);filter:brightness(1.08)}
+.focusLine{display:flex;align-items:center;gap:8px;margin-top:11px;padding:8px 10px;border-radius:11px;background:rgba(10,35,15,.28);border:1px solid rgba(177,225,116,.22);font-size:10px;color:#e4efd9;line-height:1.35}
+.focusIcon{font-size:15px}.focusLine b{color:#fffbea}
+.dashboard .dashgrid{margin-bottom:9px}
+
+/* APP NAVIGATION POLISH */
+body{padding-bottom:154px}
+.bottom{bottom:64px;padding:7px 13px calc(7px + env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(5,5,5,.9) 45%)}
+.appNav{position:fixed;left:0;right:0;bottom:0;z-index:11;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:7px 10px calc(8px + env(safe-area-inset-bottom));background:rgba(8,13,10,.96);border-top:1px solid rgba(130,190,90,.25);backdrop-filter:blur(18px);box-shadow:0 -10px 30px rgba(0,0,0,.22)}
+.appNav button{border:1px solid transparent;background:transparent;color:#9fb39a;border-radius:14px;padding:7px 4px 6px;font:800 10px -apple-system,BlinkMacSystemFont,sans-serif;display:flex;flex-direction:column;align-items:center;gap:3px;transition:.16s ease}
+.appNav button span{font-size:18px;line-height:1}.appNav button.active{background:linear-gradient(135deg,rgba(91,160,70,.34),rgba(52,105,47,.34));border-color:rgba(142,227,91,.4);color:#f3ffe9;transform:translateY(-1px)}
+.navPage{animation:pageIn .22s ease both}@keyframes pageIn{from{opacity:.35;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media(max-width:420px){.appNav button{font-size:9px}.appNav button span{font-size:17px}}
+
+.socialAuthSheet .field{margin-top:8px}.socialAuthSheet .authError{color:#ffb7ad;font-size:12px;min-height:18px;margin-top:6px}.socialMini{font-size:12px;color:#d0dfc5}.followed{background:#315c32!important;color:#fff!important}.noteTimer{font-size:11px;opacity:.75;margin-top:4px}.peopleNote{margin-top:5px;font-size:12px;color:#e5f3d8}.socialTopRow{display:flex;align-items:center;justify-content:space-between;gap:8px}.socialAvatar{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:#315c32;font-size:24px;overflow:hidden}.socialAvatar img{width:100%;height:100%;object-fit:cover}.socialProfileRow{display:flex;gap:10px;align-items:center}.smallBtn{padding:7px 9px;border-radius:11px;border:1px solid #6d9c50;background:#315c32;color:#fff;font-weight:800}.socialAuthSheet{max-height:80vh;overflow:auto}
+</style>
+<style>
+.socialPage{display:none}.socialCard{background:linear-gradient(145deg,rgba(47,91,43,.97),rgba(25,59,29,.97));border:1px solid #6d9c50;border-radius:20px;padding:14px;margin-bottom:10px;box-shadow:0 8px 25px rgba(20,65,25,.22)}.socialHero{padding:16px;border-radius:20px;background:linear-gradient(135deg,#4d963f,#24582f);border:1px solid #8ac65b}.socialTabs{display:flex;gap:7px;overflow:auto;margin:10px 0}.socialTabs button{white-space:nowrap}.socialFeed{display:grid;gap:12px}.reelCard{position:relative;overflow:hidden;border-radius:22px;background:#0d160e;border:1px solid #557c4a;min-height:360px}.reelCard video{display:block;width:100%;height:62vh;max-height:650px;object-fit:cover;background:#081008}.reelOverlay{position:absolute;left:12px;right:12px;bottom:12px;padding:12px;border-radius:16px;background:linear-gradient(transparent,rgba(0,0,0,.8));padding-top:40px}.reelOverlay b{font-size:14px}.reelActions{display:flex;gap:8px;margin-top:8px}.reelActions button{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:12px;padding:8px 11px}.noteBubble{padding:10px 12px;border-radius:16px;background:linear-gradient(135deg,#b5ed58,#61d66c);color:#143019;font-weight:800}.socialList{display:grid;gap:8px}.userRow{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid #557c4a;border-radius:15px;background:rgba(255,255,255,.04)}.avatarCircle{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#315c32;font-size:22px;flex:none}.userInfo{flex:1;min-width:0}.userInfo b,.userInfo span{display:block}.userInfo span{font-size:12px;color:#c4d6b6}.socialBtn{border:1px solid #7da65b;background:linear-gradient(135deg,#b5ed58,#61d66c);color:#143019;border-radius:12px;padding:8px 11px;font-weight:900}.dmBox{max-height:320px;overflow:auto;display:grid;gap:7px;padding:6px}.msg{max-width:78%;padding:9px 11px;border-radius:15px;background:#315c32}.msg.me{margin-left:auto;background:#b5ed58;color:#143019}.socialEmpty{text-align:center;padding:28px 10px;color:#c4d6b6}.appNav{grid-template-columns:repeat(5,1fr)}
+</style>
+</head><body><div id="splash" aria-hidden="true"><div class="splashInner"><img class="splashIcon" src="icon-512.png" alt="PUFFLOG"><div class="splashTitle">PUFFLOG</div><div class="splashSub">TRACK • REFLECT • LEVEL UP</div><div class="splashBar"><i></i></div></div></div><script>(function(){function hide(){var s=document.getElementById("splash");if(s)s.classList.add("hide")}setTimeout(hide,1800);window.addEventListener("load",function(){setTimeout(hide,250)},{once:true})})();</script><div class="app">
+<div class="top"><div><div class="logo">PUFFLOG</div><div class="sub">TRACK • REFLECT • IMPROVE</div></div><div class="topStatus"><i class="statusDot"></i><span id="saveStatus">SAVED</span></div></div>
+<section class="hero"><div class="muted">Welcome back, <b id="name">there</b> 👋</div><div class="heroRow"><div><div class="big"><span id="streak">0</span> day</div><div class="label">check-in streak</div></div><div><div class="level" id="level">LEVEL 1 • 0 XP</div><div class="bar"><div class="fill" id="fill"></div></div></div></div></section>
+<section class="card dashboard">
+<h3>🏡 Home dashboard</h3>
+<div class="dashgrid">
+<div class="dashTile"><span>🔥</span><b id="dashStreak">0</b><small>DAY STREAK</small></div>
+<div class="dashTile"><span>⭐</span><b id="dashLevel">1</b><small>LEVEL</small></div>
+<div class="dashTile"><span>🎯</span><b id="dashMissions">0/3</b><small>MISSIONS</small></div>
+<div class="dashTile"><span>🏆</span><b id="dashBest">0</b><small>GAME BEST</small></div>
+</div>
+<div class="weekly"><div><b>Weekly progress</b><span id="weeklyText">0 logs this week</span></div><div class="weekbar"><div id="weekFill"></div></div></div>
+<div class="dashActions"><button class="action primary" id="jumpGame">🎮 Play Runner</button><button class="action" id="openProfileHome">👤 Profile</button></div>
+</section>
+<section class="card"><h3>🎮 BONG RUNNER <span class="muted">• tap to jump</span></h3><div class="gameStage"><canvas id="game" class="canvas"></canvas><div id="milestone" class="milestone"></div></div><div class="gamebar"><span>Score <b id="score">0</b></span><span>Best <b id="best">0</b></span><span id="state">Tap to start</span></div></section>
+<section class="card"><h3>🫁 Lung visual</h3><div class="lung"><div class="lungs"><div class="trachea"></div><div class="lungpart left"></div><div class="lungpart right"></div></div><div><div class="lungscore" id="lung">100<span>/100</span></div><div class="muted">illustrative app score</div><div class="notice">Not a medical measurement or diagnosis.</div><div id="lungWarning" class="lungWarning">⚠️ Lung warning: your PUFFLOG score has reached 60% or lower.</div></div></div></section>
+<section class="card"><h3>📌 Quick log</h3><div class="counter"><div><b>Joint / smoke log</b><div class="muted">Track a use event</div></div><div style="display:flex;align-items:center;gap:8px"><span class="num" id="joints">0</span><button class="add" id="jointAdd">+1</button></div></div><div class="counter"><div><b>Bong session</b><div class="muted">Track a session</div></div><div style="display:flex;align-items:center;gap:8px"><span class="num" id="bongs">0</span><button class="add" id="bongAdd">+1</button></div></div></section>
+<section class="card timer"><h3>⏱ Session timer</h3><div class="timerNum" id="timer">00:00</div><div class="buttons"><button class="primary" id="start">Start</button><button id="pause">Pause</button><button id="resetTimer">Reset</button></div></section>
+<section class="card"><h3>🎯 Daily missions</h3><div class="missions" id="missions"></div></section>
+<div class="grid2"><section class="card"><h3>📊 Today</h3><div class="stats"><div class="stat"><b id="tj">0</b><span>LOGS</span></div><div class="stat"><b id="tb">0</b><span>BONGS</span></div><div class="stat"><b id="ts">0</b><span>SESSIONS</span></div></div></section><section class="card"><h3>🏆 All-time</h3><div class="stats"><div class="stat"><b id="aj">0</b><span>LOGS</span></div><div class="stat"><b id="ab">0</b><span>BONGS</span></div><div class="stat"><b id="as">0</b><span>SESSIONS</span></div></div></section></div>
+<section class="card"><h3>📅 7-day history</h3><div class="history" id="history"></div><div class="notice">Check in daily to build your tracking streak.</div></section>
+<section class="card"><h3>🏅 Achievements</h3><div class="badges" id="badges"></div></section>
+<section class="card"><h3>🔄 Data</h3><button class="action" id="resetToday"><b>Reset today</b><span>Clears today's counters only.</span></button></section>
+</div><section class="socialPage" id="socialPage">
+<div class="socialHero"><div style="font-size:24px;font-weight:1000">🌿 PUFFLOG SOCIAL</div><div class="muted" style="margin-top:4px">Connect. Share. Discover.</div><div id="socialAuthStatus" class="notice" style="margin-top:8px">Connecting…</div></div>
+<div class="socialTabs"><button class="primary" id="socialRefresh">🔄 Refresh</button><button id="socialAuth">🔐 Sign in</button><button id="socialNewNote">📝 24h Note</button></div>
+<div class="socialCard"><h3>📝 Your Note</h3><div id="myNote" class="socialEmpty">No active note.</div></div>
+<div class="socialCard"><h3>🎬 Reels</h3><div id="socialFeed" class="socialFeed"><div class="socialEmpty">Sign in to load the social feed.</div></div></div>
+<div class="socialCard"><h3>👥 People</h3><div id="peopleList" class="socialList"><div class="socialEmpty">Discover people here.</div></div></div>
+<div class="socialCard"><h3>💬 DMs</h3><div id="dmStatus" class="notice">Choose a person to start a conversation.</div><div id="dmBox" class="dmBox"></div><div style="display:flex;gap:7px;margin-top:8px"><input class="field" id="dmInput" placeholder="Write a message…"><button class="socialBtn" id="dmSend">Send</button></div></div>
+</section>
+<div class="bottom"><button class="pill" id="pro2">⚡ PRO</button><button class="pill" id="profile">👤 PROFILE</button></div><nav class="appNav" aria-label="Main navigation">
+<button class="active" data-page="home"><span>🏠</span>HOME</button>
+<button data-page="game"><span>🎮</span>GAME</button>
+<button data-page="stats"><span>📊</span>STATS</button>
+<button data-page="social"><span>🌿</span>SOCIAL</button>
+<button data-page="profile"><span>👤</span>PROFILE</button>
+</nav>
+
+<div class="modal" id="profileModal"><div class="sheet"><div class="sheettop"><h2>👤 Profile</h2><button class="close" data-close="profileModal">×</button></div><input class="field" id="nameInput" placeholder="Your name / username">
+<div class="profileCustomize"><div><label>Avatar</label><select class="field" id="avatarInput"><option>🌱</option><option>😎</option><option>🔥</option><option>🦁</option><option>👽</option><option>🐸</option></select></div><div><label>Style</label><select class="field" id="styleInput"><option value="farm">🌿 Farm</option><option value="sunset">🌅 Sunset</option><option value="night">🌙 Night</option></select></div></div>
+<button class="action" id="saveName"><b>Save profile</b><span>Stored on this device.</span></button><div class="card" style="margin-top:9px"><h3>Personal stats</h3><div class="stats"><div class="stat"><b id="plevel">1</b><span>LEVEL</span></div><div class="stat"><b id="pxp">0</b><span>XP</span></div><div class="stat"><b id="pbest">0</b><span>GAME BEST</span></div></div></div><div id="profileBadges"></div><button class="action" id="installApp"><b>📲 Install PUFFLOG</b><span>Add PUFFLOG to your Home Screen.</span></button><button class="action" id="donate"><b>❤️ Donate</b><span>Add your real payment/UPI link in DONATION_LINK.</span></button><button class="action" id="support"><b>🆘 Help & Support</b><span>Ask the in-app assistant.</span></button><button class="action" id="logout"><b>🚪 Logout</b><span>Ends this local profile session.</span></button><button class="action danger" id="resetAccount"><b>🗑️ Reset Account</b><span>Deletes all PUFFLOG data on this device.</span></button></div></div>
+<div class="modal" id="proModal"><div class="sheet"><div class="sheettop"><h2>⚡ PUFFLOG PRO</h2><button class="close" data-close="proModal">×</button></div><div class="card"><h3>Coming next</h3><div class="muted" style="line-height:1.8">• Advanced weekly insights<br>• More themes & profile styles<br>• Expanded game modes<br>• Export / backup<br>• Optional reminders<br>• Extra achievement packs</div></div><button class="action" id="notify"><b>🔔 Notify me</b><span>Save your interest on this device.</span></button></div></div>
+<div class="modal" id="supportModal"><div class="sheet"><div class="sheettop"><h2>🆘 PUFFLOG Support</h2><button class="close" data-close="supportModal">×</button></div><div class="chat" id="chat"><div class="bubble">Hey 👋 Ask me about logging, XP, the game, timer, profile, stats or data.</div></div><div class="chatrow"><input class="field" id="question" placeholder="Type your question..."><button id="send">Send</button></div><div class="notice">Built-in helper only; not a live human or medical service.</div></div></div><div class="modal" id="socialAuthModal"><div class="sheet socialAuthSheet"><div class="sheettop"><h2>🔐 PUFFLOG Social</h2><button class="close" data-close="socialAuthModal">×</button></div><div class="socialCard"><h3 id="authTitle">Create your account</h3><div class="muted">Use an email and password to join PUFFLOG Social.</div><input class="field" id="authEmail" type="email" placeholder="Email"><input class="field" id="authPassword" type="password" placeholder="Password (6+ characters)"><input class="field" id="authDisplay" placeholder="Display name"><div id="authError" class="authError"></div><div style="display:flex;gap:8px"><button class="socialBtn" id="authSubmit">Create account</button><button class="smallBtn" id="authToggle">I already have an account</button></div></div></div></div><div class="toast" id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL='https://wmmpqbaghfkgruxzgjvm.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY='sb_publishable_3WMPBKTjhPqLTUC4x48m4Q_jcccIfPE';
+const supabaseClient=(window.supabase&&window.supabase.createClient)?window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY):null;
+</script>
+<script>
+'use strict';const KEY='PUFFLOG_MASTER_V3',DEF={profile:{name:''},days:{},totalJoints:0,totalBongs:0,sessions:0,highScore:0,xp:0,done:{},pro:false};function cp(){return JSON.parse(JSON.stringify(DEF))}function load(){try{let x=JSON.parse(localStorage.getItem(KEY)||'null');return x?{...cp(),...x,profile:{...DEF.profile,...(x.profile||{})},days:x.days||{},done:x.done||{}}:cp()}catch(e){return cp()}}let data=load();function save(){try{localStorage.setItem(KEY,JSON.stringify(data));let s=document.getElementById('saveStatus');if(s){s.textContent='SAVED';s.style.opacity='1';clearTimeout(window.saveFade);window.saveFade=setTimeout(()=>s.style.opacity='.78',1200)}}catch(e){}}function key(d=new Date()){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}function today(){let k=key();if(!data.days[k])data.days[k]={joints:0,bongs:0,review:false};return data.days[k]}function toast(t){let x=document.getElementById('toast');x.textContent=t;x.classList.add('show');clearTimeout(window.tt);window.tt=setTimeout(()=>x.classList.remove('show'),1700)}function streak(){let n=0;for(let i=0;i<3650;i++){let d=new Date();d.setDate(d.getDate()-i);let x=data.days[key(d)];if(x&&(x.joints||x.bongs||x.review))n++;else break}return n}function info(){return{level:Math.floor(data.xp/100)+1,inside:data.xp%100}}function addXP(n){data.xp+=n;save();update()}function log(type){let d=today();if(type==='j'){d.joints++;data.totalJoints++}else{d.bongs++;data.totalBongs++}data.sessions++;data.xp+=5;save();update();toast('+5 XP • tracked')}function missions(){let d=today(),k=key();return[{id:'check',title:'Check in today',desc:'Open your stats and keep your tracking habit alive.',xp:10,done:!!data.done[k+'_check']},{id:'game',title:'Play Bong Runner',desc:'Play one round and try to beat your best.',xp:10,done:!!data.done[k+'_game']},{id:'review',title:'Review your day',desc:'Look at today’s numbers for a moment.',xp:15,done:!!d.review}]}function mission(id){let k=key(),d=today(),z=k+'_'+id;if(data.done[z])return;if(id==='review')d.review=true;data.done[z]=true;data.xp+=id==='check'?10:id==='game'?10:15;save();update();toast('Mission complete')}function renderMissions(){let e=document.getElementById('missions');e.innerHTML='';missions().forEach(m=>{let x=document.createElement('div');x.className='mission '+(m.done?'done':'');x.innerHTML='<div class="check">'+(m.done?'✓':'○')+'</div><div class="missionText"><b>'+m.title+'</b>'+m.desc+'</div><div class="xp">+'+m.xp+' XP</div>';if(!m.done)x.onclick=()=>mission(m.id);e.appendChild(x)})}const ACH=[['🌱','First check-in',()=>data.xp>=10,'Start your journey'],['🎯','100 XP',()=>data.xp>=100,'Reach 100 XP'],['🔥','3-day tracker',()=>streak()>=3,'Three-day check-in streak'],['🏆','Game 10',()=>data.highScore>=10,'Score 10 in Runner'],['📊','10 sessions',()=>data.sessions>=10,'Track 10 sessions'],['⭐','500 XP',()=>data.xp>=500,'Reach 500 XP']];function badges(id){let e=document.getElementById(id);e.innerHTML='';ACH.forEach(a=>{let x=document.createElement('div');x.className='badge';x.style.opacity=a[2]()?1:.42;x.innerHTML='<div class="ico">'+a[0]+'</div><b>'+a[1]+'</b><span>'+a[3]+'</span>';e.appendChild(x)})}function history(){let e=document.getElementById('history');e.innerHTML='';let names=['S','M','T','W','T','F','S'];for(let i=6;i>=0;i--){let d=new Date();d.setDate(d.getDate()-i);let x=data.days[key(d)]||{},n=(x.joints||0)+(x.bongs||0),w=document.createElement('div');w.className='day';w.innerHTML='<div class="dot '+(n||x.review?'on':'')+'">'+(n||'—')+'</div><small>'+names[d.getDay()]+'</small>';e.appendChild(w)}}function weekLogs(){let n=0;for(let i=0;i<7;i++){let d=new Date();d.setDate(d.getDate()-i);let x=data.days[key(d)]||{};n+=(x.joints||0)+(x.bongs||0)}return n}function updateDashboard(){let i=info(),ms=missions(),done=ms.filter(m=>m.done).length,w=weekLogs(),d=today(),logs=(d.joints||0)+(d.bongs||0);document.getElementById('dashStreak').textContent=streak();document.getElementById('dashLevel').textContent=i.level;document.getElementById('dashMissions').textContent=done+'/'+ms.length;document.getElementById('dashBest').textContent=data.highScore;document.getElementById('weeklyText').textContent=w+' logs this week';document.getElementById('weekFill').style.width=Math.min(100,w*10)+'%';let ft=document.getElementById('focusTitle'),fx=document.getElementById('focusText');if(done<ms.length){ft.textContent='Your next move';fx.textContent=ms.find(m=>!m.done)?.title+' • complete a mission to earn XP.'}else if(logs===0){ft.textContent='Fresh start';fx.textContent='Your dashboard is ready. Check in, then review your day.'}else{ft.textContent='Nice work today';fx.textContent=logs+' tracked event'+(logs===1?'':'s')+' logged. Keep your streak going.'}}function applyStyle(){let st=data.profile.style||'farm';document.body.dataset.style=st}function avatar(){return data.profile.avatar||'🌱'}
+function update(){let d=today(),i=info();document.getElementById('name').textContent=data.profile.name||'there';document.getElementById('streak').textContent=streak();document.getElementById('level').textContent='LEVEL '+i.level+' • '+data.xp+' XP';document.getElementById('fill').style.width=i.inside+'%';document.getElementById('joints').textContent=d.joints||0;document.getElementById('bongs').textContent=d.bongs||0;document.getElementById('tj').textContent=d.joints||0;document.getElementById('tb').textContent=d.bongs||0;document.getElementById('ts').textContent=(d.joints||0)+(d.bongs||0);document.getElementById('aj').textContent=data.totalJoints;document.getElementById('ab').textContent=data.totalBongs;document.getElementById('as').textContent=data.sessions;let lungScore=Math.max(20,100-(data.totalJoints+data.totalBongs*2));document.getElementById('lung').innerHTML=lungScore+'<span>/100</span>';let lw=document.getElementById('lungWarning');if(lw)lw.classList.toggle('show',lungScore<=60);document.getElementById('best').textContent=data.highScore;renderMissions();history();badges('badges');updateDashboard();applyStyle()}
+function open(id){document.getElementById(id).classList.add('show')}function close(id){document.getElementById(id).classList.remove('show')}document.querySelectorAll('[data-close]').forEach(x=>x.onclick=()=>close(x.dataset.close));document.querySelectorAll('.modal').forEach(x=>x.onclick=e=>{if(e.target===x)x.classList.remove('show')});document.getElementById('jointAdd').onclick=()=>log('j');document.getElementById('bongAdd').onclick=()=>log('b');document.getElementById('profile').onclick=()=>{document.getElementById('nameInput').value=data.profile.name||'';let i=info();document.getElementById('plevel').textContent=i.level;document.getElementById('pxp').textContent=data.xp;document.getElementById('pbest').textContent=data.highScore;document.getElementById('avatarInput').value=data.profile.avatar||'🌱';document.getElementById('styleInput').value=data.profile.style||'farm';badges('profileBadges');open('profileModal')};document.getElementById('pro2').onclick=()=>open('proModal');document.getElementById('saveName').onclick=()=>{data.profile.name=document.getElementById('nameInput').value.trim().slice(0,30);data.profile.avatar=document.getElementById('avatarInput').value;data.profile.style=document.getElementById('styleInput').value;save();update();toast('Profile saved')};const DONATION_LINK='';document.getElementById('donate').onclick=()=>DONATION_LINK?location.href=DONATION_LINK:toast('Add your real UPI/payment link in DONATION_LINK');document.getElementById('notify').onclick=()=>{data.pro=true;save();toast('Interest saved')};document.getElementById('logout').onclick=()=>{close('profileModal');toast('Local profile session ended')};document.getElementById('resetAccount').onclick=()=>{if(confirm('Delete all PUFFLOG data from this device?')){localStorage.removeItem(KEY);data=cp();update();close('profileModal');toast('Account reset')}};document.getElementById('resetToday').onclick=()=>{if(confirm("Reset today's counters?")){let d=today();d.joints=0;d.bongs=0;d.review=false;save();update();toast('Today reset')}};
+let sec=0,run=false,interval;function timer(){document.getElementById('timer').textContent=Math.floor(sec/60).toString().padStart(2,'0')+':'+(sec%60).toString().padStart(2,'0')}document.getElementById('start').onclick=()=>{if(run)return;run=true;interval=setInterval(()=>{sec++;timer()},1000)};document.getElementById('pause').onclick=()=>{run=false;clearInterval(interval)};document.getElementById('resetTimer').onclick=()=>{run=false;clearInterval(interval);sec=0;timer()};
+document.getElementById('jumpGame').onclick=()=>{document.getElementById('game').scrollIntoView({behavior:'smooth',block:'center'});toast('Runner ready 🎮')};document.getElementById('openProfileHome').onclick=()=>document.getElementById('profile').click();let deferredInstall=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e});document.getElementById('installApp').onclick=async()=>{if(deferredInstall){deferredInstall.prompt();deferredInstall=null}else{toast('On iPhone: Share → Add to Home Screen')}};
+function answer(q){q=q.toLowerCase();if(q.includes('log')||q.includes('joint'))return'Use the +1 button under Quick log. Your data is saved locally.';if(q.includes('bong'))return'Use Bong +1 to record a session.';if(q.includes('timer'))return'Start, pause or reset the session timer.';if(q.includes('game')||q.includes('jump'))return'Tap the Bong Runner canvas to jump. Your best score is saved.';if(q.includes('xp')||q.includes('mission'))return'Complete daily missions to earn XP and level up.';if(q.includes('profile')||q.includes('name'))return'Open Profile, enter your name and save it.';if(q.includes('reset'))return'Reset Today clears today. Reset Account deletes all app data on this device.';if(q.includes('lung'))return'The lung score is only a fictional app visualization, not a medical measurement.';if(q.includes('pro'))return'PRO is currently a preview for future premium features.';return'Try asking about logging, XP, missions, game, timer, profile, reset or data.'}function chat(t,me){let x=document.createElement('div');x.className='bubble '+(me?'me':'');x.textContent=t;let c=document.getElementById('chat');c.appendChild(x);c.scrollTop=c.scrollHeight}function send(){let i=document.getElementById('question'),q=i.value.trim();if(!q)return;chat(q,true);i.value='';setTimeout(()=>chat(answer(q)),120)}document.getElementById('support').onclick=()=>{close('profileModal');open('supportModal')};document.getElementById('send').onclick=send;document.getElementById('question').onkeydown=e=>{if(e.key==='Enter')send()};
+// PUFFLOG SOCIAL — real Supabase connection
+(function(){
+  let socialUser=null, authMode='signup', dmPartner=null, dmConversation=null, dmChannel=null;
+  if(!supabaseClient){
+    const socialAuthBtn=document.getElementById('socialAuth');
+    if(socialAuthBtn) socialAuthBtn.onclick=()=>toast('Social connection is loading. Refresh once.');
+    return;
+  }
+  const $=id=>document.getElementById(id);
+  function setStatus(t){if($('socialAuthStatus'))$('socialAuthStatus').textContent=t}
+  function esc(t){return String(t??'').replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]))}
+  function fmtTime(t){try{return new Date(t).toLocaleString([], {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}catch(e){return ''}}
+  function remaining(t){let ms=new Date(t)-Date.now();if(ms<=0)return 'expired';let h=Math.floor(ms/3600000),m=Math.floor((ms%3600000)/60000);return h?`${h}h ${m}m left`:`${m}m left`}
+  async function refreshSocial(){
+    const {data:{user}}=await supabaseClient.auth.getUser(); socialUser=user;
+    if(!user){setStatus('Not signed in • Sign in to use Social'); $('socialFeed').innerHTML='<div class="socialEmpty">🔐 Sign in to see people, Notes, Reels and DMs.</div>'; $('peopleList').innerHTML='<div class="socialEmpty">Sign in to discover people.</div>'; $('myNote').innerHTML='<div class="socialEmpty">Sign in to create a 24-hour Note.</div>'; return;}
+    setStatus(`Signed in as ${user.email}`); $('socialAuth').textContent='🚪 Sign out';
+    await ensureProfile(user); await Promise.all([loadMyNote(),loadPeople(),loadReels()]);
+  }
+  async function ensureProfile(user){
+    const {data:p}=await supabaseClient.from('profiles').select('*').eq('id',user.id).maybeSingle();
+    if(!p){await supabaseClient.from('profiles').insert({id:user.id,username:'user_'+user.id.replaceAll('-','').slice(0,8),display_name:user.user_metadata?.display_name||'PUFFLOG User'});}
+  }
+  async function loadMyNote(){
+    const {data:n}=await supabaseClient.from('notes').select('*').eq('user_id',socialUser.id).maybeSingle();
+    if(!n||new Date(n.expires_at)<=new Date()){if(n)await supabaseClient.from('notes').delete().eq('user_id',socialUser.id);$('myNote').innerHTML='<div class="socialEmpty">No active note.<br><span class="socialMini">Post a note and it disappears automatically after 24 hours.</span></div>';return;}
+    $('myNote').innerHTML=`<div class="noteBubble">${esc(n.text)}<div class="noteTimer">${remaining(n.expires_at)}</div></div>`;
+  }
+  async function loadPeople(){
+    const {data:people}=await supabaseClient.from('profiles').select('id,username,display_name,avatar_url').neq('id',socialUser.id).order('created_at',{ascending:false}).limit(30);
+    const {data:following}=await supabaseClient.from('follows').select('following_id').eq('follower_id',socialUser.id); const set=new Set((following||[]).map(x=>x.following_id));
+    const {data:notes}=await supabaseClient.from('notes').select('user_id,text,expires_at').gt('expires_at',new Date().toISOString()); const nm=new Map((notes||[]).map(x=>[x.user_id,x]));
+    if(!people?.length){$('peopleList').innerHTML='<div class="socialEmpty">No other users yet. Invite a friend to PUFFLOG.</div>';return;}
+    $('peopleList').innerHTML=people.map(p=>`<div class="userRow"><div class="avatarCircle">${p.avatar_url?`<img src="${esc(p.avatar_url)}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`:'🌱'}</div><div class="userInfo"><b>${esc(p.display_name||p.username)}</b><span>@${esc(p.username)}</span>${nm.has(p.id)?`<div class="peopleNote">📝 ${esc(nm.get(p.id).text)} · ${remaining(nm.get(p.id).expires_at)}</div>`:''}</div><button class="socialBtn ${set.has(p.id)?'followed':''}" data-follow="${p.id}" data-following="${set.has(p.id)}">${set.has(p.id)?'Following':'Follow'}</button><button class="smallBtn" data-dm="${p.id}">💬</button></div>`).join('');
+    document.querySelectorAll('[data-follow]').forEach(b=>b.onclick=()=>toggleFollow(b.dataset.follow,b.dataset.following==='true'));
+    document.querySelectorAll('[data-dm]').forEach(b=>b.onclick=()=>openDM(b.dataset.dm));
+  }
+  async function toggleFollow(id,isFollowing){if(isFollowing) await supabaseClient.from('follows').delete().eq('follower_id',socialUser.id).eq('following_id',id); else await supabaseClient.from('follows').insert({follower_id:socialUser.id,following_id:id}); await loadPeople();toast(isFollowing?'Unfollowed':'Following');}
+  async function loadReels(){
+    const {data:reels,error}=await supabaseClient.from('reels').select('id,video_url,caption,created_at,user_id,profiles(username,display_name)').order('created_at',{ascending:false}).limit(20);
+    if(error||!reels?.length){$('socialFeed').innerHTML='<div class="socialEmpty">🎬 No Reels yet.<br><span class="socialMini">Your Reels feed will appear here when people post videos.</span></div>';return;}
+    $('socialFeed').innerHTML=reels.map(r=>`<div class="reelCard"><video src="${esc(r.video_url)}" controls playsinline preload="metadata"></video><div class="reelOverlay"><b>@${esc(r.profiles?.username||'user')}</b><div>${esc(r.caption||'')}</div><div class="reelActions"><button>❤️ Like</button><button>💬 Comment</button><button>↗️ Share</button></div></div></div>`).join('');
+  }
+  async function openDM(partnerId){
+    if(!socialUser)return openAuth();
+    const {data:partner}=await supabaseClient.from('profiles').select('*').eq('id',partnerId).single(); if(!partner)return;
+    dmPartner=partner; $('dmStatus').textContent=`Chatting with @${partner.username}`; $('dmBox').innerHTML='<div class="socialEmpty">Loading chat…</div>';
+    const {data:mine}=await supabaseClient.from('conversation_members').select('conversation_id').eq('user_id',socialUser.id); const mineIds=(mine||[]).map(x=>x.conversation_id);
+    const {data:theirs}=await supabaseClient.from('conversation_members').select('conversation_id').eq('user_id',partnerId).in('conversation_id',mineIds.length?mineIds:['00000000-0000-0000-0000-000000000000']);
+    dmConversation=theirs?.[0]?.conversation_id||null;
+    if(!dmConversation){const {data:c}=await supabaseClient.from('conversations').insert({}).select().single();if(!c){toast('Could not start chat');return;}dmConversation=c.id;await supabaseClient.from('conversation_members').insert([{conversation_id:c.id,user_id:socialUser.id},{conversation_id:c.id,user_id:partnerId}]);}
+    await loadMessages();
+    if(dmChannel)supabaseClient.removeChannel(dmChannel); dmChannel=supabaseClient.channel('dm-'+dmConversation).on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:`conversation_id=eq.${dmConversation}`},loadMessages).subscribe();
+  }
+  async function loadMessages(){const {data:msgs}=await supabaseClient.from('messages').select('*').eq('conversation_id',dmConversation).order('created_at',{ascending:true}).limit(100);$('dmBox').innerHTML=(msgs||[]).map(m=>`<div class="msg ${m.sender_id===socialUser.id?'me':''}">${esc(m.body)}<div class="socialMini">${fmtTime(m.created_at)}</div></div>`).join('')||'<div class="socialEmpty">No messages yet. Say hi 👋</div>';$('dmBox').scrollTop=$('dmBox').scrollHeight;}
+  async function sendDM(){let body=$('dmInput').value.trim();if(!body||!dmConversation||!socialUser)return;let {error}=await supabaseClient.from('messages').insert({conversation_id:dmConversation,sender_id:socialUser.id,body:body.slice(0,2000)});if(error)toast('Message failed');$('dmInput').value='';await loadMessages();}
+  async function createNote(){if(!socialUser){openAuth();return;}let text=prompt('Your 24-hour Note (max 80 characters):','');if(!text)return;text=text.trim().slice(0,80);if(!text)return;const expires=new Date(Date.now()+86400000).toISOString();let {error}=await supabaseClient.from('notes').upsert({user_id:socialUser.id,text,created_at:new Date().toISOString(),expires_at:expires});if(error)toast('Could not save Note');else{toast('📝 Note posted for 24 hours');await loadMyNote();await loadPeople();}}
+  function openAuth(){ $('socialAuthModal').classList.add('show'); $('authError').textContent=''; $('authTitle').textContent=authMode==='signup'?'Create your account':'Welcome back'; $('authSubmit').textContent=authMode==='signup'?'Create account':'Sign in'; $('authToggle').textContent=authMode==='signup'?'I already have an account':'Create a new account'; $('authDisplay').style.display=authMode==='signup'?'block':'none'; }
+  async function authSubmit(){let email=$('authEmail').value.trim(),password=$('authPassword').value,display=$('authDisplay').value.trim();$('authError').textContent='';if(!email||password.length<6){$('authError').textContent='Enter a valid email and a password of at least 6 characters.';return;}let r=authMode==='signup'?await supabaseClient.auth.signUp({email,password,options:{data:{display_name:display||'PUFFLOG User'}}}):await supabaseClient.auth.signInWithPassword({email,password});if(r.error){$('authError').textContent=r.error.message;return;}close('socialAuthModal');toast(authMode==='signup'?'Account created':'Signed in');await refreshSocial();}
+  $('socialAuth').onclick=async()=>{if(socialUser){await supabaseClient.auth.signOut();socialUser=null;$('socialAuth').textContent='🔐 Sign in';setStatus('Signed out');toast('Signed out');}else openAuth()};
+  $('socialRefresh').onclick=refreshSocial;$('socialNewNote').onclick=createNote;$('dmSend').onclick=sendDM;$('dmInput').onkeydown=e=>{if(e.key==='Enter')sendDM()};$('authSubmit').onclick=authSubmit;$('authToggle').onclick=()=>{authMode=authMode==='signup'?'signin':'signup';openAuth()};
+  supabaseClient.auth.onAuthStateChange(()=>setTimeout(refreshSocial,0));
+  window.PUFFLOG_SOCIAL={refresh:refreshSocial};
+  setTimeout(refreshSocial,200);
+})();
+
+const c=document.getElementById('game'),ctx=c.getContext('2d');
+let W=0,H=0,started=false,over=false,t=0,last=0,obs=[],parts=[];
+let p={x:55,y:0,w:96,h:44,vy:0,rot:0,ground:0};
+let spawnDistance=9999;
+const MIN_GAP=300, MAX_GAP=430;
+function size(){let r=c.getBoundingClientRect(),d=devicePixelRatio||1;W=Math.max(280,r.width);H=Math.max(150,r.height);c.width=W*d;c.height=H*d;ctx.setTransform(d,0,0,d,0,0);p.ground=H-35;if(!started&&!over)p.y=p.ground-p.h}
+window.onresize=size;
+function rr(x,y,w,h,r){r=Math.min(r,w/2,h/2);ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+function drawBong(){
+  ctx.save();
+  ctx.translate(p.x+p.w/2,p.y+p.h/2);
+  ctx.rotate(p.rot);
+  ctx.scale(1.05,1.05);
+  ctx.globalAlpha=.22;ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(0,20,31,4,0,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
+  const glass=ctx.createLinearGradient(-25,-25,25,25);
+  glass.addColorStop(0,'rgba(250,250,255,.18)');glass.addColorStop(.25,'rgba(145,210,220,.42)');glass.addColorStop(.48,'rgba(245,255,255,.72)');glass.addColorStop(.72,'rgba(100,170,180,.30)');glass.addColorStop(1,'rgba(30,80,90,.42)');
+  ctx.fillStyle=glass;ctx.strokeStyle='rgba(235,250,255,.92)';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(-18,17);ctx.quadraticCurveTo(-25,14,-25,5);ctx.quadraticCurveTo(-25,-3,-18,-8);ctx.lineTo(-10,-12);ctx.lineTo(-8,-27);ctx.lineTo(8,-27);ctx.lineTo(10,-12);ctx.lineTo(18,-8);ctx.quadraticCurveTo(25,-3,25,5);ctx.quadraticCurveTo(25,14,18,17);ctx.quadraticCurveTo(0,22,-18,17);ctx.closePath();ctx.fill();ctx.stroke();
+  ctx.fillStyle='rgba(220,245,250,.48)';ctx.strokeStyle='rgba(240,255,255,.9)';ctx.lineWidth=1.2;rr(-9,-29,18,5,2.5);ctx.fill();ctx.stroke();
+  ctx.strokeStyle='rgba(230,250,255,.85)';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(9,-5);ctx.lineTo(28,7);ctx.stroke();
+  ctx.fillStyle='rgba(80,80,80,.95)';ctx.strokeStyle='rgba(220,220,220,.9)';ctx.lineWidth=1.2;ctx.beginPath();ctx.ellipse(30,8,7,5,0,0,Math.PI*2);ctx.fill();ctx.stroke();
+  ctx.fillStyle='#171717';ctx.beginPath();ctx.ellipse(30,7,3.2,2.2,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='rgba(70,190,210,.20)';ctx.beginPath();ctx.moveTo(-19,8);ctx.quadraticCurveTo(0,12,19,8);ctx.lineTo(18,15);ctx.quadraticCurveTo(0,19,-18,15);ctx.closePath();ctx.fill();
+  ctx.strokeStyle='rgba(120,220,235,.8)';ctx.lineWidth=1.1;ctx.beginPath();ctx.moveTo(-19,8);ctx.quadraticCurveTo(0,12,19,8);ctx.stroke();
+  ctx.strokeStyle='rgba(255,255,255,.72)';ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(-16,-3);ctx.quadraticCurveTo(-20,5,-15,13);ctx.stroke();
+  ctx.restore();
+}
+function drawWeedPlant(o){
+  const cx=o.x+o.w/2, base=o.y+o.h;
+  const scale=o.h/50;
+  ctx.save();
+  ctx.translate(cx,base);
+  ctx.scale(scale,scale);
+  ctx.lineCap='round';ctx.lineJoin='round';
+  // Original leafy cannabis-style plant silhouette — decorative game artwork.
+  const stem=ctx.createLinearGradient(-2,-52,2,0);
+  stem.addColorStop(0,'#9ee8a4');stem.addColorStop(1,'#4d9a58');
+  ctx.strokeStyle=stem;ctx.lineWidth=3.5;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(0,-52);ctx.stroke();
+  function leaf(x,y,ang,len,w){
+    ctx.save();ctx.translate(x,y);ctx.rotate(ang);
+    const g=ctx.createLinearGradient(0,0,len,0);g.addColorStop(0,'#4f9d59');g.addColorStop(.55,'#7dcc83');g.addColorStop(1,'#a7e8ac');
+    ctx.fillStyle=g;ctx.strokeStyle='rgba(210,255,215,.45)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(0,0);ctx.bezierCurveTo(len*.28,-w,len*.72,-w,len,0);ctx.bezierCurveTo(len*.72,w,len*.28,w,0,0);ctx.closePath();ctx.fill();ctx.stroke();
+    ctx.strokeStyle='rgba(30,75,35,.7)';ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(len*.84,0);ctx.stroke();
+    ctx.restore();
+  }
+  leaf(0,-45,-Math.PI/2,18,5);
+  leaf(0,-39,-2.55,25,6);leaf(0,-37,-.6,25,6);
+  leaf(0,-28,-2.8,29,7);leaf(0,-27,-.35,29,7);
+  leaf(0,-18,-2.95,22,6);leaf(0,-17,-.2,22,6);
+  ctx.fillStyle='#6dbb75';ctx.beginPath();ctx.ellipse(0,2,15,3.5,0,0,Math.PI*2);ctx.fill();
+  ctx.restore();
+}
+function puffBurst(){
+  for(let i=0;i<16;i++){let a=Math.random()*Math.PI*2,sp=20+Math.random()*55;parts.push({x:p.x+p.w/2,y:p.y+2,r:2+Math.random()*4,life:.9+Math.random()*.5,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-25})}
+}
+function milestone(sc){
+  const marks=[10,25,50,100,200,500,1000];
+  if(!marks.includes(sc)||window.lastMilestone===sc)return;
+  window.lastMilestone=sc;puffBurst();
+  const el=document.getElementById('milestone');el.textContent='💨 PUFF '+sc+' • MILESTONE';el.classList.remove('show');void el.offsetWidth;el.classList.add('show');
+  toast('Milestone '+sc+' • virtual puff');
+}
+function drawCloud(x,y,s){
+  ctx.save();ctx.translate(x,y);ctx.scale(s,s);ctx.fillStyle='rgba(255,255,255,.88)';ctx.beginPath();
+  ctx.arc(0,8,9,0,Math.PI*2);ctx.arc(11,3,12,0,Math.PI*2);ctx.arc(24,9,9,0,Math.PI*2);ctx.roundRect(-9,8,42,10,5);ctx.fill();ctx.restore();
+}
+function drawBackground(){
+  // Bright blue sky + simple clouds + grassy ground, inspired by classic endless-runner scenery.
+  const sky=ctx.createLinearGradient(0,0,0,p.ground);sky.addColorStop(0,'#74c7ff');sky.addColorStop(1,'#b9e6ff');ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
+  const drift=(t*18)% (W+120);
+  drawCloud(W-drift,28,.9);drawCloud(W-drift-210,62,.65);drawCloud(W-drift-430,35,.75);
+  ctx.fillStyle='#78c86b';ctx.fillRect(0,p.ground,W,H-p.ground);
+  ctx.fillStyle='#4d9b4b';ctx.fillRect(0,p.ground,W,3);
+  ctx.strokeStyle='rgba(38,110,45,.65)';ctx.lineWidth=1;
+  for(let x=0;x<W+20;x+=17){let y=p.ground+5+(x%3);ctx.beginPath();ctx.moveTo(x,y+6);ctx.lineTo(x+2,y);ctx.stroke();}
+}
+function draw(){
+  ctx.clearRect(0,0,W,H);drawBackground();
+  obs.forEach(o=>drawWeedPlant(o));
+  parts.forEach(q=>{ctx.globalAlpha=q.life;ctx.fillStyle='#aaa';ctx.beginPath();ctx.arc(q.x,q.y,q.r,0,Math.PI*2);ctx.fill()});ctx.globalAlpha=1;
+  drawBong();
+  if(!started){ctx.fillStyle='#fff';ctx.font='800 14px -apple-system';ctx.textAlign='center';ctx.fillText('TAP TO START',W/2,H/2);ctx.textAlign='left'}
+  if(over){ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='900 18px -apple-system';ctx.textAlign='center';ctx.fillText('GAME OVER',W/2,H/2-8);ctx.font='700 11px -apple-system';ctx.fillText('TAP TO RESTART',W/2,H/2+15);ctx.textAlign='left'}
+}
+function jump(){if(over){startGame();return}if(!started){startGame();return}if(p.y>=p.ground-p.h-3){p.vy=-900;p.rot=-.08}}
+function startGame(){started=true;over=false;t=0;obs=[];parts=[];window.lastMilestone=0;spawnDistance=W+MIN_GAP;p.y=p.ground-p.h;p.vy=0;p.rot=0;document.getElementById('state').textContent='Running';last=performance.now();requestAnimationFrame(loop)}
+c.onpointerdown=e=>{e.preventDefault();jump()};
+function maybeSpawn(){
+  const lastObstacle=obs[obs.length-1];
+  if(!lastObstacle || lastObstacle.x < W-MIN_GAP){
+    const gap=MIN_GAP+Math.random()*(MAX_GAP-MIN_GAP);
+    const x=lastObstacle ? lastObstacle.x+lastObstacle.w+gap : W+320;
+    const count=Math.random()<.28?2:1;
+    let cursor=x;
+    for(let i=0;i<count;i++){
+      const h=42+Math.random()*32;
+      const w=34+Math.random()*13;
+      obs.push({x:cursor,y:p.ground-h,w,h});
+      cursor+=w+(count===2?(5+Math.random()*9):0);
+    }
+  }
+}
+function loop(now){
+  if(!started||over)return;
+  let dt=Math.min(.033,(now-last)/1000||0);last=now;t+=dt;
+  p.vy+=1800*dt;p.y+=p.vy*dt;
+  if(p.y>p.ground-p.h){p.y=p.ground-p.h;p.vy=0;p.rot=0}else p.rot+=dt*1.1;
+  const speed=270+Math.min(260,t*5.2);
+  maybeSpawn();
+  obs.forEach(o=>o.x-=speed*dt);obs=obs.filter(o=>o.x>-40);
+  parts.push({x:p.x-40,y:p.y+8,r:1.4+Math.random()*1.2,life:.7,vx:-22,vy:-12});parts.forEach(q=>{q.x+=q.vx*dt;q.y+=q.vy*dt;q.vy-=4*dt;q.life-=dt});parts=parts.filter(q=>q.life>0);
+  /* smaller collision box than the visible joint = fairer gameplay */
+  const hitbox={x:p.x+15,y:p.y+10,w:p.w-30,h:p.h-18};
+  for(const o of obs)if(hitbox.x+hitbox.w>o.x&&hitbox.x<o.x+o.w&&hitbox.y+hitbox.h>o.y&&hitbox.y<o.y+o.h){over=true;document.getElementById('state').textContent='Game over';draw();return}
+  let sc=Math.floor(t*2);document.getElementById('score').textContent=sc;milestone(sc);
+  if(sc>data.highScore){data.highScore=sc;save();document.getElementById('best').textContent=sc}
+  if(sc>=10&&!data.done[key()+'_game']){data.done[key()+'_game']=true;data.xp+=10;save();toast('+10 XP • game mission');update()}
+  draw();requestAnimationFrame(loop)
+}
+size();timer();update();draw();
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}))}
+
+// Native-feeling tab navigation: keeps the existing app features intact.
+(function(){
+  const sections=[...document.querySelectorAll('.app > section, .app > .grid2')];
+  const map={home:[],game:[],stats:[],social:[]};
+  sections.forEach(el=>{
+    const h=el.querySelector('h3')?.textContent?.toLowerCase()||'';
+    if(el.classList.contains('hero')||el.classList.contains('dashboard')||h.includes('lung')) map.home.push(el);
+    else if(h.includes('bong runner')) map.game.push(el);
+    else map.stats.push(el);
+  });
+  map.social=[document.getElementById('socialPage')];
+  function showPage(page){
+    const target=page==='profile'?'home':page;
+    sections.forEach(el=>{el.style.display='none';el.classList.remove('navPage')});
+    (map[target]||[]).forEach(el=>{el.style.display='block';el.classList.add('navPage')});
+    document.querySelectorAll('.appNav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
+    window.scrollTo({top:0,behavior:'smooth'});
+    if(page==='game'){setTimeout(()=>document.getElementById('game')?.scrollIntoView({behavior:'smooth',block:'start'}),80)}
+    if(page==='profile') document.getElementById('profileModal')?.classList.add('show');
+  }
+  document.querySelectorAll('.appNav button').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.page)));
+  document.getElementById('jumpGame')?.addEventListener('click',()=>showPage('game'));
+  document.getElementById('openProfileHome')?.addEventListener('click',()=>showPage('profile'));
+  // Existing profile button opens the modal; the nav profile does the same.
+  document.getElementById('profile')?.addEventListener('click',()=>document.querySelector('.appNav button[data-page="profile"]')?.classList.add('active'));
+})();
+
+</script></body></html>
