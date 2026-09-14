@@ -1,4 +1,4 @@
-const CACHE = 'pufflog-v3';
+const CACHE = 'pufflog-v4';
 
 self.addEventListener('install', event => {
   self.skipWaiting();
