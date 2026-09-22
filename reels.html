@@ -49,14 +49,12 @@ body{overflow:hidden}
 .searchPanel.show{display:block}.searchHead{display:flex;gap:10px;align-items:center}.searchInput{flex:1;height:48px;border:1px solid #ffffff25;border-radius:24px;background:#ffffff12;color:#fff;padding:0 18px;font-size:17px;outline:none}.searchClose{width:48px;height:48px;border:0;border-radius:50%;background:#ffffff12;color:#fff;font-size:28px}.searchResults{margin-top:18px;display:grid;gap:10px;max-height:calc(100vh - 150px);overflow:auto}.searchResult{padding:15px;border:1px solid #ffffff14;border-radius:16px;background:#ffffff0a}.searchResult b{font-size:16px}.searchResult span{display:block;margin-top:5px;opacity:.7;font-size:13px}.emptySearch{padding:30px;text-align:center;opacity:.65}.personResult{width:100%;display:flex;align-items:center;gap:12px;text-align:left;color:#fff;font:inherit;cursor:pointer}.personAvatar{width:44px;height:44px;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:#222;font-size:22px;flex:0 0 44px}.personAvatar img{width:100%;height:100%;object-fit:cover}
 </style>
 <style id="pufflog-reels-ui-visibility-fix">
-/* UI-only fix: restore the existing Reels + button and bottom Reels navigation. No feed/game/home logic changed. */
 .topPlus{display:flex!important;visibility:visible!important;opacity:1!important;position:relative!important;z-index:100!important;pointer-events:auto!important;align-items:center!important;justify-content:center!important;}
 .bottomNav{display:flex!important;visibility:visible!important;opacity:1!important;z-index:100!important;}
 .bottomNav .navBtn{display:flex!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;}
 </style>
 </head>
 <body>
-
 <div class="top">
   <button class="topPlus" id="uploadBtn" aria-label="Upload Reel">＋</button>
   <div class="topCenter"><b class="activeTab" id="reelsTab">Reels</b><b id="friendsTab">Friends</b></div>
@@ -67,188 +65,42 @@ body{overflow:hidden}
   <div class="searchHead"><input id="searchInput" class="searchInput" placeholder="Search PUFFLOG" autocomplete="off"><button class="searchClose" id="searchClose">×</button></div>
   <div class="searchResults" id="searchResults"></div>
 </div>
-
 <main class="feed" id="feed"></main>
 <nav class="bottomNav" aria-label="PUFFLOG navigation">
-  <button class="navBtn" onclick="try{parent.showPUFFLOGPage('home')}catch(e){parent.postMessage({type:'pufflog-nav',page:'home'},'*')}" aria-label="Home">
-    <span class="navIcon">⌂</span><span>Home</span>
-  </button>
-  <button class="navBtn active" aria-label="Reels">
-    <span class="navIcon">▶</span><span>Reels</span>
-  </button>
-  <button class="navBtn" onclick="try{parent.showPUFFLOGPage('dms')}catch(e){parent.postMessage({type:'pufflog-nav',page:'dms'},'*')}" aria-label="DM">
-    <span class="navIcon">✈</span><span>DM</span>
-  </button>
-  <button class="navBtn" id="searchBtn" aria-label="Search">
-    <span class="navIcon">⌕</span><span>Search</span>
-  </button>
-  <button class="navBtn" onclick="try{parent.showPUFFLOGPage('profile')}catch(e){parent.postMessage({type:'pufflog-nav',page:'profile'},'*')}" aria-label="Profile">
-    <span class="navIcon profileIcon">◉</span><span>Profile</span>
-  </button>
+  <button class="navBtn" onclick="try{parent.showPUFFLOGPage('home')}catch(e){parent.postMessage({type:'pufflog-nav',page:'home'},'*')}" aria-label="Home"><span class="navIcon">⌂</span><span>Home</span></button>
+  <button class="navBtn active" aria-label="Reels"><span class="navIcon">▶</span><span>Reels</span></button>
+  <button class="navBtn" onclick="try{parent.showPUFFLOGPage('dms')}catch(e){parent.postMessage({type:'pufflog-nav',page:'dms'},'*')}" aria-label="DM"><span class="navIcon">✈</span><span>DM</span></button>
+  <button class="navBtn" id="searchBtn" aria-label="Search"><span class="navIcon">⌕</span><span>Search</span></button>
+  <button class="navBtn" onclick="try{parent.showPUFFLOGPage('profile')}catch(e){parent.postMessage({type:'pufflog-nav',page:'profile'},'*')}" aria-label="Profile"><span class="navIcon profileIcon">◉</span><span>Profile</span></button>
 </nav>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL="https://wmmpqbaghfkgruxzgjvm.supabase.co";
 const SUPABASE_KEY="sb_publishable_3WMPBKTjhPqLTUC4x48m4Q_jcccIfPE";
 const db=window.supabase?.createClient(SUPABASE_URL,SUPABASE_KEY);
 let currentUser=null;
-const files = [
-  ["reel1.mp4","Welcome to PUFFLOG 🌿"],
-  ["reel2.mp4","Track • Reflect • Connect."],
-  ["reel3.mp4","Bong Runner • PUFFLOG Original 🎮"]
-];
-
-const feed = document.getElementById("feed");
-const uploadBtn = document.getElementById("uploadBtn");
-const uploadInput = document.getElementById("uploadInput");
+const files = [["reel1.mp4","Welcome to PUFFLOG 🌿"],["reel2.mp4","Track • Reflect • Connect."],["reel3.mp4","Bong Runner • PUFFLOG Original 🎮"]];
+const feed=document.getElementById("feed"),uploadBtn=document.getElementById("uploadBtn"),uploadInput=document.getElementById("uploadInput");
 uploadBtn?.addEventListener("click",()=>uploadInput?.click());
-uploadInput?.addEventListener("change",()=>{
-  const f=uploadInput.files?.[0]; if(!f)return;
-  const url=URL.createObjectURL(f);
-  const item=[url,f.name.replace(/\.[^.]+$/,'')||'My PUFFLOG Reel'];
-  files.unshift(item); renderReels(); uploadInput.value='';
-});
-const reelRows = new Map();
-const esc = v => String(v??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;","\"":"&quot;"}[c]));
-const fmtTime = v => { const d=new Date(v); const mins=Math.max(0,Math.floor((Date.now()-d.getTime())/60000)); if(mins<1)return "now"; if(mins<60)return mins+"m"; const h=Math.floor(mins/60); if(h<24)return h+"h"; return Math.floor(h/24)+"d"; };
-
-async function getUser(){
-  if(!db)return null;
-  const {data:{user}}=await db.auth.getUser();
-  currentUser=user||null;
-  return currentUser;
-}
-
-async function ensureReelRow(item,index){
-  if(!db)return null;
-  let {data,rowError}=await db.from('reels').select('id,video_url,caption,user_id').eq('video_url',new URL(item[0],document.baseURI).href).maybeSingle();
-  if(data){reelRows.set(index,data);return data;}
-  if(!currentUser)return null;
-  const {data:created}=await db.from('reels').insert({video_url:new URL(item[0],document.baseURI).href,caption:item[1],user_id:currentUser.id}).select('id,video_url,caption,user_id').single();
-  if(created)reelRows.set(index,created);
-  return created||null;
-}
-
-async function getCounts(reelId){
-  if(!db||!reelId)return {likes:0,comments:0};
-  const [l,c]=await Promise.all([
-    db.from('reel_likes').select('id',{count:'exact',head:true}).eq('reel_id',reelId),
-    db.from('reel_comments').select('id',{count:'exact',head:true}).eq('reel_id',reelId)
-  ]);
-  return {likes:l.count||0,comments:c.count||0};
-}
-
-async function loadComments(card,reelId){
-  const list=card.querySelector('.commentList');
-  if(!db||!reelId){list.innerHTML='<div class="commentEmpty">Sign in to load comments.</div>';return;}
-  list.innerHTML='<div class="commentEmpty">Loading comments…</div>';
-  const {data,error}=await db.from('reel_comments').select('id,body,created_at,user_id').eq('reel_id',reelId).order('created_at',{ascending:false}).limit(40);
-  if(error){list.innerHTML='<div class="commentEmpty">Comments unavailable right now.</div>';return;}
-  const ids=[...new Set((data||[]).map(x=>x.user_id).filter(Boolean))];
-  let names=new Map();
-  if(ids.length){const {data:profiles}=await db.from('profiles').select('id,username,display_name').in('id',ids);(profiles||[]).forEach(x=>names.set(x.id,x));}
-  list.innerHTML=data?.length?data.map(c=>{const p=names.get(c.user_id);return `<div class="commentItem"><b>@${esc(p?.username||'user')}</b> ${esc(c.body)}<div class="commentTime">${fmtTime(c.created_at)}</div></div>`}).join(''):'<div class="commentEmpty">No comments yet. Be the first 👋</div>';
-}
-
-async function refreshStats(card,index){
-  const reel=reelRows.get(index); if(!reel)return;
-  const st=await getCounts(reel.id);
-  card.querySelector('.likeCount').textContent=`♥ ${st.likes}`;
-  card.querySelector('.commentCount').textContent=`💬 ${st.comments}`;
-  const badge=card.querySelector('.commentBadge'); badge.textContent=st.comments; badge.style.display=st.comments?'flex':'none';
-}
-
-async function toggleLike(card,index){
-  if(!currentUser){alert('Please sign in to like reels.');return;}
-  const reel=reelRows.get(index); if(!reel)return;
-  const {data:existing}=await db.from('reel_likes').select('id').eq('reel_id',reel.id).eq('user_id',currentUser.id).maybeSingle();
-  if(existing) await db.from('reel_likes').delete().eq('id',existing.id); else await db.from('reel_likes').insert({reel_id:reel.id,user_id:currentUser.id});
-  const btn=card.querySelector('.likeBtn'); btn.classList.toggle('liked',!existing); btn.textContent=existing?'♡':'♥';
-  await refreshStats(card,index);
-}
-
-async function sendComment(card,index){
-  if(!currentUser){alert('Please sign in to comment.');return;}
-  const reel=reelRows.get(index); if(!reel)return;
-  const input=card.querySelector('.commentInput'); const body=input.value.trim().slice(0,300); if(!body)return;
-  const {error}=await db.from('reel_comments').insert({reel_id:reel.id,user_id:currentUser.id,body});
-  if(error){alert('Comment failed. Please try again.');return;}
-  input.value=''; await loadComments(card,reel.id); await refreshStats(card,index);
-}
-
-async function openComments(card,index){
-  const sheet=card.querySelector('.commentSheet'); sheet.classList.add('show');
-  const reel=reelRows.get(index); if(reel)await loadComments(card,reel.id);
-  card.querySelector('.commentInput')?.focus();
-}
-
-function renderReels(){
-  feed.innerHTML=''; reelRows.clear();
-  files.forEach((item,index)=>{
-  const card=document.createElement("section"); card.className="reel";
-  const video=document.createElement("video");
-  video.src=item[0]; video.load(); video.setAttribute("playsinline",""); video.setAttribute("webkit-playsinline",""); video.setAttribute("autoplay",""); video.setAttribute("loop",""); video.preload="auto"; video.muted=(localStorage.getItem('PUFFLOG_REEL_SOUND')!=='on'); video.defaultMuted=video.muted; video.controls=false; video.loop=true; video.removeAttribute("controls"); video.addEventListener("loadedmetadata",()=>video.play().catch(()=>{})); video.addEventListener("canplay",()=>video.play().catch(()=>{}));
-  const shade=document.createElement("div"); shade.className="shade";
-  const info=document.createElement("div"); info.className="info"; info.innerHTML='<div class="user">@pufflog</div><div class="caption"></div><span class="tag">PUFFLOG REELS</span>'; info.querySelector('.caption').textContent=item[1];
-  const actions=document.createElement("div"); actions.className="actions";
-  const like=document.createElement("button"); like.className='likeBtn'; like.textContent="♡";
-  const likeCount=document.createElement("span"); likeCount.className='likeCount'; likeCount.textContent='♥ 0';
-  like.onclick=()=>toggleLike(card,index);
-  const comment=document.createElement("button"); comment.className='commentsBtn'; comment.innerHTML='💬<span class="commentBadge"></span>'; comment.onclick=()=>openComments(card,index);
-  const commentCount=document.createElement("span"); commentCount.className='commentCount'; commentCount.textContent='💬 0';
-  const share=document.createElement("button"); share.textContent="↗";
-  share.onclick=async()=>{try{if(navigator.share)await navigator.share({title:"PUFFLOG Reel",url:video.src});else{await navigator.clipboard.writeText(video.src);alert("Video link copied");}}catch(e){}};
-  
-  mute.onclick=()=>{video.muted=!video.muted; localStorage.setItem('PUFFLOG_REEL_SOUND',video.muted?'off':'on'); mute.textContent=video.muted?"🔇":"🔊"; if(!video.muted) video.play().catch(()=>{});};
-  
-  const sheet=document.createElement('div'); sheet.className='commentSheet'; sheet.innerHTML='<div class="commentHead"><div class="commentTitle">Comments</div><button class="commentClose">×</button></div><div class="commentList"><div class="commentEmpty">Loading…</div></div><div class="commentComposer"><input class="commentInput" maxlength="300" placeholder="Write a comment…"><button class="commentSend">Post</button></div>';
-  sheet.querySelector('.commentClose').onclick=()=>sheet.classList.remove('show'); sheet.querySelector('.commentSend').onclick=()=>sendComment(card,index); sheet.querySelector('.commentInput').onkeydown=e=>{if(e.key==='Enter')sendComment(card,index)}; sheet.addEventListener('touchstart',e=>e.stopPropagation()); sheet.addEventListener('touchmove',e=>e.stopPropagation());
-  const meta=document.createElement('div'); meta.style='position:absolute;z-index:6;right:15px;bottom:calc(140px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:5px;align-items:center'; meta.append(likeCount,commentCount); [likeCount,commentCount].forEach(x=>{x.style='font-size:10px;font-weight:900;text-shadow:0 1px 4px #000'});
-  actions.append(like,comment,share); card.append(video,shade,mute,info,actions,meta,sheet); feed.appendChild(card);
-  ensureReelRow(item,index).then(()=>refreshStats(card,index));
-  });
-  const observer=new IntersectionObserver(entries=>{entries.forEach(entry=>{const video=entry.target.querySelector("video");if(entry.isIntersecting){document.querySelectorAll(".reel video").forEach(v=>{if(v!==video)v.pause()});video.muted=(localStorage.getItem('PUFFLOG_REEL_SOUND')!=='on');video.play().catch(()=>{})}else video.pause()})},{threshold:0.65});
-  document.querySelectorAll(".reel").forEach(card=>observer.observe(card));
-}
-
-async function loadPostedReels(){
-  if(!db)return;
-  try{
-    const {data,error}=await db.from('reels').select('id,video_url,caption,created_at,user_id').order('created_at',{ascending:false}).limit(50);
-    if(error||!data?.length)return;
-    const existing=new Set(files.map(x=>x[0]));
-    const posted=data.filter(r=>r.video_url&&!existing.has(r.video_url)).reverse();
-    posted.forEach(r=>files.unshift([r.video_url,r.caption||'PUFFLOG Reel',r.user_id,r.id]));
-  }catch(e){console.warn('PUFFLOG reels feed:',e)}
-}
-
+uploadInput?.addEventListener("change",()=>{const f=uploadInput.files?.[0];if(!f)return;const url=URL.createObjectURL(f);files.unshift([url,f.name.replace(/\.[^.]+$/,'')||'My PUFFLOG Reel']);renderReels();uploadInput.value='';});
+const reelRows=new Map();
+const esc=v=>String(v??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;","\"":"&quot;"}[c]));
+const fmtTime=v=>{const d=new Date(v),mins=Math.max(0,Math.floor((Date.now()-d.getTime())/60000));if(mins<1)return"now";if(mins<60)return mins+"m";const h=Math.floor(mins/60);if(h<24)return h+"h";return Math.floor(h/24)+"d"};
+async function getUser(){if(!db)return null;const {data:{user}}=await db.auth.getUser();currentUser=user||null;return currentUser;}
+async function ensureReelRow(item,index){if(!db)return null;let {data}=await db.from('reels').select('id,video_url,caption,user_id').eq('video_url',new URL(item[0],document.baseURI).href).maybeSingle();if(data){reelRows.set(index,data);return data;}if(!currentUser)return null;const {data:created}=await db.from('reels').insert({video_url:new URL(item[0],document.baseURI).href,caption:item[1],user_id:currentUser.id}).select('id,video_url,caption,user_id').single();if(created)reelRows.set(index,created);return created||null;}
+async function getCounts(reelId){if(!db||!reelId)return{likes:0,comments:0};const [l,c]=await Promise.all([db.from('reel_likes').select('id',{count:'exact',head:true}).eq('reel_id',reelId),db.from('reel_comments').select('id',{count:'exact',head:true}).eq('reel_id',reelId)]);return{likes:l.count||0,comments:c.count||0};}
+async function loadComments(card,reelId){const list=card.querySelector('.commentList');if(!db||!reelId){list.innerHTML='<div class="commentEmpty">Sign in to load comments.</div>';return;}list.innerHTML='<div class="commentEmpty">Loading comments…</div>';const {data,error}=await db.from('reel_comments').select('id,body,created_at,user_id').eq('reel_id',reelId).order('created_at',{ascending:false}).limit(40);if(error){list.innerHTML='<div class="commentEmpty">Comments unavailable right now.</div>';return;}const ids=[...new Set((data||[]).map(x=>x.user_id).filter(Boolean))];let names=new Map();if(ids.length){const {data:profiles}=await db.from('profiles').select('id,username,display_name').in('id',ids);(profiles||[]).forEach(x=>names.set(x.id,x));}list.innerHTML=data?.length?data.map(c=>{const p=names.get(c.user_id);return `<div class="commentItem"><b>@${esc(p?.username||'user')}</b> ${esc(c.body)}<div class="commentTime">${fmtTime(c.created_at)}</div></div>`}).join(''):'<div class="commentEmpty">No comments yet. Be the first 👋</div>';}
+async function refreshStats(card,index){const reel=reelRows.get(index);if(!reel)return;const st=await getCounts(reel.id);card.querySelector('.likeCount').textContent=`♥ ${st.likes}`;card.querySelector('.commentCount').textContent=`💬 ${st.comments}`;const badge=card.querySelector('.commentBadge');badge.textContent=st.comments;badge.style.display=st.comments?'flex':'none';}
+async function toggleLike(card,index){if(!currentUser){alert('Please sign in to like reels.');return;}const reel=reelRows.get(index);if(!reel)return;const {data:existing}=await db.from('reel_likes').select('id').eq('reel_id',reel.id).eq('user_id',currentUser.id).maybeSingle();if(existing)await db.from('reel_likes').delete().eq('id',existing.id);else await db.from('reel_likes').insert({reel_id:reel.id,user_id:currentUser.id});const btn=card.querySelector('.likeBtn');btn.classList.toggle('liked',!existing);btn.textContent=existing?'♡':'♥';await refreshStats(card,index);}
+async function sendComment(card,index){if(!currentUser){alert('Please sign in to comment.');return;}const reel=reelRows.get(index);if(!reel)return;const input=card.querySelector('.commentInput'),body=input.value.trim().slice(0,300);if(!body)return;const {error}=await db.from('reel_comments').insert({reel_id:reel.id,user_id:currentUser.id,body});if(error){alert('Comment failed. Please try again.');return;}input.value='';await loadComments(card,reel.id);await refreshStats(card,index);}
+async function openComments(card,index){const sheet=card.querySelector('.commentSheet');sheet.classList.add('show');const reel=reelRows.get(index);if(reel)await loadComments(card,reel.id);card.querySelector('.commentInput')?.focus();}
+function renderReels(){feed.innerHTML='';reelRows.clear();files.forEach((item,index)=>{const card=document.createElement("section");card.className="reel";const video=document.createElement("video");video.src=item[0];video.load();video.setAttribute("playsinline","");video.setAttribute("webkit-playsinline","");video.setAttribute("autoplay","");video.setAttribute("loop","");video.preload="auto";video.muted=false;video.defaultMuted=false;video.controls=false;video.loop=true;video.removeAttribute("controls");video.addEventListener("loadedmetadata",()=>video.play().catch(()=>{}));video.addEventListener("canplay",()=>video.play().catch(()=>{}));const shade=document.createElement("div");shade.className="shade";const info=document.createElement("div");info.className="info";info.innerHTML='<div class="user">@pufflog</div><div class="caption"></div><span class="tag">PUFFLOG REELS</span>';info.querySelector('.caption').textContent=item[1];const actions=document.createElement("div");actions.className="actions";const like=document.createElement("button");like.className='likeBtn';like.textContent="♡";const likeCount=document.createElement("span");likeCount.className='likeCount';likeCount.textContent='♥ 0';like.onclick=()=>toggleLike(card,index);const comment=document.createElement("button");comment.className='commentsBtn';comment.innerHTML='💬<span class="commentBadge"></span>';comment.onclick=()=>openComments(card,index);const commentCount=document.createElement("span");commentCount.className='commentCount';commentCount.textContent='💬 0';const share=document.createElement("button");share.textContent="↗";share.onclick=async()=>{try{if(navigator.share)await navigator.share({title:"PUFFLOG Reel",url:video.src});else{await navigator.clipboard.writeText(video.src);alert("Video link copied");}}catch(e){}};const sheet=document.createElement('div');sheet.className='commentSheet';sheet.innerHTML='<div class="commentHead"><div class="commentTitle">Comments</div><button class="commentClose">×</button></div><div class="commentList"><div class="commentEmpty">Loading…</div></div><div class="commentComposer"><input class="commentInput" maxlength="300" placeholder="Write a comment…"><button class="commentSend">Post</button></div>';sheet.querySelector('.commentClose').onclick=()=>sheet.classList.remove('show');sheet.querySelector('.commentSend').onclick=()=>sendComment(card,index);sheet.querySelector('.commentInput').onkeydown=e=>{if(e.key==='Enter')sendComment(card,index)};sheet.addEventListener('touchstart',e=>e.stopPropagation());sheet.addEventListener('touchmove',e=>e.stopPropagation());const meta=document.createElement('div');meta.style='position:absolute;z-index:6;right:15px;bottom:calc(140px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:5px;align-items:center';meta.append(likeCount,commentCount);[likeCount,commentCount].forEach(x=>{x.style='font-size:10px;font-weight:900;text-shadow:0 1px 4px #000'});actions.append(like,comment,share);card.append(video,shade,info,actions,meta,sheet);feed.appendChild(card);ensureReelRow(item,index).then(()=>refreshStats(card,index));});const observer=new IntersectionObserver(entries=>{entries.forEach(entry=>{const video=entry.target.querySelector("video");if(entry.isIntersecting){document.querySelectorAll(".reel video").forEach(v=>{if(v!==video)v.pause()});video.muted=false;video.play().catch(()=>{})}else video.pause()})},{threshold:0.65});document.querySelectorAll(".reel").forEach(card=>observer.observe(card));}
+async function loadPostedReels(){if(!db)return;try{const {data,error}=await db.from('reels').select('id,video_url,caption,created_at,user_id').order('created_at',{ascending:false}).limit(50);if(error||!data?.length)return;const existing=new Set(files.map(x=>x[0]));const posted=data.filter(r=>r.video_url&&!existing.has(r.video_url)).reverse();posted.forEach(r=>files.unshift([r.video_url,r.caption||'PUFFLOG Reel',r.user_id,r.id]));}catch(e){console.warn('PUFFLOG reels feed:',e)}}
 (async()=>{await getUser();await loadPostedReels();renderReels();})();
-
 db?.auth.onAuthStateChange((_event,session)=>{currentUser=session?.user||null;document.querySelectorAll('.reel').forEach((card,i)=>{ensureReelRow(files[i],i).then(()=>refreshStats(card,i));});});
-
 const searchPanel=document.getElementById('searchPanel'),searchInput=document.getElementById('searchInput'),searchResults=document.getElementById('searchResults');
-async function runSearch(){
-  const q=searchInput.value.trim();
-  searchResults.innerHTML='<div class="emptySearch">Searching people…</div>';
-  if(!db){searchResults.innerHTML='<div class="emptySearch">Search is unavailable right now.</div>';return;}
-  let query=db.from('profiles').select('id,username,display_name,avatar_url').order('created_at',{ascending:false}).limit(30);
-  if(q) query=query.or(`username.ilike.%${q.replace(/[,()]/g,'')}%,display_name.ilike.%${q.replace(/[,()]/g,'')}%`);
-  const {data:people,error}=await query;
-  if(error){searchResults.innerHTML='<div class="emptySearch">Could not search people.</div>';return;}
-  if(!people?.length){searchResults.innerHTML='<div class="emptySearch">No people found.</div>';return;}
-  searchResults.innerHTML=people.map(p=>`<button class="searchResult personResult" data-person="${esc(p.id)}"><div class="personAvatar">${p.avatar_url?`<img src="${esc(p.avatar_url)}">`:'🌱'}</div><div><b>${esc(p.display_name||p.username||'PUFFLOG User')}</b><span>@${esc(p.username||'user')}</span></div></button>`).join('');
-  searchResults.querySelectorAll('[data-person]').forEach(btn=>btn.onclick=()=>{
-    const id=btn.dataset.person;
-    searchPanel.classList.remove('show');
-    parent.postMessage({type:'pufflog-person',userId:id},'*');
-  });
-}
-document.getElementById('searchBtn')?.addEventListener('click',()=>{searchPanel.classList.add('show');searchInput.focus();runSearch()});
-document.getElementById('searchClose')?.addEventListener('click',()=>searchPanel.classList.remove('show'));
-searchInput?.addEventListener('input',runSearch);
-document.getElementById('friendsTab')?.addEventListener('click',()=>{document.getElementById('reelsTab').classList.remove('activeTab');document.getElementById('friendsTab').classList.add('activeTab');searchResults.innerHTML='<div class="emptySearch">Friends Reels will appear here when you follow people on PUFFLOG.</div>';searchPanel.classList.add('show')});
-document.getElementById('reelsTab')?.addEventListener('click',()=>{document.getElementById('friendsTab').classList.remove('activeTab');document.getElementById('reelsTab').classList.add('activeTab');searchPanel.classList.remove('show')});
+async function runSearch(){const q=searchInput.value.trim();searchResults.innerHTML='<div class="emptySearch">Searching people…</div>';if(!db){searchResults.innerHTML='<div class="emptySearch">Search is unavailable right now.</div>';return;}let query=db.from('profiles').select('id,username,display_name,avatar_url').order('created_at',{ascending:false}).limit(30);if(q)query=query.or(`username.ilike.%${q.replace(/[,()]/g,'')}%,display_name.ilike.%${q.replace(/[,()]/g,'')}%`);const {data:people,error}=await query;if(error){searchResults.innerHTML='<div class="emptySearch">Could not search people.</div>';return;}if(!people?.length){searchResults.innerHTML='<div class="emptySearch">No people found.</div>';return;}searchResults.innerHTML=people.map(p=>`<button class="searchResult personResult" data-person="${esc(p.id)}"><div class="personAvatar">${p.avatar_url?`<img src="${esc(p.avatar_url)}">`:'🌱'}</div><div><b>${esc(p.display_name||p.username||'PUFFLOG User')}</b><span>@${esc(p.username||'user')}</span></div></button>`).join('');searchResults.querySelectorAll('[data-person]').forEach(btn=>btn.onclick=()=>{const id=btn.dataset.person;searchPanel.classList.remove('show');parent.postMessage({type:'pufflog-person',userId:id},'*');});}
+document.getElementById('searchBtn')?.addEventListener('click',()=>{searchPanel.classList.add('show');searchInput.focus();runSearch()});document.getElementById('searchClose')?.addEventListener('click',()=>searchPanel.classList.remove('show'));searchInput?.addEventListener('input',runSearch);document.getElementById('friendsTab')?.addEventListener('click',()=>{document.getElementById('reelsTab').classList.remove('activeTab');document.getElementById('friendsTab').classList.add('activeTab');searchResults.innerHTML='<div class="emptySearch">Friends Reels will appear here when you follow people on PUFFLOG.</div>';searchPanel.classList.add('show')});document.getElementById('reelsTab')?.addEventListener('click',()=>{document.getElementById('friendsTab').classList.remove('activeTab');document.getElementById('reelsTab').classList.add('activeTab');searchPanel.classList.remove('show')});
 </script>
 </body>
 </html>
