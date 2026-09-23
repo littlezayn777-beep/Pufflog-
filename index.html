@@ -2013,6 +2013,25 @@ setTimeout(load,1000);
   window.addEventListener('load',()=>setTimeout(renderLocalPosts,500));
 })();
 </script>
+<script>
+/* PUFFLOG_UPLOAD_BUTTON_HARD_FIX: repair Upload navigation click only */
+(() => {
+  const activateUpload = (e) => {
+    const b = e.target && e.target.closest ? e.target.closest('[data-page="upload"],#pufflogUploadNav') : null;
+    if (!b) return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    if (typeof window.PUFFLOG_OPEN_UPLOAD === 'function') {
+      window.PUFFLOG_OPEN_UPLOAD();
+    } else {
+      const m = document.getElementById('pufflogUploadModal');
+      if (m) m.classList.add('show');
+    }
+  };
+  document.addEventListener('pointerup', activateUpload, true);
+  document.addEventListener('click', activateUpload, true);
+})();
+</script>
 </body></html>
 <style id="pufflog-theme-final-visibility">
 .igp-theme-sheet.show{display:flex!important;visibility:visible!important;opacity:1!important}
