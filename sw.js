@@ -1,4 +1,4 @@
-const CACHE='pufflog-v8';
+const CACHE='pufflog-v9';
 
 const PUFFLOG_FIX=`
 <style id="pufflog-direct-nav-fix">
@@ -9,12 +9,16 @@ const PUFFLOG_FIX=`
 .bottom{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:7px!important;justify-content:stretch!important;align-items:stretch!important}
 .bottom .appNav{display:contents!important}.bottom>button,.bottom .appNav>button{min-width:0!important;max-width:none!important;width:100%!important;flex-shrink:1!important}
 #pufflogUploadInput{display:none!important}
+
+/* Uploaded-post feed is HOME-ONLY. PROFILE has its own post grid. */
+#pufflogHomePosts{display:none!important}
+#pufflogHomePosts.pufflog-home-visible{display:block!important}
 </style>`;
 
 const PUFFLOG_FIX_JS=`
 <script id="pufflog-direct-nav-fix-js">
 (function(){
-  if(window.__pufflogDirectNavFix)return;window.__pufflogDirectNavFix=true;
+  if(window.__pufflogDirectNavFixV2)return;window.__pufflogDirectNavFixV2=true;
 
   function removeLiteralArtifacts(){
     try{
@@ -23,33 +27,47 @@ const PUFFLOG_FIX_JS=`
       while(n=walker.nextNode()){
         const raw=n.nodeValue||'';
         const t=raw.trim();
-        if(/^(?:\\\\n|\\n)+$/.test(t)||/^n\\/n(?:\\/n)*$/.test(t))remove.push(n);
+        if(!t)continue;
+        if(/^(?:(?:\\n|\\r|n\\/n|\\/n|n)){1,}$/.test(t))remove.push(n);
       }
       remove.forEach(x=>x.parentNode&&x.parentNode.removeChild(x));
     }catch(e){}
   }
 
-  function scopeUploadedPosts(){
-    const root=document.getElementById('pufflogHomePosts');
-    if(!root)return;
+  function currentPage(){
+    const profile=document.getElementById('instagramProfilePage');
+    if(profile?.classList.contains('show'))return 'profile';
     const active=document.querySelector('.appNav button.active[data-page]');
-    const page=active?.dataset.page||'home';
-    root.style.setProperty('display',page==='home'?'block':'none','important');
+    if(active?.dataset.page)return active.dataset.page;
+    const pageIds=[['dms','dmsPage'],['search','searchPage'],['game','gamePage'],['stats','statsPage']];
+    for(const [name,id] of pageIds){const el=document.getElementById(id);if(el?.classList.contains('activePage'))return name;}
+    return 'home';
   }
 
-  function repair(){removeLiteralArtifacts();scopeUploadedPosts();}
+  function placeAndScopeHomePosts(){
+    const root=document.getElementById('pufflogHomePosts');
+    if(!root)return;
+    const app=document.querySelector('.app');
+    if(app&&root.parentElement!==app)app.appendChild(root);
+    const page=currentPage();
+    const home=page==='home';
+    root.classList.toggle('pufflog-home-visible',home);
+    root.style.setProperty('display',home?'block':'none','important');
+    if(!home)root.setAttribute('aria-hidden','true');else root.removeAttribute('aria-hidden');
+  }
+
+  function repair(){removeLiteralArtifacts();placeAndScopeHomePosts();}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',repair,{once:true});else repair();
-  document.addEventListener('click',e=>{const b=e.target.closest?.('.appNav button[data-page]');if(b)setTimeout(repair,0)},true);
-  new MutationObserver(repair).observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['class','aria-current']});
-  setTimeout(repair,100);setTimeout(repair,500);setTimeout(repair,1500);setTimeout(repair,3000);
+  document.addEventListener('click',e=>{const b=e.target.closest?.('button[data-page]');if(b)setTimeout(repair,0)},true);
+  window.addEventListener('load',()=>{repair();setTimeout(repair,250);setTimeout(repair,1000);setTimeout(repair,2500)});
+  new MutationObserver(()=>repair()).observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['class','aria-current']});
 })();
 </script>`;
 
 function cleanHTML(text){
   let out=text;
-  // Remove the legacy global post scanner; the upload/profile code handles local posts now.
+  // Remove legacy post scanners/visibility patches that conflict with the single HOME post feed.
   out=out.replace(/\\n<script id="pufflog-home-posts-js">[\\s\\S]*?\\n<\\/script>/g,'');
-  // Remove the old page-visibility patch that was causing race conditions.
   out=out.replace(/\\n<style id="pufflog-post-visibility-fix-v1">[\\s\\S]*?\\n<\\/style>/g,'');
   out=out.replace(/\\n<script id="pufflog-post-visibility-fix-v1-js">[\\s\\S]*?\\n<\\/script>/g,'');
   // Turn accidental literal backslash-n prefixes into real whitespace before HTML tags.
