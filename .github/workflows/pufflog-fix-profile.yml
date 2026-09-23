@@ -1,0 +1,59 @@
+name: Fix PUFFLOG profile posts
+on:
+  push:
+    paths:
+      - '.github/workflows/pufflog-fix-profile.yml'
+  workflow_dispatch:
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch profile videos and local posts only
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text()
+          old='<button aria-label="Reels" class="igp-tab" data-igtab="reels">▶</button>'
+          if old in s:
+              s=s.replace(old,'',1)
+          marker='</body>'
+          patch=r'''<style id="pufflog-profile-posts-only-fix">
+          #instagramProfilePage .igp-tab[data-igtab="reels"]{display:none!important}
+          #instagramProfilePage .pufflogLocalPost{position:relative;overflow:hidden;border:1px solid #4f7a43;border-radius:0;background:#17351d}
+          #instagramProfilePage .pufflogLocalPost img,#instagramProfilePage .pufflogLocalPost video{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;background:#071008}
+          #instagramProfilePage .pufflogLocalPostCaption{padding:7px 8px;font-size:9px;line-height:1.35;color:#e5f0dc;word-break:break-word}
+          </style>
+          <script id="pufflog-profile-posts-only-fix-js">
+          (function(){
+            if(window.__PUFFLOG_PROFILE_POSTS_ONLY_FIX)return;
+            window.__PUFFLOG_PROFILE_POSTS_ONLY_FIX=true;
+            const DB='PUFFLOG_POSTS_V2',STORE='posts';let urls=[];
+            const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+            function openDB(){return new Promise((resolve,reject)=>{const r=indexedDB.open(DB,1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains(STORE))r.result.createObjectStore(STORE,{keyPath:'id'});};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});}
+            async function getPosts(){const db=await openDB();return new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readonly'),r=tx.objectStore(STORE).getAll();r.onsuccess=()=>resolve((r.result||[]).sort((a,b)=>b.createdAt-a.createdAt));r.onerror=()=>reject(r.error);});}
+            function root(){let r=document.getElementById('pufflogHomePosts');if(!r){r=document.createElement('section');r.id='pufflogHomePosts';const home=document.getElementById('pufflogSocialHome');if(home?.parentNode)home.parentNode.insertBefore(r,home.nextSibling);else document.querySelector('.app')?.appendChild(r);}return r;}
+            async function renderHome(){const r=root();let posts=[];try{posts=await getPosts()}catch(e){return;}r.classList.add('show');r.innerHTML='<div class="phpTitle">Posts</div>';if(!posts.length){r.insertAdjacentHTML('beforeend','<div class="phpEmpty">No posts yet. Your uploaded posts will appear here.</div>');return;}for(const p of posts){const url=URL.createObjectURL(p.blob);const card=document.createElement('article');card.className='phpCard';const media=p.mime?.startsWith('video/')?document.createElement('video'):document.createElement('img');media.className='phpMedia';media.src=url;media.playsInline=true;media.loading='lazy';if(media.tagName==='VIDEO'){media.controls=true;media.preload='metadata';}const body=document.createElement('div');body.className='phpBody';body.innerHTML='<div class="phpUser">@'+esc(p.user||'pufflog')+'</div>'+(p.caption?'<div class="phpCaption">'+esc(p.caption)+'</div>':'');card.append(media,body);r.appendChild(card);}}
+            async function renderProfile(){const page=document.getElementById('instagramProfilePage'),grid=document.getElementById('igpGrid');if(!page||!grid||!page.classList.contains('show'))return;const active=page.querySelector('.igp-tab.active');if(active&&active.dataset.igtab!=='grid')return;let posts=[];try{posts=await getPosts()}catch(e){return;}const count=document.getElementById('igpPosts');if(count)count.textContent=String(posts.length);if(!posts.length){grid.innerHTML='<div class="igp-empty" style="grid-column:1/-1"><b>Share your first post</b><span>Your uploaded PUFFLOG posts will appear here.</span></div>';return;}grid.innerHTML=posts.map((p,i)=>'<div class="pufflogLocalPost" data-local-post="'+i+'"><div class="pufflogLocalPostMedia"></div>'+(p.caption?'<div class="pufflogLocalPostCaption">'+esc(p.caption)+'</div>':'')+'</div>').join('');[...grid.querySelectorAll('[data-local-post]')].forEach((card,i)=>{const p=posts[i],url=URL.createObjectURL(p.blob);const media=p.mime?.startsWith('video/')?document.createElement('video'):document.createElement('img');media.src=url;media.playsInline=true;media.loading='lazy';if(media.tagName==='VIDEO'){media.controls=true;media.preload='metadata';}card.querySelector('.pufflogLocalPostMedia').appendChild(media);});}
+            function schedule(){setTimeout(renderHome,80);setTimeout(renderProfile,140);}
+            document.addEventListener('click',e=>{const b=e.target.closest?.('[data-page="home"],#pufflogUploadNav,.igp-tab');if(b)schedule()},true);
+            window.addEventListener('load',()=>{setTimeout(renderHome,500);setTimeout(renderProfile,700);setTimeout(renderProfile,1500)});
+            new MutationObserver(()=>{const page=document.getElementById('instagramProfilePage');if(page?.classList.contains('show'))setTimeout(renderProfile,120)}).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class']});
+          })();
+          </script>
+          '''
+          if 'id="pufflog-profile-posts-only-fix-js"' not in s:
+              s=s.replace(marker,patch+marker,1)
+          p.write_text(s)
+          PY
+          git config user.name 'PUFFLOG Bot'
+          git config user.email 'pufflog-bot@users.noreply.github.com'
+          git add index.html
+          git commit -m 'fix: show uploaded posts in home and profile; remove profile videos'
+          git push
+          git rm .github/workflows/pufflog-fix-profile.yml
+          git commit -m 'chore: remove temporary profile fix workflow'
+          git push
