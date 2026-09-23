@@ -248,6 +248,27 @@ body[data-theme="dark"] #instagramProfilePage{background:#080d09!important}body[
 .bottom{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;align-items:end!important;justify-items:stretch!important;justify-content:stretch!important;gap:0!important;width:100%!important;left:0!important;right:0!important;padding-left:6px!important;padding-right:6px!important}
 .bottom button{display:flex!important;width:100%!important;min-width:0!important;max-width:none!important;flex:none!important;margin:0!important;align-items:center!important;justify-content:center!important}
 </style>
+
+<style id="pufflog-upload-post-fix-v2">
+#pufflogUploadModal{display:none;position:fixed;inset:0;z-index:2147483646;background:rgba(0,0,0,.76);backdrop-filter:blur(10px);align-items:flex-end;justify-content:center}
+#pufflogUploadModal.show{display:flex}
+#pufflogUploadModal .pufUploadSheet{width:min(760px,100%);max-height:90dvh;overflow:auto;background:linear-gradient(145deg,#205b2a,#173d20);border:1px solid #7aaa5b;border-radius:24px 24px 0 0;padding:18px 14px calc(22px + env(safe-area-inset-bottom));box-shadow:0 -18px 55px rgba(0,0,0,.45)}
+#pufflogUploadModal .pufUploadHead{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+#pufflogUploadModal h2{margin:0;font-size:24px;color:#fffbea}
+#pufflogUploadModal .pufClose{width:38px;height:38px;border-radius:50%;border:1px solid #7aaa5b;background:#315c32;color:#fff;font-size:24px}
+#pufflogUploadModal .pufHint{font-size:13px;color:#cfe0c6;line-height:1.35;margin-bottom:12px}
+#pufflogUploadModal .pufCaption{width:100%;min-height:105px;resize:vertical;border:1px solid #5e8d4e;border-radius:14px;background:#0e1c12!important;color:#fff!important;padding:13px;font:700 16px -apple-system,BlinkMacSystemFont,Arial,sans-serif;outline:none}
+#pufflogUploadModal .pufPreview{display:none;margin:12px 0;border:1px solid #6d9c50;border-radius:16px;overflow:hidden;background:#081008;min-height:90px;align-items:center;justify-content:center}
+#pufflogUploadModal .pufPreview.show{display:flex}
+#pufflogUploadModal .pufPreview img,#pufflogUploadModal .pufPreview video{display:block;width:100%;max-height:45dvh;object-fit:contain;background:#071008}
+#pufflogUploadModal .pufFileName{display:none;margin:8px 0;color:#dcebd4;font-size:11px;word-break:break-all}
+#pufflogUploadModal .pufFileName.show{display:block}
+#pufflogUploadModal .pufActions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
+#pufflogUploadModal .pufBtn{border:1px solid #7aaa5b;border-radius:14px;padding:13px 12px;font-weight:900;font-size:15px;background:#315c32;color:#fff}
+#pufflogUploadModal .pufBtn.primary{background:linear-gradient(135deg,#b5ed58,#61d66c);color:#143019;border-color:transparent}
+#pufflogUploadModal .pufBtn:disabled{opacity:.42}
+#pufflogUploadNav{position:relative}
+</style>
 </head><body><div aria-hidden="true" id="splash"><div class="splashInner"><img alt="PUFFLOG" class="splashIcon" src="icon-512.png"/><div class="splashTitle">PUFFLOG</div><div class="splashSub">TRACK • REFLECT • LEVEL UP</div><div class="splashBar"><i></i></div></div></div><script>(function(){function hide(){var s=document.getElementById("splash");if(s)s.classList.add("hide")}setTimeout(hide,1800);window.addEventListener("load",function(){setTimeout(hide,250)},{once:true})})();</script><div class="app">
 <div class="top"><div><div class="logo">PUFFLOG</div><div class="sub">TRACK • REFLECT • IMPROVE</div></div><div class="topStatus">
 <button aria-label="PRO mode" class="pufflogProHeaderBtn" id="pufflogProMode" type="button">⚡ <b>PRO</b></button><button aria-label="Notifications" id="notifyBell" style="position:relative;border:0;background:transparent;color:#fff;font-size:20px;padding:2px 5px;cursor:pointer">
@@ -1912,7 +1933,87 @@ setTimeout(load,1000);
   ['pointerdown','touchstart','keydown'].forEach(ev=>window.addEventListener(ev,wake,{passive:true,once:false}));
 })();
 </script>
-\n<script id="pufflog-home-posts-js">\n(function(){\n  if(window.__pufflogHomePostsLoaded)return; window.__pufflogHomePostsLoaded=true;\n  const ROOT_ID='pufflogHomePosts';\n  const mediaKey=/^(image|video|media|file|src|url|download|blob|content|thumbnail|photo|picture)/i;\n  const textKey=/^(caption|description|text|title|content|body|message)$/i;\n  const seen=new Set();\n  function looksMedia(v){return typeof v==='string' && (/^(https?:|blob:|data:|\/)/i.test(v)) && (/\.(jpe?g|png|gif|webp|mp4|mov|m4v|webm)(\?|$)/i.test(v) || /^(blob:|data:video|data:image)/i.test(v));}\n  function walk(v,out,depth){\n    if(depth>7||v==null)return;\n    if(Array.isArray(v)){v.forEach(x=>walk(x,out,depth+1));return;}\n    if(typeof v!=='object')return;\n    let media='',caption='',user='';\n    for(const [k,x] of Object.entries(v)){\n      if(typeof x==='string'){\n        if(!media && mediaKey.test(k) && looksMedia(x)) media=x;\n        if(!caption && textKey.test(k) && x.trim()) caption=x.trim();\n        if(!user && /^(username|user|handle|author|name)$/i.test(k) && x.trim()) user=x.trim();\n      }\n    }\n    if(media){out.push({media,caption,user,obj:v});}\n    Object.values(v).forEach(x=>walk(x,out,depth+1));\n  }\n  function collect(){\n    const out=[];\n    for(let i=0;i<localStorage.length;i++){\n      const key=localStorage.key(i); if(!key)continue;\n      let raw=''; try{raw=localStorage.getItem(key)}catch(e){}\n      if(!raw)continue;\n      try{walk(JSON.parse(raw),out,0)}catch(e){ if(looksMedia(raw)) out.push({media:raw,caption:'',user:'',obj:{}}); }\n    }\n    const unique=[]; const ids=new Set();\n    for(const x of out){\n      const id=x.media+'|'+x.caption+'|'+x.user; if(ids.has(id))continue; ids.add(id); unique.push(x);\n    }\n    return unique.slice(-50).reverse();\n  }\n  function isHome(){\n    const b=document.querySelector('.appNav button.active,[data-page="home"].active,.appNav button[aria-current="page"]');\n    if(b)return /home/i.test(b.getAttribute('data-page')||b.textContent||'');\n    const active=document.querySelector('.appNav button[style*="background"],.appNav button[style*="border"]');\n    if(active && /home/i.test(active.getAttribute('data-page')||active.textContent||''))return true;\n    const hash=(location.hash||'').toLowerCase(); if(hash.includes('profile')||hash.includes('dm')||hash.includes('search'))return false;\n    return true;\n  }\n  function root(){\n    let r=document.getElementById(ROOT_ID);\n    if(!r){\n      r=document.createElement('section'); r.id=ROOT_ID;\n      const app=document.querySelector('.app')||document.body; app.appendChild(r);\n    }\n    return r;\n  }\n  function render(){\n    const r=root(); r.classList.toggle('show',isHome());\n    if(!r.classList.contains('show'))return;\n    const posts=collect();\n    r.innerHTML='<div class="phpTitle">Posts</div>' + (posts.length?posts.map(p=>{\n      const safeCap=String(p.caption||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));\n      const safeUser=String(p.user||'@pufflog').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));\n      const esc=p.media.replace(/&/g,'&amp;').replace(/"/g,'&quot;');\n      const isVid=/\.(mp4|mov|m4v|webm)(\?|$)/i.test(p.media)||/^blob:|^data:video/i.test(p.media);\n      return '<article class="phpCard">'+(isVid?'<video class="phpMedia" src="'+esc+'" controls playsinline preload="metadata"></video>':'<img class="phpMedia" src="'+esc+'" loading="lazy" alt="Post">')+'<div class="phpBody"><div class="phpUser">'+safeUser+'</div>'+(safeCap?'<div class="phpCaption">'+safeCap+'</div>':'')+'</div></article>';\n    }).join(''):'<div class="phpEmpty">No posts yet. Your uploaded posts will appear here.</div>');\n  }\n  let timer; function schedule(){clearTimeout(timer);timer=setTimeout(render,120);}\n  document.addEventListener('click',schedule,true);\n  window.addEventListener('hashchange',schedule);\n  window.addEventListener('storage',schedule);\n  const oldSet=Storage.prototype.setItem; Storage.prototype.setItem=function(){const r=oldSet.apply(this,arguments);schedule();return r};\n  const oldRemove=Storage.prototype.removeItem; Storage.prototype.removeItem=function(){const r=oldRemove.apply(this,arguments);schedule();return r};\n  new MutationObserver(schedule).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','aria-current']});\n  setTimeout(render,250); setTimeout(render,1000);\n})();\n</script>\n</body></html>
+\n<script id="pufflog-home-posts-js">\n(function(){\n  if(window.__pufflogHomePostsLoaded)return; window.__pufflogHomePostsLoaded=true;\n  const ROOT_ID='pufflogHomePosts';\n  const mediaKey=/^(image|video|media|file|src|url|download|blob|content|thumbnail|photo|picture)/i;\n  const textKey=/^(caption|description|text|title|content|body|message)$/i;\n  const seen=new Set();\n  function looksMedia(v){return typeof v==='string' && (/^(https?:|blob:|data:|\/)/i.test(v)) && (/\.(jpe?g|png|gif|webp|mp4|mov|m4v|webm)(\?|$)/i.test(v) || /^(blob:|data:video|data:image)/i.test(v));}\n  function walk(v,out,depth){\n    if(depth>7||v==null)return;\n    if(Array.isArray(v)){v.forEach(x=>walk(x,out,depth+1));return;}\n    if(typeof v!=='object')return;\n    let media='',caption='',user='';\n    for(const [k,x] of Object.entries(v)){\n      if(typeof x==='string'){\n        if(!media && mediaKey.test(k) && looksMedia(x)) media=x;\n        if(!caption && textKey.test(k) && x.trim()) caption=x.trim();\n        if(!user && /^(username|user|handle|author|name)$/i.test(k) && x.trim()) user=x.trim();\n      }\n    }\n    if(media){out.push({media,caption,user,obj:v});}\n    Object.values(v).forEach(x=>walk(x,out,depth+1));\n  }\n  function collect(){\n    const out=[];\n    for(let i=0;i<localStorage.length;i++){\n      const key=localStorage.key(i); if(!key)continue;\n      let raw=''; try{raw=localStorage.getItem(key)}catch(e){}\n      if(!raw)continue;\n      try{walk(JSON.parse(raw),out,0)}catch(e){ if(looksMedia(raw)) out.push({media:raw,caption:'',user:'',obj:{}}); }\n    }\n    const unique=[]; const ids=new Set();\n    for(const x of out){\n      const id=x.media+'|'+x.caption+'|'+x.user; if(ids.has(id))continue; ids.add(id); unique.push(x);\n    }\n    return unique.slice(-50).reverse();\n  }\n  function isHome(){\n    const b=document.querySelector('.appNav button.active,[data-page="home"].active,.appNav button[aria-current="page"]');\n    if(b)return /home/i.test(b.getAttribute('data-page')||b.textContent||'');\n    const active=document.querySelector('.appNav button[style*="background"],.appNav button[style*="border"]');\n    if(active && /home/i.test(active.getAttribute('data-page')||active.textContent||''))return true;\n    const hash=(location.hash||'').toLowerCase(); if(hash.includes('profile')||hash.includes('dm')||hash.includes('search'))return false;\n    return true;\n  }\n  function root(){\n    let r=document.getElementById(ROOT_ID);\n    if(!r){\n      r=document.createElement('section'); r.id=ROOT_ID;\n      const app=document.querySelector('.app')||document.body; app.appendChild(r);\n    }\n    return r;\n  }\n  function render(){\n    const r=root(); r.classList.toggle('show',isHome());\n    if(!r.classList.contains('show'))return;\n    const posts=collect();\n    r.innerHTML='<div class="phpTitle">Posts</div>' + (posts.length?posts.map(p=>{\n      const safeCap=String(p.caption||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));\n      const safeUser=String(p.user||'@pufflog').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));\n      const esc=p.media.replace(/&/g,'&amp;').replace(/"/g,'&quot;');\n      const isVid=/\.(mp4|mov|m4v|webm)(\?|$)/i.test(p.media)||/^blob:|^data:video/i.test(p.media);\n      return '<article class="phpCard">'+(isVid?'<video class="phpMedia" src="'+esc+'" controls playsinline preload="metadata"></video>':'<img class="phpMedia" src="'+esc+'" loading="lazy" alt="Post">')+'<div class="phpBody"><div class="phpUser">'+safeUser+'</div>'+(safeCap?'<div class="phpCaption">'+safeCap+'</div>':'')+'</div></article>';\n    }).join(''):'<div class="phpEmpty">No posts yet. Your uploaded posts will appear here.</div>');\n  }\n  let timer; function schedule(){clearTimeout(timer);timer=setTimeout(render,120);}\n  document.addEventListener('click',schedule,true);\n  window.addEventListener('hashchange',schedule);\n  window.addEventListener('storage',schedule);\n  const oldSet=Storage.prototype.setItem; Storage.prototype.setItem=function(){const r=oldSet.apply(this,arguments);schedule();return r};\n  const oldRemove=Storage.prototype.removeItem; Storage.prototype.removeItem=function(){const r=oldRemove.apply(this,arguments);schedule();return r};\n  new MutationObserver(schedule).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','aria-current']});\n  setTimeout(render,250); setTimeout(render,1000);\n})();\n</script>\n
+<script id="pufflog-upload-post-fix-v2-js">
+(function(){
+  if(window.__PUFFLOG_UPLOAD_POST_FIX_V2)return;
+  window.__PUFFLOG_UPLOAD_POST_FIX_V2=true;
+  const DB='PUFFLOG_POSTS_V2',STORE='posts';
+  let selected=null,previewUrl=null;
+  const $=id=>document.getElementById(id);
+  function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  function openDB(){return new Promise((resolve,reject)=>{const r=indexedDB.open(DB,1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains(STORE))r.result.createObjectStore(STORE,{keyPath:'id'});};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});}
+  async function putPost(post){const db=await openDB();return new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).put(post);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);});}
+  async function getPosts(){const db=await openDB();return new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readonly'),r=tx.objectStore(STORE).getAll();r.onsuccess=()=>resolve((r.result||[]).sort((a,b)=>b.createdAt-a.createdAt));r.onerror=()=>reject(r.error);});}
+  function ensureModal(){
+    if($('pufflogUploadModal'))return $('pufflogUploadModal');
+    const m=document.createElement('div');m.id='pufflogUploadModal';m.innerHTML=`<div class="pufUploadSheet">
+      <div class="pufUploadHead"><h2>Upload Post</h2><button type="button" class="pufClose" id="pufUploadClose">×</button></div>
+      <div class="pufHint">Choose a photo or video. It will appear in your PUFFLOG Home feed.</div>
+      <textarea class="pufCaption" id="pufUploadCaption" placeholder="Write a caption..."></textarea>
+      <div class="pufPreview" id="pufUploadPreview"></div>
+      <div class="pufFileName" id="pufUploadFileName"></div>
+      <input id="pufUploadFile" type="file" accept="image/*,video/*" hidden>
+      <div class="pufActions"><button type="button" class="pufBtn" id="pufChooseMedia">Choose media</button><button type="button" class="pufBtn primary" id="pufPublish" disabled>Post</button></div>
+    </div>`;
+    document.body.appendChild(m);
+    $('pufUploadClose').onclick=closeModal;
+    m.addEventListener('click',e=>{if(e.target===m)closeModal();});
+    $('pufChooseMedia').onclick=()=>$('pufUploadFile').click();
+    $('pufUploadFile').onchange=handleFile;
+    $('pufPublish').onclick=publish;
+    return m;
+  }
+  function closeModal(){const m=$('pufflogUploadModal');if(m)m.classList.remove('show');}
+  function openModal(){ensureModal().classList.add('show');}
+  function handleFile(e){
+    const f=e.target.files?.[0];if(!f)return;
+    if(!/^(image|video)\//i.test(f.type)){alert('Please choose an image or video.');return;}
+    selected=f;if(previewUrl)URL.revokeObjectURL(previewUrl);previewUrl=URL.createObjectURL(f);
+    const box=$('pufUploadPreview');box.innerHTML='';
+    const el=f.type.startsWith('video/')?document.createElement('video'):document.createElement('img');
+    el.src=previewUrl;el.playsInline=true;el.controls=f.type.startsWith('video/');if(el.tagName==='VIDEO')el.muted=true;box.appendChild(el);box.classList.add('show');
+    $('pufUploadFileName').textContent=f.name+' • '+Math.round(f.size/1024)+' KB';$('pufUploadFileName').classList.add('show');$('pufPublish').disabled=false;
+  }
+  async function publish(){
+    if(!selected)return;
+    const btn=$('pufPublish');btn.disabled=true;btn.textContent='Posting…';
+    try{
+      const post={id:(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random()),createdAt:Date.now(),caption:$('pufUploadCaption').value.trim().slice(0,500),user:(window.PUFFLOG_SOCIAL?.user?.user_metadata?.username||window.PUFFLOG_SOCIAL?.user?.email?.split('@')[0]||'pufflog'),mime:selected.type,name:selected.name,blob:selected};
+      await putPost(post);
+      closeModal();selected=null;if(previewUrl){URL.revokeObjectURL(previewUrl);previewUrl=null;}
+      $('pufUploadFile').value='';$('pufUploadCaption').value='';$('pufUploadPreview').innerHTML='';$('pufUploadPreview').classList.remove('show');$('pufUploadFileName').classList.remove('show');
+      await renderLocalPosts();
+      if(typeof window.toast==='function')window.toast('Post published');
+    }catch(e){console.error('PUFFLOG upload:',e);alert('Could not publish this post. Please try a smaller photo or video.');}
+    btn.disabled=!selected;btn.textContent='Post';
+  }
+  async function renderLocalPosts(){
+    const root=$('pufflogHomePosts');if(!root)return;
+    let posts=[];try{posts=await getPosts();}catch(e){console.warn('PUFFLOG local posts:',e);return;}
+    root.classList.add('show');root.innerHTML='<div class="phpTitle">Posts</div>';
+    if(!posts.length){root.insertAdjacentHTML('beforeend','<div class="phpEmpty">No posts yet. Your uploaded posts will appear here.</div>');return;}
+    for(const p of posts){
+      const url=URL.createObjectURL(p.blob);const card=document.createElement('article');card.className='phpCard';
+      const media=p.mime?.startsWith('video/')?document.createElement('video'):document.createElement('img');media.className='phpMedia';media.src=url;media.controls=media.tagName==='VIDEO';media.playsInline=true;if(media.tagName==='VIDEO')media.preload='metadata';
+      const body=document.createElement('div');body.className='phpBody';body.innerHTML='<div class="phpUser">@'+esc(p.user||'pufflog')+'</div>'+(p.caption?'<div class="phpCaption">'+esc(p.caption)+'</div>':'');card.append(media,body);root.appendChild(card);
+    }
+  }
+  function addNavButton(){
+    const nav=document.querySelector('.appNav');if(!nav)return;
+    let b=nav.querySelector('[data-page="upload"]');
+    if(!b){b=document.createElement('button');b.id='pufflogUploadNav';b.type='button';b.dataset.page='upload';b.innerHTML='<span>＋</span>Upload';const search=nav.querySelector('[data-page="search"]');if(search)nav.insertBefore(b,search);else nav.appendChild(b);}
+    b.onclick=e=>{e.preventDefault();e.stopPropagation();openModal();};
+  }
+  function bind(){ensureModal();addNavButton();}
+  document.addEventListener('DOMContentLoaded',bind);setTimeout(bind,100);setTimeout(bind,800);setTimeout(bind,1800);
+  new MutationObserver(()=>addNavButton()).observe(document.body,{subtree:true,childList:true});
+  window.PUFFLOG_OPEN_UPLOAD=openModal;
+  window.PUFFLOG_REFRESH_POSTS=renderLocalPosts;
+  window.addEventListener('load',()=>setTimeout(renderLocalPosts,500));
+})();
+</script>
+</body></html>
 <style id="pufflog-theme-final-visibility">
 .igp-theme-sheet.show{display:flex!important;visibility:visible!important;opacity:1!important}
 .igp-theme-sheet.show .igp-theme-card{display:block!important;visibility:visible!important;opacity:1!important}
