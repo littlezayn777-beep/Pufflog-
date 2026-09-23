@@ -2,12 +2,14 @@ name: PUFFLOG fix uploaded post scope
 on:
   push:
     branches: [main]
+  pull_request:
+    types: [opened, synchronize]
 permissions:
   contents: write
 jobs:
   fix:
     runs-on: ubuntu-latest
-    if: ${{ !contains(github.event.head_commit.message, '[pufflog-auto-fix]') }}
+    if: ${{ !contains(github.event.head_commit.message, '[pufflog-auto-fix]') || github.event_name == 'pull_request' }}
     steps:
       - uses: actions/checkout@v4
       - name: Patch index.html
@@ -18,17 +20,10 @@ jobs:
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
           original=s
-
-          # Remove the legacy localStorage scanner that injected uploaded posts globally.
           s=re.sub(r'\\n<script id="pufflog-home-posts-js">.*?\\n</script>', '', s, flags=re.S)
-
-          # Remove the old global visibility guard that raced with navigation.
           s=re.sub(r'\\n<style id="pufflog-post-visibility-fix-v1">.*?\\n</style>', '', s, flags=re.S)
           s=re.sub(r'\\n<script id="pufflog-post-visibility-fix-v1-js">.*?\\n</script>', '', s, flags=re.S)
-
-          # Remove literal backslash-n text accidentally inserted before HTML tags.
           s=re.sub(r'\\\\n(?=<(?:style|script|/style|/script|/head|/body|div|section|nav|main|html))', '\n', s)
-
           marker='</body></html>'
           guard='''
 <style id="pufflog-local-post-scope-fix">
@@ -43,8 +38,7 @@ jobs:
   const old=window.showPUFFLOGPage;
   if(typeof old==='function'&&!old.__pufflogLocalScopeFix){
     const wrapped=function(p){const result=old.apply(this,arguments);setTimeout(apply,0);return result};
-    wrapped.__pufflogLocalScopeFix=true;
-    window.showPUFFLOGPage=wrapped;
+    wrapped.__pufflogLocalScopeFix=true;window.showPUFFLOGPage=wrapped;
   }
   document.addEventListener('click',e=>{const b=e.target.closest?.('.appNav button[data-page]');if(b)setTimeout(apply,0)},true);
   new MutationObserver(apply).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class']});
@@ -54,17 +48,14 @@ jobs:
 '''
           if 'id="pufflog-local-post-scope-fix-js"' not in s:
               s=s.replace(marker,guard+marker)
-
           if s != original:
               p.write_text(s,encoding='utf-8')
-          else:
-              print('No textual change needed')
           PY
       - name: Commit fix
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git diff --cached --quiet && exit 0
+          if git diff --cached --quiet; then exit 0; fi
           git commit -m "Fix PUFFLOG post visibility and n-n artifact [pufflog-auto-fix]"
           git push
