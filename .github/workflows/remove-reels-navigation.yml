@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Remove Reels from Home and fix four-button navigation
+      - name: Update Home posts only
         shell: bash
         run: |
           python3 - <<'PY'
@@ -24,19 +24,25 @@ jobs:
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
 
-          # Remove a Reels navigation button if one is present.
+          # Keep the existing four-button navigation exactly as-is.
           s = re.sub(r'<button[^>]*data-page=["\']reels["\'][^>]*>.*?</button>', '', s, flags=re.I | re.S)
-
-          # Keep the four-button navigation evenly distributed.
           s = re.sub(r'\.appNav\{[^}]*grid-template-columns:repeat\(5[^}]*\}',
                      '.appNav{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:0!important;width:100%!important;left:0!important;right:0!important}', s)
           s = re.sub(r'\.appNav\{grid-template-columns:repeat\(5,minmax\(0,1fr\)\)!important;gap:2px!important;width:100%!important;left:0!important;right:0!important;padding-left:5px!important;padding-right:5px!important\}',
                      '.appNav{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:0!important;width:100%!important;left:0!important;right:0!important;padding-left:5px!important;padding-right:5px!important}', s)
 
-          # Remove all Reel cards/sections from the Home presentation only.
+          # Home must not show Reels.
           marker = '<style id="pufflog-home-no-reels">'
           if marker not in s:
-              s += '''\n<style id="pufflog-home-no-reels">\n/* PUFFLOG: Home is posts/tools only — no Reels surface. */\n#pufflogSocialHome .pshHeroReel,\n#pufflogSocialHome .pshHomeFeed,\n#pufflogSocialHome .pshTrending,\n#pshHomeFeed,\n#pshTrending,\n.pshFeedReel,\n.pshHeroReel{display:none!important}\n.appNav{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:0!important;width:100%!important;left:0!important;right:0!important}\n.appNav button{width:100%!important;min-width:0!important}\n</style>\n'''
+              s += '''\n<style id="pufflog-home-no-reels">\n#pufflogSocialHome .pshHeroReel,#pufflogSocialHome .pshHomeFeed,#pufflogSocialHome .pshTrending,#pshHomeFeed,#pshTrending,.pshFeedReel,.pshHeroReel{display:none!important}\n.appNav{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:0!important;width:100%!important;left:0!important;right:0!important}\n.appNav button{width:100%!important;min-width:0!important}\n</style>\n'''
+
+          post_css = '''\n<style id="pufflog-home-posts-css">\n#pufflogHomePosts{display:none;margin:14px 0 110px;padding:0 2px}\n#pufflogHomePosts.show{display:block}\n#pufflogHomePosts .phpTitle{font-size:16px;font-weight:900;margin:8px 4px 10px}\n#pufflogHomePosts .phpEmpty{padding:22px 14px;border:1px solid #4f7a43;border-radius:16px;background:rgba(25,59,29,.72);color:#c4d6b6;text-align:center;font-size:11px}\n#pufflogHomePosts .phpCard{margin:0 0 12px;border:1px solid #4f7a43;border-radius:16px;overflow:hidden;background:#17351d;box-shadow:0 6px 18px rgba(0,0,0,.16)}\n#pufflogHomePosts .phpMedia{display:block;width:100%;max-height:520px;object-fit:cover;background:#071008}\n#pufflogHomePosts .phpBody{padding:10px 12px}\n#pufflogHomePosts .phpUser{font-weight:900;font-size:12px;margin-bottom:4px}\n#pufflogHomePosts .phpCaption{font-size:11px;line-height:1.45;color:#e5f0dc;white-space:pre-wrap;word-break:break-word}\n</style>\n'''
+          if 'id="pufflog-home-posts-css"' not in s:
+              s = s.replace('</head>', post_css + '</head>', 1)
+
+          post_js = r'''\n<script id="pufflog-home-posts-js">\n(function(){\n  if(window.__pufflogHomePostsLoaded)return; window.__pufflogHomePostsLoaded=true;\n  const ROOT_ID='pufflogHomePosts';\n  const mediaKey=/^(image|video|media|file|src|url|download|blob|content|thumbnail|photo|picture)/i;\n  const textKey=/^(caption|description|text|title|content|body|message)$/i;\n  const seen=new Set();\n  function looksMedia(v){return typeof v==='string' && (/^(https?:|blob:|data:|\/)/i.test(v)) && (/\.(jpe?g|png|gif|webp|mp4|mov|m4v|webm)(\?|$)/i.test(v) || /^(blob:|data:video|data:image)/i.test(v));}\n  function walk(v,out,depth){\n    if(depth>7||v==null)return;\n    if(Array.isArray(v)){v.forEach(x=>walk(x,out,depth+1));return;}\n    if(typeof v!=='object')return;\n    let media='',caption='',user='';\n    for(const [k,x] of Object.entries(v)){\n      if(typeof x==='string'){\n        if(!media && mediaKey.test(k) && looksMedia(x)) media=x;\n        if(!caption && textKey.test(k) && x.trim()) caption=x.trim();\n        if(!user && /^(username|user|handle|author|name)$/i.test(k) && x.trim()) user=x.trim();\n      }\n    }\n    if(media){out.push({media,caption,user,obj:v});}\n    Object.values(v).forEach(x=>walk(x,out,depth+1));\n  }\n  function collect(){\n    const out=[];\n    for(let i=0;i<localStorage.length;i++){\n      const key=localStorage.key(i); if(!key)continue;\n      let raw=''; try{raw=localStorage.getItem(key)}catch(e){}\n      if(!raw)continue;\n      try{walk(JSON.parse(raw),out,0)}catch(e){ if(looksMedia(raw)) out.push({media:raw,caption:'',user:'',obj:{}}); }\n    }\n    const unique=[]; const ids=new Set();\n    for(const x of out){\n      const id=x.media+'|'+x.caption+'|'+x.user; if(ids.has(id))continue; ids.add(id); unique.push(x);\n    }\n    return unique.slice(-50).reverse();\n  }\n  function isHome(){\n    const b=document.querySelector('.appNav button.active,[data-page="home"].active,.appNav button[aria-current="page"]');\n    if(b)return /home/i.test(b.getAttribute('data-page')||b.textContent||'');\n    const active=document.querySelector('.appNav button[style*="background"],.appNav button[style*="border"]');\n    if(active && /home/i.test(active.getAttribute('data-page')||active.textContent||''))return true;\n    const hash=(location.hash||'').toLowerCase(); if(hash.includes('profile')||hash.includes('dm')||hash.includes('search'))return false;\n    return true;\n  }\n  function root(){\n    let r=document.getElementById(ROOT_ID);\n    if(!r){\n      r=document.createElement('section'); r.id=ROOT_ID;\n      const app=document.querySelector('.app')||document.body; app.appendChild(r);\n    }\n    return r;\n  }\n  function render(){\n    const r=root(); r.classList.toggle('show',isHome());\n    if(!r.classList.contains('show'))return;\n    const posts=collect();\n    r.innerHTML='<div class="phpTitle">Posts</div>' + (posts.length?posts.map(p=>{\n      const safeCap=String(p.caption||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));\n      const safeUser=String(p.user||'@pufflog').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));\n      const esc=p.media.replace(/&/g,'&amp;').replace(/"/g,'&quot;');\n      const isVid=/\.(mp4|mov|m4v|webm)(\?|$)/i.test(p.media)||/^blob:|^data:video/i.test(p.media);\n      return '<article class="phpCard">'+(isVid?'<video class="phpMedia" src="'+esc+'" controls playsinline preload="metadata"></video>':'<img class="phpMedia" src="'+esc+'" loading="lazy" alt="Post">')+'<div class="phpBody"><div class="phpUser">'+safeUser+'</div>'+(safeCap?'<div class="phpCaption">'+safeCap+'</div>':'')+'</div></article>';\n    }).join(''):'<div class="phpEmpty">No posts yet. Your uploaded posts will appear here.</div>');\n  }\n  let timer; function schedule(){clearTimeout(timer);timer=setTimeout(render,120);}\n  document.addEventListener('click',schedule,true);\n  window.addEventListener('hashchange',schedule);\n  window.addEventListener('storage',schedule);\n  const oldSet=Storage.prototype.setItem; Storage.prototype.setItem=function(){const r=oldSet.apply(this,arguments);schedule();return r};\n  const oldRemove=Storage.prototype.removeItem; Storage.prototype.removeItem=function(){const r=oldRemove.apply(this,arguments);schedule();return r};\n  new MutationObserver(schedule).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','aria-current']});\n  setTimeout(render,250); setTimeout(render,1000);\n})();\n</script>\n'''
+          if 'id="pufflog-home-posts-js"' not in s:
+              s = s.replace('</body>', post_js + '</body>', 1)
 
           p.write_text(s, encoding='utf-8')
           PY
@@ -47,5 +53,5 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html
           if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'Fix four-button navigation and remove home reels'
+          git commit -m 'Add persistent Home posts feed without Reels'
           git push
