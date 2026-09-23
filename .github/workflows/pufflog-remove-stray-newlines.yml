@@ -1,0 +1,55 @@
+name: PUFFLOG remove stray newline text
+on:
+  push:
+    paths:
+      - '.github/workflows/pufflog-remove-stray-newlines.yml'
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Remove stray literal newline text from app
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          marker='id="pufflog-stray-newline-cleaner"'
+          if marker not in s:
+              fix=r'''
+<script id="pufflog-stray-newline-cleaner">
+(function(){
+  function clean(root){
+    if(!root) return;
+    var w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
+    var a=[];
+    while(w.nextNode()) a.push(w.currentNode);
+    a.forEach(function(n){
+      var v=n.nodeValue||'';
+      if(/^(?:\s|\\n|\\r)+$/.test(v)) n.remove();
+      else if(/^(?:\\n|\\r)+$/.test(v)) n.remove();
+    });
+  }
+  function run(){clean(document.body)}
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',run); else run();
+  window.addEventListener('load',run);
+  new MutationObserver(function(){clean(document.body)}).observe(document.documentElement,{subtree:true,childList:true});
+})();
+</script>
+'''
+              s=s.replace('</body>',fix+'</body>',1)
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit app fix and remove workflow
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git commit -m 'Remove stray literal newline text from PUFFLOG' || true
+          git rm .github/workflows/pufflog-remove-stray-newlines.yml || true
+          git commit -m 'Remove one-time newline cleanup workflow' || true
+          git push
