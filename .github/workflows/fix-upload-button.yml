@@ -1,0 +1,55 @@
+name: Fix PUFFLOG Upload Button
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  fix-upload-button:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch upload button only
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          marker = 'PUFFLOG_UPLOAD_BUTTON_HARD_FIX'
+          if marker not in s:
+              patch = r'''<script>
+          /* PUFFLOG_UPLOAD_BUTTON_HARD_FIX: repair Upload navigation click only */
+          (() => {
+            const activateUpload = (e) => {
+              const b = e.target && e.target.closest ? e.target.closest('[data-page="upload"],#pufflogUploadNav') : null;
+              if (!b) return;
+              e.preventDefault();
+              e.stopImmediatePropagation();
+              if (typeof window.PUFFLOG_OPEN_UPLOAD === 'function') {
+                window.PUFFLOG_OPEN_UPLOAD();
+              } else {
+                const m = document.getElementById('pufflogUploadModal');
+                if (m) m.classList.add('show');
+              }
+            };
+            document.addEventListener('pointerup', activateUpload, true);
+            document.addEventListener('click', activateUpload, true);
+          })();
+          </script>
+          '''
+              s = s.replace('</body></html>', patch + '</body></html>')
+              p.write_text(s, encoding='utf-8')
+          PY
+      - name: Commit patch and remove temporary workflow
+        run: |
+          git config user.name "PUFFLOG Repair Bot"
+          git config user.email "actions@github.com"
+          git add index.html
+          git commit -m "Fix PUFFLOG upload button click" || true
+          rm -f .github/workflows/fix-upload-button.yml
+          git add .github/workflows/fix-upload-button.yml
+          git commit -m "Remove temporary upload button repair workflow" || true
+          git push
