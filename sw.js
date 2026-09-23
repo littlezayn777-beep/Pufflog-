@@ -1,4 +1,4 @@
-const CACHE='pufflog-v10';
+const CACHE='pufflog-v11';
 
 const PUFFLOG_FIX=`
 <style id="pufflog-direct-nav-fix">
@@ -9,14 +9,17 @@ const PUFFLOG_FIX=`
 .bottom{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:7px!important;justify-content:stretch!important;align-items:stretch!important}
 .bottom .appNav{display:contents!important}.bottom>button,.bottom .appNav>button{min-width:0!important;max-width:none!important;width:100%!important;flex-shrink:1!important}
 #pufflogUploadInput{display:none!important}
-#pufflogHomePosts{display:none!important}
-#pufflogHomePosts.pufflog-home-visible{display:block!important}
+/* Uploaded posts are allowed only on Home and Profile. */
+body.pufflog-posts-hidden #pufflogHomePosts,
+body.pufflog-posts-hidden #pufflogHomePosts *{display:none!important}
+body.pufflog-posts-hidden .phpCard{display:none!important}
+body.pufflog-posts-hidden [data-pufflog-post]{display:none!important}
 </style>`;
 
 const PUFFLOG_FIX_JS=`
 <script id="pufflog-direct-nav-fix-js">
 (function(){
-  if(window.__pufflogDirectNavFixV3)return;window.__pufflogDirectNavFixV3=true;
+  if(window.__pufflogDirectNavFixV4)return;window.__pufflogDirectNavFixV4=true;
 
   function removeLiteralArtifacts(){
     try{
@@ -25,7 +28,7 @@ const PUFFLOG_FIX_JS=`
       while(n=walker.nextNode()){
         const t=(n.nodeValue||'').trim();
         if(!t)continue;
-        if(/^(?:(?:\\n|\\r|n\\/n|\\/n|n|\\\\n|\\\\r)){1,}$/.test(t))remove.push(n);
+        if(/^(?:(?:\\n|\\r|n\\/n|\\/n|n|\\\\n|\\\\r)){1,}$/.test(t)||/^(?:\\\\n|\\\\r|\\n|\\r|n\\/n|\\/n|n)+$/.test(t))remove.push(n);
       }
       remove.forEach(x=>x.parentNode&&x.parentNode.removeChild(x));
     }catch(e){}
@@ -33,38 +36,55 @@ const PUFFLOG_FIX_JS=`
 
   function currentPage(){
     const profile=document.getElementById('instagramProfilePage');
-    if(profile?.classList.contains('show'))return 'profile';
-    const active=document.querySelector('.appNav button.active[data-page]');
+    if(profile && (profile.classList.contains('show') || getComputedStyle(profile).display!=='none'))return 'profile';
+    const active=document.querySelector('.appNav button.active[data-page],button[data-page][aria-current="page"]');
     if(active?.dataset.page)return active.dataset.page;
-    const pageIds=[['dms','dmsPage'],['search','searchPage'],['game','gamePage'],['stats','statsPage']];
-    for(const [name,id] of pageIds){const el=document.getElementById(id);if(el?.classList.contains('activePage'))return name;}
+    const selectors=[
+      ['dms',['#dmsPage','.dmsPage','[data-page-view="dms"]']],
+      ['search',['#searchPage','.searchPage','[data-page-view="search"]']],
+      ['game',['#gamePage','.gamePage','[data-page-view="game"]']],
+      ['stats',['#statsPage','.statsPage','[data-page-view="stats"]']]
+    ];
+    for(const [name,ids] of selectors){
+      for(const id of ids){
+        const el=document.querySelector(id);
+        if(el && (el.classList.contains('activePage')||el.classList.contains('show')||getComputedStyle(el).display!=='none'))return name;
+      }
+    }
     return 'home';
   }
 
-  function placeAndScopeHomePosts(){
-    const root=document.getElementById('pufflogHomePosts');
-    if(!root)return;
-    const app=document.querySelector('.app');
-    if(app&&root.parentElement!==app)app.appendChild(root);
+  function setPostVisibility(){
     const page=currentPage();
-    const home=page==='home';
-    root.classList.toggle('pufflog-home-visible',home);
-    root.style.setProperty('display',home?'block':'none','important');
-    if(!home)root.setAttribute('aria-hidden','true');else root.removeAttribute('aria-hidden');
+    const allowed=page==='home'||page==='profile';
+    document.body.classList.toggle('pufflog-posts-hidden',!allowed);
+
+    const root=document.getElementById('pufflogHomePosts');
+    if(root){
+      if(allowed){root.classList.add('pufflog-home-visible');root.removeAttribute('aria-hidden');root.style.removeProperty('display');}
+      else{root.classList.remove('pufflog-home-visible');root.setAttribute('aria-hidden','true');root.style.setProperty('display','none','important');}
+    }
+
+    document.querySelectorAll('.phpCard,[data-pufflog-post]').forEach(card=>{
+      const inHome=!!card.closest('#pufflogHomePosts');
+      const inProfile=!!card.closest('#instagramProfilePage');
+      const show=allowed && (page==='home' ? inHome : inProfile);
+      card.style.setProperty('display',show?'':'none','important');
+      if(show)card.removeAttribute('aria-hidden');else card.setAttribute('aria-hidden','true');
+    });
   }
 
-  function repair(){removeLiteralArtifacts();placeAndScopeHomePosts();}
+  function repair(){removeLiteralArtifacts();setPostVisibility();}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',repair,{once:true});else repair();
-  document.addEventListener('click',e=>{const b=e.target.closest?.('button[data-page]');if(b)setTimeout(repair,0)},true);
-  window.addEventListener('load',()=>{repair();setTimeout(repair,250);setTimeout(repair,1000);setTimeout(repair,2500)});
-  new MutationObserver(()=>repair()).observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['class','aria-current']});
+  document.addEventListener('click',e=>{if(e.target.closest?.('button[data-page],.appNav button'))setTimeout(repair,0)},true);
+  window.addEventListener('load',()=>{repair();setTimeout(repair,100);setTimeout(repair,500);setTimeout(repair,1200);setTimeout(repair,2500)});
+  new MutationObserver(()=>repair()).observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['class','aria-current','style','hidden']});
 })();
 </script>`;
 
 function cleanHTML(text){
   let out=text;
-  // The broken feed was caused by legacy scripts that scan every localStorage key and
-  // inject media into the DOM. Remove them by element id regardless of surrounding \n markers.
+  // Remove legacy post scanners/visibility patches by element id before the page runs them.
   out=out.replace(/<script\\s+id=["']pufflog-home-posts-js["'][^>]*>[\\s\\S]*?<\\/script>/gi,'');
   out=out.replace(/<script\\s+id=["']pufflog-post-visibility-fix-v1-js["'][^>]*>[\\s\\S]*?<\\/script>/gi,'');
   out=out.replace(/<style\\s+id=["']pufflog-post-visibility-fix-v1["'][^>]*>[\\s\\S]*?<\\/style>/gi,'');
