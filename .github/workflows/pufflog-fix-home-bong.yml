@@ -1,0 +1,53 @@
+name: PUFFLOG Home and Bong Runner fix
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  fix:
+    if: github.event.head_commit.message != 'PUFFLOG Home and Bong Runner fix applied'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply targeted UI fix
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          fix = r'''
+<style id="pufflog-home-bong-targeted-fix">
+#pufflogSocialHome{min-height:0!important;height:auto!important;margin-bottom:0!important;padding-bottom:0!important}
+#pufflogHomePosts{margin-top:0!important;padding-top:0!important}
+</style>
+<script id="pufflog-home-bong-targeted-fix-js">
+(function(){
+  function sync(){
+    var posts=document.getElementById('pufflogHomePosts');
+    if(!posts)return;
+    var active=document.querySelector('.appNav button.active[data-page]');
+    var page=active&&active.dataset?active.dataset.page:'home';
+    var game=document.querySelector('.gameStage, canvas.canvas');
+    var hide=(page!=='home' && page!=='profile') || !!game;
+    posts.style.display=hide?'none':'';
+  }
+  document.addEventListener('click',function(){setTimeout(sync,50);setTimeout(sync,300)},true);
+  window.addEventListener('load',function(){sync();setTimeout(sync,500);setTimeout(sync,1200)});
+  new MutationObserver(sync).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','style']});
+  setInterval(sync,1000);
+})();
+</script>
+'''
+          marker='id="pufflog-home-bong-targeted-fix"'
+          if marker not in s:
+              s=s.replace('</body>',fix+'</body>',1)
+          p.write_text(s,encoding='utf-8')
+      - name: Commit fix
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "PUFFLOG Home and Bong Runner fix applied" || exit 0
+          git push
