@@ -9,19 +9,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inspect profile/upload code
+      - name: Inspect exact profile and post code
         run: |
           python3 - <<'PY'
           from pathlib import Path
           s=Path('index.html').read_text()
-          keys=['Profile','profile','Upload Post','posts','localStorage','renderProfile','profileGrid']
-          for k in keys:
-              print('\n===== KEY:',k,'=====')
-              pos=0; n=0
-              while True:
-                  p=s.find(k,pos)
-                  if p<0 or n>=8: break
-                  print('---',p,'---')
-                  print(s[max(0,p-700):p+1200].replace('\\n','\\n'))
-                  pos=p+len(k); n+=1
+          for a,b in [(157000,161500),(173500,177500),(199000,208000),(138000,146500)]:
+              print(f'\\n===== RANGE {a}:{b} =====\\n')
+              print(s[a:b])
           PY
