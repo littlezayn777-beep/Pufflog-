@@ -9,12 +9,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inspect exact profile and post code
+      - name: Inspect target functions
         run: |
           python3 - <<'PY'
           from pathlib import Path
           s=Path('index.html').read_text()
-          for a,b in [(157000,161500),(173500,177500),(199000,208000),(138000,146500)]:
-              print(f'\\n===== RANGE {a}:{b} =====\\n')
-              print(s[a:b])
+          for key in ['function loadIGProfile','function renderIGGrid','function renderLocalPosts','pufflogHomePosts','data-igtab="reels"']:
+              p=s.find(key)
+              print(f'\\n===== {key} @ {p} =====\\n')
+              if p>=0: print(s[max(0,p-1200):p+6500])
           PY
