@@ -1,0 +1,40 @@
+name: Finish Home Posts Step
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  finish-posts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add post detail interaction only
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          marker='id="pufflog-post-detail-step"'
+          if marker in s:
+              print('Already applied')
+              raise SystemExit(0)
+          css='''\n<style id="pufflog-post-detail-step">\n#pufflogPostDetail{display:none;position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.82);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:18px}\n#pufflogPostDetail.show{display:flex}\n#pufflogPostDetail .pdpCard{width:min(720px,100%);max-height:90vh;overflow:auto;background:#17351d;border:1px solid #6d9c50;border-radius:18px;padding:10px}\n#pufflogPostDetail img,#pufflogPostDetail video{display:block;width:100%;max-height:72vh;object-fit:contain;border-radius:12px;background:#071008}\n#pufflogPostDetail .pdpCaption{padding:10px 4px 3px;font-size:12px;line-height:1.45}\n</style>\n'''
+          js=r'''\n<script id="pufflog-post-detail-step-js">\n(function(){\n  function closeDetail(){document.getElementById('pufflogPostDetail')?.remove();}\n  function openDetail(card){\n    const media=card.querySelector('.phpMedia');if(!media)return;\n    const modal=document.createElement('div');modal.id='pufflogPostDetail';modal.className='show';\n    const body=media.tagName.toLowerCase()==='video'?media.cloneNode(true):media.cloneNode(true);\n    body.controls=true;body.removeAttribute('loading');\n    const cap=card.querySelector('.phpCaption')?.textContent||'';\n    const safe=cap.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));\n    modal.innerHTML='<div class="pdpCard"></div>';\n    const c=modal.querySelector('.pdpCard');c.appendChild(body);\n    if(safe)c.insertAdjacentHTML('beforeend','<div class="pdpCaption">'+safe+'</div>');\n    modal.addEventListener('click',e=>{if(e.target===modal)closeDetail();});\n    document.body.appendChild(modal);\n  }\n  function bind(){\n    document.querySelectorAll('#pufflogHomePosts .phpCard').forEach(card=>{\n      if(card.dataset.detailBound)return;card.dataset.detailBound='1';\n      card.addEventListener('click',e=>{if(e.target.closest('video'))return;openDetail(card);});\n    });\n  }\n  new MutationObserver(bind).observe(document.body,{subtree:true,childList:true});\n  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDetail();});\n  setTimeout(bind,500);setTimeout(bind,1500);\n})();\n</script>\n'''
+          if '</head>' not in s or '</body>' not in s: raise SystemExit('Unexpected index structure')
+          s=s.replace('</head>',css+'</head>',1)
+          s=s.replace('</body>',js+'</body>',1)
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit and remove temporary workflow
+        shell: bash
+        run: |
+          git config user.name 'PUFFLOG GitHub Bot'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git rm .github/workflows/finish-posts-step.yml
+          git commit -m 'Finish Home posts step'
+          git push
