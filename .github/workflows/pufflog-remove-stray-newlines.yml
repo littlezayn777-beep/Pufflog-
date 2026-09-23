@@ -10,17 +10,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Remove stray literal newline text from app
+      - name: Clean visible newline artifacts and malformed loader text
         shell: bash
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          p=Path('index.html')
-          s=p.read_text(encoding='utf-8')
-          marker='id="pufflog-stray-newline-cleaner"'
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          marker = 'id="pufflog-global-artifact-cleaner"'
           if marker not in s:
-              fix=r'''
-<script id="pufflog-stray-newline-cleaner">
+              fix = r'''
+<script id="pufflog-global-artifact-cleaner">
 (function(){
   function clean(root){
     if(!root) return;
@@ -29,8 +29,9 @@ jobs:
     while(w.nextNode()) a.push(w.currentNode);
     a.forEach(function(n){
       var v=n.nodeValue||'';
-      if(/^(?:\s|\\n|\\r)+$/.test(v)) n.remove();
-      else if(/^(?:\\n|\\r)+$/.test(v)) n.remove();
+      if(/^\\s+$/.test(v) || /^(?:\\n|\\r)+$/.test(v)) { n.remove(); return; }
+      if(v.indexOf('document.open();document.write')!==-1 || v.indexOf("PUFFLOG is loading...")!==-1 || v.indexOf("String(e)")!==-1) { n.remove(); return; }
+      if(v.indexOf('\\n\\n')!==-1 || v.indexOf('\\n\\n\\n')!==-1) n.nodeValue=v.replace(/\\[nr]/g,'');
     });
   }
   function run(){clean(document.body)}
@@ -43,13 +44,13 @@ jobs:
               s=s.replace('</body>',fix+'</body>',1)
           p.write_text(s,encoding='utf-8')
           PY
-      - name: Commit app fix and remove workflow
+      - name: Commit fix and remove one-time workflow
         shell: bash
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html
-          git commit -m 'Remove stray literal newline text from PUFFLOG' || true
+          git commit -m 'Remove visible newline artifacts from PUFFLOG' || true
           git rm .github/workflows/pufflog-remove-stray-newlines.yml || true
-          git commit -m 'Remove one-time newline cleanup workflow' || true
+          git commit -m 'Remove newline cleanup workflow' || true
           git push
