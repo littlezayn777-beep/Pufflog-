@@ -1,0 +1,41 @@
+name: Remove Reels navigation
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/remove-reels-navigation.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  update-index:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Remove Reels button and Home Reel rendering
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          old='<button data-page="reels"><span>▶</span>Reels</button>'
+          s=s.replace(old,'')
+          old2="if(!['home','game','stats','reels','dms','search','profile'].includes(page))page='home';"
+          s=s.replace(old2,"if(!['home','game','stats','dms','search','profile'].includes(page))page='home';")
+          old3="else if(page==='reels'){if(reelsPage){reelsPage.classList.remove('navPage');reelsPage.classList.add('activePage');reelsPage.innerHTML='<iframe id=\"pufflogReelsFrame\" src=\"./reels.html\" title=\"PUFFLOG Reels\" allow=\"autoplay; fullscreen; picture-in-picture\" style=\"display:block;position:fixed;inset:0;z-index:30;width:100%;height:100dvh;min-height:100dvh;border:0;border-radius:0;background:#123a1c\"></iframe>';bridgeReelsFrame(document.getElementById('pufflogReelsFrame'))}}"
+          s=s.replace(old3,'')
+          s=s.replace("if(['home','reels','dms','search','profile'].includes(d.page)) window.showPUFFLOGPage(d.page);","if(['home','dms','search','profile'].includes(d.page)) window.showPUFFLOGPage(d.page);")
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit if changed
+        shell: bash
+        run: |
+          git config user.name 'PUFFLOG GitHub Bot'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'Remove Reels from app navigation and home feed'
+          git push
