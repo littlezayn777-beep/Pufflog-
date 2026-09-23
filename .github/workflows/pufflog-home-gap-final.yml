@@ -1,0 +1,76 @@
+name: PUFFLOG final Home posts fix
+on:
+  push:
+    paths:
+      - '.github/workflows/pufflog-home-gap-final.yml'
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply exact Home and Runner fix
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+
+          # Remove escaped markup separators left by earlier injected patches.
+          for a,b in [
+            ('\\n<style','<style'),('\\n<script','<script'),
+            ('</style>\\n','</style>'),('</script>\\n','</script>'),
+            ('\\n</style>','</style>'),('\\n</script>','</script>'),
+            ('\\n</body>','</body>')
+          ]:
+            s=s.replace(a,b)
+
+          marker='id="pufflog-home-gap-final-fix"'
+          if marker not in s:
+            fix=r'''
+<style id="pufflog-home-gap-final-fix">
+#pufflogSocialHome{min-height:0!important;height:auto!important;margin-bottom:0!important;overflow:visible!important}
+#pufflogHomePosts{margin:8px 0 110px!important;padding-top:0!important}
+</style>
+<script id="pufflog-home-gap-final-fix-js">
+(function(){
+  function fix(){
+    var home=document.getElementById('pufflogSocialHome');
+    var posts=document.getElementById('pufflogHomePosts');
+    if(home&&posts&&posts.parentNode!==home) home.appendChild(posts);
+    if(posts){
+      var active=document.querySelector('.appNav button.active[data-page]');
+      var page=active&&active.dataset?active.dataset.page:'home';
+      var game=document.getElementById('gamePage');
+      var gameActive=game&&game.classList.contains('activePage');
+      posts.style.display=(page==='home'||page==='profile')&&!gameActive?'':'none';
+    }
+    var body=document.body;
+    if(body){
+      Array.from(body.childNodes).forEach(function(n){
+        if(n.nodeType===3 && /^\\s*\\n(?:\\s*\\n)?\\s*$/.test(n.nodeValue||'')) n.remove();
+      });
+    }
+  }
+  window.addEventListener('load',function(){fix();setTimeout(fix,200);setTimeout(fix,800);setTimeout(fix,1600)});
+  document.addEventListener('click',function(){setTimeout(fix,0);setTimeout(fix,150)},true);
+  new MutationObserver(function(){fix()}).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','style']});
+  setInterval(fix,1000);
+})();
+</script>
+'''
+            s=s.replace('</body>',fix+'</body>',1)
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit app fix and remove one-time workflow
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git commit -m 'PUFFLOG Home and Bong Runner fix applied' || true
+          git rm .github/workflows/pufflog-home-gap-final.yml || true
+          git commit -m 'Remove one-time PUFFLOG Home fix workflow' || true
+          git push
