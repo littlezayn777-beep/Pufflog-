@@ -9,7 +9,6 @@ permissions:
 
 jobs:
   fix-post-visibility:
-    if: github.event.head_commit.message != 'Fix uploaded post visibility by page'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -42,5 +41,5 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html
           git rm .github/workflows/finish-posts-step.yml
-          git commit -m 'Fix uploaded post visibility by page'
+          git commit -m 'Apply uploaded post visibility fix'
           git push
