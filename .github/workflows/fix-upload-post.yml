@@ -1,0 +1,146 @@
+name: Fix PUFFLOG Upload Post
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-upload-post.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix-upload:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install reliable upload and post flow
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          marker='id="pufflog-upload-post-fix-v2"'
+          if marker in s:
+              print('Upload fix already present')
+              raise SystemExit(0)
+
+          css=r'''
+          <style id="pufflog-upload-post-fix-v2">
+          #pufflogUploadModal{display:none;position:fixed;inset:0;z-index:2147483646;background:rgba(0,0,0,.76);backdrop-filter:blur(10px);align-items:flex-end;justify-content:center}
+          #pufflogUploadModal.show{display:flex}
+          #pufflogUploadModal .pufUploadSheet{width:min(760px,100%);max-height:90dvh;overflow:auto;background:linear-gradient(145deg,#205b2a,#173d20);border:1px solid #7aaa5b;border-radius:24px 24px 0 0;padding:18px 14px calc(22px + env(safe-area-inset-bottom));box-shadow:0 -18px 55px rgba(0,0,0,.45)}
+          #pufflogUploadModal .pufUploadHead{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+          #pufflogUploadModal h2{margin:0;font-size:24px;color:#fffbea}
+          #pufflogUploadModal .pufClose{width:38px;height:38px;border-radius:50%;border:1px solid #7aaa5b;background:#315c32;color:#fff;font-size:24px}
+          #pufflogUploadModal .pufHint{font-size:13px;color:#cfe0c6;line-height:1.35;margin-bottom:12px}
+          #pufflogUploadModal .pufCaption{width:100%;min-height:105px;resize:vertical;border:1px solid #5e8d4e;border-radius:14px;background:#0e1c12!important;color:#fff!important;padding:13px;font:700 16px -apple-system,BlinkMacSystemFont,Arial,sans-serif;outline:none}
+          #pufflogUploadModal .pufPreview{display:none;margin:12px 0;border:1px solid #6d9c50;border-radius:16px;overflow:hidden;background:#081008;min-height:90px;align-items:center;justify-content:center}
+          #pufflogUploadModal .pufPreview.show{display:flex}
+          #pufflogUploadModal .pufPreview img,#pufflogUploadModal .pufPreview video{display:block;width:100%;max-height:45dvh;object-fit:contain;background:#071008}
+          #pufflogUploadModal .pufFileName{display:none;margin:8px 0;color:#dcebd4;font-size:11px;word-break:break-all}
+          #pufflogUploadModal .pufFileName.show{display:block}
+          #pufflogUploadModal .pufActions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
+          #pufflogUploadModal .pufBtn{border:1px solid #7aaa5b;border-radius:14px;padding:13px 12px;font-weight:900;font-size:15px;background:#315c32;color:#fff}
+          #pufflogUploadModal .pufBtn.primary{background:linear-gradient(135deg,#b5ed58,#61d66c);color:#143019;border-color:transparent}
+          #pufflogUploadModal .pufBtn:disabled{opacity:.42}
+          #pufflogUploadNav{position:relative}
+          </style>
+          '''
+
+          js=r'''
+          <script id="pufflog-upload-post-fix-v2-js">
+          (function(){
+            if(window.__PUFFLOG_UPLOAD_POST_FIX_V2)return;
+            window.__PUFFLOG_UPLOAD_POST_FIX_V2=true;
+            const DB='PUFFLOG_POSTS_V2',STORE='posts';
+            let selected=null,previewUrl=null;
+            const $=id=>document.getElementById(id);
+            function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+            function openDB(){return new Promise((resolve,reject)=>{const r=indexedDB.open(DB,1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains(STORE))r.result.createObjectStore(STORE,{keyPath:'id'});};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});}
+            async function putPost(post){const db=await openDB();return new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).put(post);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);});}
+            async function getPosts(){const db=await openDB();return new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readonly'),r=tx.objectStore(STORE).getAll();r.onsuccess=()=>resolve((r.result||[]).sort((a,b)=>b.createdAt-a.createdAt));r.onerror=()=>reject(r.error);});}
+            function ensureModal(){
+              if($('pufflogUploadModal'))return $('pufflogUploadModal');
+              const m=document.createElement('div');m.id='pufflogUploadModal';m.innerHTML=`<div class="pufUploadSheet">
+                <div class="pufUploadHead"><h2>Upload Post</h2><button type="button" class="pufClose" id="pufUploadClose">×</button></div>
+                <div class="pufHint">Choose a photo or video. It will appear in your PUFFLOG Home feed.</div>
+                <textarea class="pufCaption" id="pufUploadCaption" placeholder="Write a caption..."></textarea>
+                <div class="pufPreview" id="pufUploadPreview"></div>
+                <div class="pufFileName" id="pufUploadFileName"></div>
+                <input id="pufUploadFile" type="file" accept="image/*,video/*" hidden>
+                <div class="pufActions"><button type="button" class="pufBtn" id="pufChooseMedia">Choose media</button><button type="button" class="pufBtn primary" id="pufPublish" disabled>Post</button></div>
+              </div>`;
+              document.body.appendChild(m);
+              $('pufUploadClose').onclick=closeModal;
+              m.addEventListener('click',e=>{if(e.target===m)closeModal();});
+              $('pufChooseMedia').onclick=()=>$('pufUploadFile').click();
+              $('pufUploadFile').onchange=handleFile;
+              $('pufPublish').onclick=publish;
+              return m;
+            }
+            function closeModal(){const m=$('pufflogUploadModal');if(m)m.classList.remove('show');}
+            function openModal(){ensureModal().classList.add('show');}
+            function handleFile(e){
+              const f=e.target.files?.[0];if(!f)return;
+              if(!/^(image|video)\//i.test(f.type)){alert('Please choose an image or video.');return;}
+              selected=f;if(previewUrl)URL.revokeObjectURL(previewUrl);previewUrl=URL.createObjectURL(f);
+              const box=$('pufUploadPreview');box.innerHTML='';
+              const el=f.type.startsWith('video/')?document.createElement('video'):document.createElement('img');
+              el.src=previewUrl;el.playsInline=true;el.controls=f.type.startsWith('video/');if(el.tagName==='VIDEO')el.muted=true;box.appendChild(el);box.classList.add('show');
+              $('pufUploadFileName').textContent=f.name+' • '+Math.round(f.size/1024)+' KB';$('pufUploadFileName').classList.add('show');$('pufPublish').disabled=false;
+            }
+            async function publish(){
+              if(!selected)return;
+              const btn=$('pufPublish');btn.disabled=true;btn.textContent='Posting…';
+              try{
+                const post={id:(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random()),createdAt:Date.now(),caption:$('pufUploadCaption').value.trim().slice(0,500),user:(window.PUFFLOG_SOCIAL?.user?.user_metadata?.username||window.PUFFLOG_SOCIAL?.user?.email?.split('@')[0]||'pufflog'),mime:selected.type,name:selected.name,blob:selected};
+                await putPost(post);
+                closeModal();selected=null;if(previewUrl){URL.revokeObjectURL(previewUrl);previewUrl=null;}
+                $('pufUploadFile').value='';$('pufUploadCaption').value='';$('pufUploadPreview').innerHTML='';$('pufUploadPreview').classList.remove('show');$('pufUploadFileName').classList.remove('show');
+                await renderLocalPosts();
+                if(typeof window.toast==='function')window.toast('Post published');
+              }catch(e){console.error('PUFFLOG upload:',e);alert('Could not publish this post. Please try a smaller photo or video.');}
+              btn.disabled=!selected;btn.textContent='Post';
+            }
+            async function renderLocalPosts(){
+              const root=$('pufflogHomePosts');if(!root)return;
+              let posts=[];try{posts=await getPosts();}catch(e){console.warn('PUFFLOG local posts:',e);return;}
+              root.classList.add('show');root.innerHTML='<div class="phpTitle">Posts</div>';
+              if(!posts.length){root.insertAdjacentHTML('beforeend','<div class="phpEmpty">No posts yet. Your uploaded posts will appear here.</div>');return;}
+              for(const p of posts){
+                const url=URL.createObjectURL(p.blob);const card=document.createElement('article');card.className='phpCard';
+                const media=p.mime?.startsWith('video/')?document.createElement('video'):document.createElement('img');media.className='phpMedia';media.src=url;media.controls=media.tagName==='VIDEO';media.playsInline=true;if(media.tagName==='VIDEO')media.preload='metadata';
+                const body=document.createElement('div');body.className='phpBody';body.innerHTML='<div class="phpUser">@'+esc(p.user||'pufflog')+'</div>'+(p.caption?'<div class="phpCaption">'+esc(p.caption)+'</div>':'');card.append(media,body);root.appendChild(card);
+              }
+            }
+            function addNavButton(){
+              const nav=document.querySelector('.appNav');if(!nav)return;
+              let b=nav.querySelector('[data-page="upload"]');
+              if(!b){b=document.createElement('button');b.id='pufflogUploadNav';b.type='button';b.dataset.page='upload';b.innerHTML='<span>＋</span>Upload';const search=nav.querySelector('[data-page="search"]');if(search)nav.insertBefore(b,search);else nav.appendChild(b);}
+              b.onclick=e=>{e.preventDefault();e.stopPropagation();openModal();};
+            }
+            function bind(){ensureModal();addNavButton();}
+            document.addEventListener('DOMContentLoaded',bind);setTimeout(bind,100);setTimeout(bind,800);setTimeout(bind,1800);
+            new MutationObserver(()=>addNavButton()).observe(document.body,{subtree:true,childList:true});
+            window.PUFFLOG_OPEN_UPLOAD=openModal;
+            window.PUFFLOG_REFRESH_POSTS=renderLocalPosts;
+            window.addEventListener('load',()=>setTimeout(renderLocalPosts,500));
+          })();
+          </script>
+          '''
+          if '</head>' not in s or '</body>' not in s: raise SystemExit('Unexpected index structure')
+          s=s.replace('</head>',css+'</head>',1)
+          s=s.replace('</body>',js+'</body>',1)
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit and remove temporary workflow
+        shell: bash
+        run: |
+          git config user.name 'PUFFLOG GitHub Bot'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git rm .github/workflows/fix-upload-post.yml
+          git commit -m 'Fix PUFFLOG post upload flow'
+          git push
