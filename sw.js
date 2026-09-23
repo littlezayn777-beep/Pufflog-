@@ -1,4 +1,4 @@
-const CACHE='pufflog-v9';
+const CACHE='pufflog-v10';
 
 const PUFFLOG_FIX=`
 <style id="pufflog-direct-nav-fix">
@@ -9,8 +9,6 @@ const PUFFLOG_FIX=`
 .bottom{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:7px!important;justify-content:stretch!important;align-items:stretch!important}
 .bottom .appNav{display:contents!important}.bottom>button,.bottom .appNav>button{min-width:0!important;max-width:none!important;width:100%!important;flex-shrink:1!important}
 #pufflogUploadInput{display:none!important}
-
-/* Uploaded-post feed is HOME-ONLY. PROFILE has its own post grid. */
 #pufflogHomePosts{display:none!important}
 #pufflogHomePosts.pufflog-home-visible{display:block!important}
 </style>`;
@@ -18,17 +16,16 @@ const PUFFLOG_FIX=`
 const PUFFLOG_FIX_JS=`
 <script id="pufflog-direct-nav-fix-js">
 (function(){
-  if(window.__pufflogDirectNavFixV2)return;window.__pufflogDirectNavFixV2=true;
+  if(window.__pufflogDirectNavFixV3)return;window.__pufflogDirectNavFixV3=true;
 
   function removeLiteralArtifacts(){
     try{
       const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
       const remove=[];let n;
       while(n=walker.nextNode()){
-        const raw=n.nodeValue||'';
-        const t=raw.trim();
+        const t=(n.nodeValue||'').trim();
         if(!t)continue;
-        if(/^(?:(?:\\n|\\r|n\\/n|\\/n|n)){1,}$/.test(t))remove.push(n);
+        if(/^(?:(?:\\n|\\r|n\\/n|\\/n|n|\\\\n|\\\\r)){1,}$/.test(t))remove.push(n);
       }
       remove.forEach(x=>x.parentNode&&x.parentNode.removeChild(x));
     }catch(e){}
@@ -66,12 +63,13 @@ const PUFFLOG_FIX_JS=`
 
 function cleanHTML(text){
   let out=text;
-  // Remove legacy post scanners/visibility patches that conflict with the single HOME post feed.
-  out=out.replace(/\\n<script id="pufflog-home-posts-js">[\\s\\S]*?\\n<\\/script>/g,'');
-  out=out.replace(/\\n<style id="pufflog-post-visibility-fix-v1">[\\s\\S]*?\\n<\\/style>/g,'');
-  out=out.replace(/\\n<script id="pufflog-post-visibility-fix-v1-js">[\\s\\S]*?\\n<\\/script>/g,'');
-  // Turn accidental literal backslash-n prefixes into real whitespace before HTML tags.
-  out=out.replace(/\\\\n(?=<(?:style|script|\\/style|\\/script|\\/head|\\/body|div|section|nav|main|html))/g,'\n');
+  // The broken feed was caused by legacy scripts that scan every localStorage key and
+  // inject media into the DOM. Remove them by element id regardless of surrounding \n markers.
+  out=out.replace(/<script\\s+id=["']pufflog-home-posts-js["'][^>]*>[\\s\\S]*?<\\/script>/gi,'');
+  out=out.replace(/<script\\s+id=["']pufflog-post-visibility-fix-v1-js["'][^>]*>[\\s\\S]*?<\\/script>/gi,'');
+  out=out.replace(/<style\\s+id=["']pufflog-post-visibility-fix-v1["'][^>]*>[\\s\\S]*?<\\/style>/gi,'');
+  // Remove stray literal newline markers that were being rendered as visible text.
+  out=out.replace(/(?:\\\\n|n\\/n|\\/n)(?=\\s*(?:<|$))/g,'');
   return out;
 }
 
@@ -79,8 +77,7 @@ async function transformResponse(response){
   if(!response||!response.ok)return response;
   const text=await response.text();
   const cleaned=cleanHTML(text);
-  if(cleaned.includes('pufflog-direct-nav-fix-js'))return new Response(cleaned,{status:response.status,statusText:response.statusText,headers:response.headers});
-  const injected=cleaned.replace(/<\\/body>/i,PUFFLOG_FIX+PUFFLOG_FIX_JS+'<\\/body>');
+  const injected=cleaned.includes('pufflog-direct-nav-fix-js')?cleaned:cleaned.replace(/<\\/body>/i,PUFFLOG_FIX+PUFFLOG_FIX_JS+'<\\/body>');
   const headers=new Headers(response.headers);headers.set('content-type','text/html; charset=utf-8');
   return new Response(injected,{status:response.status,statusText:response.statusText,headers});
 }
