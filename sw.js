@@ -1,11 +1,11 @@
-const CACHE = 'pufflog-v5';
+const CACHE = 'pufflog-v6';
 
 const PUFFLOG_FIX = `
 <style id="pufflog-direct-nav-fix">
-.appNav{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:0!important;width:100%!important;left:0!important;right:0!important}
-.appNav button{min-width:0!important;width:100%!important;white-space:nowrap!important}
+.appNav{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:0!important;width:100%!important;left:0!important;right:0!important;align-items:stretch!important}
+.appNav button{min-width:0!important;width:100%!important;max-width:none!important;white-space:nowrap!important;font-size:16px!important;padding:10px 2px!important;box-sizing:border-box!important}
 .appNav button span{font-size:28px!important;line-height:1!important;display:block;margin-bottom:4px}
-@media(max-width:420px){.appNav button{font-size:10px!important;padding-left:1px!important;padding-right:1px!important}.appNav button span{font-size:22px!important}}
+@media(max-width:420px){.appNav button{font-size:16px!important;padding-left:1px!important;padding-right:1px!important}.appNav button span{font-size:26px!important}}
 #pufflogUploadInput{display:none!important}
 #pufflogUploadModal{display:none;position:fixed;inset:0;z-index:2147483646;background:rgba(0,0,0,.72);backdrop-filter:blur(10px);align-items:flex-end}
 #pufflogUploadModal.show{display:flex}
@@ -27,7 +27,7 @@ const PUFFLOG_FIX_JS = `
       const remove=[]; let n;
       while(n=walker.nextNode()){
         const t=(n.nodeValue||'').trim();
-        if(t==='\\n\\n' || t==='\\\\n\\\\n') remove.push(n);
+        if(/^(?:\\n)+$/.test(t)) remove.push(n);
       }
       remove.forEach(x=>x.parentNode&&x.parentNode.removeChild(x));
     }catch(e){}
