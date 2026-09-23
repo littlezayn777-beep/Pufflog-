@@ -24,17 +24,17 @@ jobs:
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
 
-          # Keep the existing four-button navigation exactly as-is.
+          # Keep the existing five-button navigation exactly as-is.
           s = re.sub(r'<button[^>]*data-page=["\']reels["\'][^>]*>.*?</button>', '', s, flags=re.I | re.S)
           s = re.sub(r'\.appNav\{[^}]*grid-template-columns:repeat\(5[^}]*\}',
-                     '.appNav{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:0!important;width:100%!important;left:0!important;right:0!important}', s)
+                     '.appNav{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:0!important;width:100%!important;left:0!important;right:0!important}', s)
           s = re.sub(r'\.appNav\{grid-template-columns:repeat\(5,minmax\(0,1fr\)\)!important;gap:2px!important;width:100%!important;left:0!important;right:0!important;padding-left:5px!important;padding-right:5px!important\}',
-                     '.appNav{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:0!important;width:100%!important;left:0!important;right:0!important;padding-left:5px!important;padding-right:5px!important}', s)
+                     '.appNav{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:0!important;width:100%!important;left:0!important;right:0!important;padding-left:5px!important;padding-right:5px!important}', s)
 
           # Home must not show Reels.
           marker = '<style id="pufflog-home-no-reels">'
           if marker not in s:
-              s += '''\n<style id="pufflog-home-no-reels">\n#pufflogSocialHome .pshHeroReel,#pufflogSocialHome .pshHomeFeed,#pufflogSocialHome .pshTrending,#pshHomeFeed,#pshTrending,.pshFeedReel,.pshHeroReel{display:none!important}\n.appNav{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:0!important;width:100%!important;left:0!important;right:0!important}\n.appNav button{width:100%!important;min-width:0!important}\n</style>\n'''
+              s += '''\n<style id="pufflog-home-no-reels">\n#pufflogSocialHome .pshHeroReel,#pufflogSocialHome .pshHomeFeed,#pufflogSocialHome .pshTrending,#pshHomeFeed,#pshTrending,.pshFeedReel,.pshHeroReel{display:none!important}\n.appNav{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:0!important;width:100%!important;left:0!important;right:0!important}\n.appNav button{width:100%!important;min-width:0!important}\n</style>\n'''
 
           post_css = '''\n<style id="pufflog-home-posts-css">\n#pufflogHomePosts{display:none;margin:14px 0 110px;padding:0 2px}\n#pufflogHomePosts.show{display:block}\n#pufflogHomePosts .phpTitle{font-size:16px;font-weight:900;margin:8px 4px 10px}\n#pufflogHomePosts .phpEmpty{padding:22px 14px;border:1px solid #4f7a43;border-radius:16px;background:rgba(25,59,29,.72);color:#c4d6b6;text-align:center;font-size:11px}\n#pufflogHomePosts .phpCard{margin:0 0 12px;border:1px solid #4f7a43;border-radius:16px;overflow:hidden;background:#17351d;box-shadow:0 6px 18px rgba(0,0,0,.16)}\n#pufflogHomePosts .phpMedia{display:block;width:100%;max-height:520px;object-fit:cover;background:#071008}\n#pufflogHomePosts .phpBody{padding:10px 12px}\n#pufflogHomePosts .phpUser{font-weight:900;font-size:12px;margin-bottom:4px}\n#pufflogHomePosts .phpCaption{font-size:11px;line-height:1.45;color:#e5f0dc;white-space:pre-wrap;word-break:break-word}\n</style>\n'''
           if 'id="pufflog-home-posts-css"' not in s:
