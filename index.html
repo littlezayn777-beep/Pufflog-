@@ -2056,7 +2056,25 @@ setTimeout(load,1000);
   new MutationObserver(()=>{const page=document.getElementById('instagramProfilePage');if(page?.classList.contains('show'))setTimeout(renderProfile,120)}).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class']});
 })();
 </script>
-\n<script id="pufflog-post-visibility-fix-v1-js">\n(function(){\n  'use strict';\n  function setUploadedPostVisibility(page){\n    const posts=document.getElementById('pufflogHomePosts');\n    if(!posts)return;\n    const visible=page==='home'||page==='profile';\n    posts.classList.toggle('pufflog-hide-uploaded-posts',!visible);\n  }\n  const original=window.showPUFFLOGPage;\n  if(typeof original==='function' && !original.__pufflogPostVisibilityFix){\n    const wrapped=function(page){\n      original.apply(this,arguments);\n      setUploadedPostVisibility(page);\n    };\n    wrapped.__pufflogPostVisibilityFix=true;\n    window.showPUFFLOGPage=wrapped;\n  }\n  document.addEventListener('click',function(e){\n    const b=e.target.closest?.('button[data-page]');\n    if(b)setTimeout(()=>setUploadedPostVisibility(b.dataset.page),0);\n  },true);\n  const observer=new MutationObserver(()=>{\n    const posts=document.getElementById('pufflogHomePosts');\n    if(!posts)return;\n    const active=document.querySelector('.appNav button.active[data-page]');\n    const page=active?.dataset.page||'home';\n    setUploadedPostVisibility(page);\n  });\n  observer.observe(document.body,{subtree:true,childList:true});\n  setTimeout(()=>setUploadedPostVisibility('home'),0);\n  setTimeout(()=>{\n    const active=document.querySelector('.appNav button.active[data-page]');\n    setUploadedPostVisibility(active?.dataset.page||'home');\n  },800);\n})();\n</script>\n</body></html>
+\n<script id="pufflog-post-visibility-fix-v1-js">\n(function(){\n  'use strict';\n  function setUploadedPostVisibility(page){\n    const posts=document.getElementById('pufflogHomePosts');\n    if(!posts)return;\n    const visible=page==='home'||page==='profile';\n    posts.classList.toggle('pufflog-hide-uploaded-posts',!visible);\n  }\n  const original=window.showPUFFLOGPage;\n  if(typeof original==='function' && !original.__pufflogPostVisibilityFix){\n    const wrapped=function(page){\n      original.apply(this,arguments);\n      setUploadedPostVisibility(page);\n    };\n    wrapped.__pufflogPostVisibilityFix=true;\n    window.showPUFFLOGPage=wrapped;\n  }\n  document.addEventListener('click',function(e){\n    const b=e.target.closest?.('button[data-page]');\n    if(b)setTimeout(()=>setUploadedPostVisibility(b.dataset.page),0);\n  },true);\n  const observer=new MutationObserver(()=>{\n    const posts=document.getElementById('pufflogHomePosts');\n    if(!posts)return;\n    const active=document.querySelector('.appNav button.active[data-page]');\n    const page=active?.dataset.page||'home';\n    setUploadedPostVisibility(page);\n  });\n  observer.observe(document.body,{subtree:true,childList:true});\n  setTimeout(()=>setUploadedPostVisibility('home'),0);\n  setTimeout(()=>{\n    const active=document.querySelector('.appNav button.active[data-page]');\n    setUploadedPostVisibility(active?.dataset.page||'home');\n  },800);\n})();\n</script>\n
+<script id="pufflog-artifact-cleaner">
+(function(){
+  function clean(){
+    var w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT),a=[];
+    while(w.nextNode())a.push(w.currentNode);
+    a.forEach(function(n){
+      var v=n.nodeValue||"";
+      if(v.indexOf("document.open();document.write")>=0||v.indexOf("PUFFLOG is loading...")>=0||v.indexOf("String(e)")>=0){n.remove();return;}
+      n.nodeValue=v.replace(/\\[nr]/g,"");
+      if(!n.nodeValue.trim())n.remove();
+    });
+  }
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",clean);else clean();
+  window.addEventListener("load",clean);
+  new MutationObserver(clean).observe(document.documentElement,{subtree:true,childList:true});
+})();
+</script>
+</body></html>
 <style id="pufflog-theme-final-visibility">
 .igp-theme-sheet.show{display:flex!important;visibility:visible!important;opacity:1!important}
 .igp-theme-sheet.show .igp-theme-card{display:block!important;visibility:visible!important;opacity:1!important}
