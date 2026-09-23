@@ -1,4 +1,4 @@
-const CACHE = 'pufflog-v6';
+const CACHE = 'pufflog-v7';
 
 const PUFFLOG_FIX = `
 <style id="pufflog-direct-nav-fix">
@@ -6,6 +6,10 @@ const PUFFLOG_FIX = `
 .appNav button{min-width:0!important;width:100%!important;max-width:none!important;white-space:nowrap!important;font-size:16px!important;padding:10px 2px!important;box-sizing:border-box!important}
 .appNav button span{font-size:28px!important;line-height:1!important;display:block;margin-bottom:4px}
 @media(max-width:420px){.appNav button{font-size:16px!important;padding-left:1px!important;padding-right:1px!important}.appNav button span{font-size:26px!important}}
+/* Keep the five bottom-navigation items on ONE row. The existing button sizing is preserved. */
+.bottom{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:7px!important;justify-content:stretch!important;align-items:stretch!important}
+.bottom .appNav{display:contents!important}
+.bottom>button,.bottom .appNav>button{min-width:0!important;max-width:none!important;width:100%!important;flex-shrink:1!important}
 #pufflogUploadInput{display:none!important}
 #pufflogUploadModal{display:none;position:fixed;inset:0;z-index:2147483646;background:rgba(0,0,0,.72);backdrop-filter:blur(10px);align-items:flex-end}
 #pufflogUploadModal.show{display:flex}
