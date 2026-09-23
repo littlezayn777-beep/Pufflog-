@@ -11,38 +11,57 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Apply targeted UI fix
-        shell: python
+        shell: bash
         run: |
+          python3 <<'PY'
           from pathlib import Path
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
-          fix = r'''
-<style id="pufflog-home-bong-targeted-fix">
-#pufflogSocialHome{min-height:0!important;height:auto!important;margin-bottom:0!important;padding-bottom:0!important}
-#pufflogHomePosts{margin-top:0!important;padding-top:0!important}
+
+          # Remove the Home's forced full-screen height that creates the blank gap.
+          s = s.replace('min-height:calc(100dvh - 8px);', 'min-height:0!important;', 1)
+
+          # Add a small, isolated runtime fix. It moves the local Posts container
+          # inside Home so it cannot render alongside/inside Bong Runner.
+          marker = 'id="pufflog-home-bong-targeted-fix-v2"'
+          if marker not in s:
+              fix = r'''
+<style id="pufflog-home-bong-targeted-fix-v2">
+#pufflogSocialHome{min-height:0!important;height:auto!important;margin-bottom:0!important;overflow:visible!important}
+#pufflogHomePosts{margin:10px 0 110px!important;padding-top:0!important}
 </style>
-<script id="pufflog-home-bong-targeted-fix-js">
+<script id="pufflog-home-bong-targeted-fix-v2-js">
 (function(){
-  function sync(){
+  function clean(){
+    var home=document.getElementById('pufflogSocialHome');
     var posts=document.getElementById('pufflogHomePosts');
-    if(!posts)return;
-    var active=document.querySelector('.appNav button.active[data-page]');
-    var page=active&&active.dataset?active.dataset.page:'home';
-    var game=document.querySelector('.gameStage, canvas.canvas');
-    var hide=(page!=='home' && page!=='profile') || !!game;
-    posts.style.display=hide?'none':'';
+    if(home&&posts&&posts.parentNode!==home) home.appendChild(posts);
+    if(posts){
+      var active=document.querySelector('.appNav button.active[data-page]');
+      var page=active&&active.dataset?active.dataset.page:'home';
+      posts.style.display=(page==='home'||page==='profile')?'':'none';
+    }
+    var walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
+    var nodes=[];
+    while(walker.nextNode()){
+      var n=walker.currentNode, p=n.parentElement;
+      if(!p||/^(SCRIPT|STYLE|TEXTAREA|INPUT)$/i.test(p.tagName)) continue;
+      var t=n.nodeValue||'';
+      if(/^\\n\\n?$/.test(t.trim()) || /^\\n\\n+$/.test(t.trim()) || /document\\.open\\(\\);document\\.write\\(html\\);document\\.close\\(\\)/.test(t)) nodes.push(n);
+    }
+    nodes.forEach(function(n){n.remove()});
   }
-  document.addEventListener('click',function(){setTimeout(sync,50);setTimeout(sync,300)},true);
-  window.addEventListener('load',function(){sync();setTimeout(sync,500);setTimeout(sync,1200)});
-  new MutationObserver(sync).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','style']});
-  setInterval(sync,1000);
+  document.addEventListener('click',function(){setTimeout(clean,0);setTimeout(clean,250)},true);
+  window.addEventListener('load',function(){clean();setTimeout(clean,400);setTimeout(clean,1200)});
+  new MutationObserver(function(){clean()}).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','style']});
+  setInterval(clean,1000);
 })();
 </script>
 '''
-          marker='id="pufflog-home-bong-targeted-fix"'
-          if marker not in s:
-              s=s.replace('</body>',fix+'</body>',1)
-          p.write_text(s,encoding='utf-8')
+              s = s.replace('</body>', fix + '</body>', 1)
+
+          p.write_text(s, encoding='utf-8')
+          PY
       - name: Commit fix
         shell: bash
         run: |
