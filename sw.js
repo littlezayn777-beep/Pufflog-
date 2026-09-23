@@ -1,4 +1,4 @@
-const CACHE='pufflog-v11';
+const CACHE='pufflog-v12';
 
 const PUFFLOG_FIX=`
 <style id="pufflog-direct-nav-fix">
@@ -9,7 +9,8 @@ const PUFFLOG_FIX=`
 .bottom{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:7px!important;justify-content:stretch!important;align-items:stretch!important}
 .bottom .appNav{display:contents!important}.bottom>button,.bottom .appNav>button{min-width:0!important;max-width:none!important;width:100%!important;flex-shrink:1!important}
 #pufflogUploadInput{display:none!important}
-/* Uploaded posts are allowed only on Home and Profile. */
+#pufflogSocialHome{min-height:0!important;height:auto!important;margin-bottom:0!important;overflow:visible!important}
+#pufflogHomePosts{margin:8px 0 110px!important;padding:0 2px!important}
 body.pufflog-posts-hidden #pufflogHomePosts,
 body.pufflog-posts-hidden #pufflogHomePosts *{display:none!important}
 body.pufflog-posts-hidden .phpCard{display:none!important}
@@ -19,16 +20,18 @@ body.pufflog-posts-hidden [data-pufflog-post]{display:none!important}
 const PUFFLOG_FIX_JS=`
 <script id="pufflog-direct-nav-fix-js">
 (function(){
-  if(window.__pufflogDirectNavFixV4)return;window.__pufflogDirectNavFixV4=true;
+  if(window.__pufflogDirectNavFixV5)return;window.__pufflogDirectNavFixV5=true;
 
   function removeLiteralArtifacts(){
     try{
       const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
       const remove=[];let n;
       while(n=walker.nextNode()){
+        const p=n.parentElement;
+        if(p&&/^(SCRIPT|STYLE|TEXTAREA|INPUT)$/i.test(p.tagName))continue;
         const t=(n.nodeValue||'').trim();
         if(!t)continue;
-        if(/^(?:(?:\\n|\\r|n\\/n|\\/n|n|\\\\n|\\\\r)){1,}$/.test(t)||/^(?:\\\\n|\\\\r|\\n|\\r|n\\/n|\\/n|n)+$/.test(t))remove.push(n);
+        if(/^(?:(?:\\n|\\r|n\\/n|\\/n|n|\\\\n|\\\\r)){1,}$/.test(t)||/^(?:\\\\n|\\\\r|\\n|\\r|n\\/n|\\/n|n)+$/.test(t)||/document\\.open\\(\\);document\\.write\\(html\\);document\\.close\\(\\)/.test(t))remove.push(n);
       }
       remove.forEach(x=>x.parentNode&&x.parentNode.removeChild(x));
     }catch(e){}
@@ -45,36 +48,37 @@ const PUFFLOG_FIX_JS=`
       ['game',['#gamePage','.gamePage','[data-page-view="game"]']],
       ['stats',['#statsPage','.statsPage','[data-page-view="stats"]']]
     ];
-    for(const [name,ids] of selectors){
-      for(const id of ids){
-        const el=document.querySelector(id);
-        if(el && (el.classList.contains('activePage')||el.classList.contains('show')||getComputedStyle(el).display!=='none'))return name;
-      }
-    }
+    for(const [name,ids] of selectors){for(const id of ids){const el=document.querySelector(id);if(el&&(el.classList.contains('activePage')||el.classList.contains('show')||getComputedStyle(el).display!=='none'))return name;}}
     return 'home';
+  }
+
+  function movePostsIntoHome(){
+    const home=document.getElementById('pufflogSocialHome');
+    const root=document.getElementById('pufflogHomePosts');
+    if(home&&root&&root.parentNode!==home)home.appendChild(root);
   }
 
   function setPostVisibility(){
     const page=currentPage();
+    movePostsIntoHome();
     const allowed=page==='home'||page==='profile';
     document.body.classList.toggle('pufflog-posts-hidden',!allowed);
-
     const root=document.getElementById('pufflogHomePosts');
     if(root){
-      if(allowed){root.classList.add('pufflog-home-visible');root.removeAttribute('aria-hidden');root.style.removeProperty('display');}
+      const showHome=page==='home'&&allowed;
+      if(showHome){root.classList.add('pufflog-home-visible');root.removeAttribute('aria-hidden');root.style.removeProperty('display');}
       else{root.classList.remove('pufflog-home-visible');root.setAttribute('aria-hidden','true');root.style.setProperty('display','none','important');}
     }
-
     document.querySelectorAll('.phpCard,[data-pufflog-post]').forEach(card=>{
       const inHome=!!card.closest('#pufflogHomePosts');
       const inProfile=!!card.closest('#instagramProfilePage');
-      const show=allowed && (page==='home' ? inHome : inProfile);
+      const show=page==='home'?inHome:(page==='profile'&&inProfile);
       card.style.setProperty('display',show?'':'none','important');
       if(show)card.removeAttribute('aria-hidden');else card.setAttribute('aria-hidden','true');
     });
   }
 
-  function repair(){removeLiteralArtifacts();setPostVisibility();}
+  function repair(){removeLiteralArtifacts();movePostsIntoHome();setPostVisibility();}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',repair,{once:true});else repair();
   document.addEventListener('click',e=>{if(e.target.closest?.('button[data-page],.appNav button'))setTimeout(repair,0)},true);
   window.addEventListener('load',()=>{repair();setTimeout(repair,100);setTimeout(repair,500);setTimeout(repair,1200);setTimeout(repair,2500)});
@@ -84,12 +88,11 @@ const PUFFLOG_FIX_JS=`
 
 function cleanHTML(text){
   let out=text;
-  // Remove legacy post scanners/visibility patches by element id before the page runs them.
   out=out.replace(/<script\\s+id=["']pufflog-home-posts-js["'][^>]*>[\\s\\S]*?<\\/script>/gi,'');
   out=out.replace(/<script\\s+id=["']pufflog-post-visibility-fix-v1-js["'][^>]*>[\\s\\S]*?<\\/script>/gi,'');
   out=out.replace(/<style\\s+id=["']pufflog-post-visibility-fix-v1["'][^>]*>[\\s\\S]*?<\\/style>/gi,'');
-  // Remove stray literal newline markers that were being rendered as visible text.
   out=out.replace(/(?:\\\\n|n\\/n|\\/n)(?=\\s*(?:<|$))/g,'');
+  out=out.replace(/\\n(?=<\\/?(?:style|script|body|head))/gi,'');
   return out;
 }
 
