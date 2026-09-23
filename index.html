@@ -341,7 +341,7 @@ body[data-theme="dark"] #instagramProfilePage{background:#080d09!important}body[
 </div>
 </section>
 <nav aria-label="Main navigation" class="appNav"><button class="active" data-page="home"><span>⌂</span>Home</button>
-<button data-page="reels"><span>▶</span>Reels</button>
+
 <button data-page="dms"><span>✈</span>DM</button>
 <button data-page="search"><span>⌕</span>Search</button>
 <button data-page="profile"><span>◉</span>Profile</button></nav>
@@ -1089,11 +1089,11 @@ const searchPage=document.getElementById('searchPage');
 function hideAll(){[...homeItems,...statsItems,reelsPage,dmsPage,searchPage,gamePage].forEach(el=>{if(el){el.classList.remove('activePage');el.classList.add('navPage')}});if(profileModal)profileModal.classList.remove('show')}
 function refreshGame(){setTimeout(()=>{try{if(typeof size==='function')size()}catch(e){}try{if(typeof draw==='function')draw()}catch(e){}},100)}
 function refreshSocial(){setTimeout(()=>{try{if(window.PUFFLOG_SOCIAL?.refresh)window.PUFFLOG_SOCIAL.refresh()}catch(e){console.log(e)}},80)}
-window.showPUFFLOGPage=function(page){if(!['home','game','stats','reels','dms','search','profile'].includes(page))page='home';hideAll();if(page==='profile'){if(window.PUFFLOG_InstagramProfile?.show)window.PUFFLOG_InstagramProfile.show();else if(typeof window.openProfileModal==='function')window.openProfileModal();else profileModal?.classList.add('show')}else if(page==='game'){gamePage?.classList.remove('navPage');gamePage?.classList.add('activePage');refreshGame()}else if(page==='stats'){statsItems.forEach(el=>{el.classList.remove('navPage');el.classList.add('activePage')});try{update()}catch(e){}}else if(page==='reels'){if(reelsPage){reelsPage.classList.remove('navPage');reelsPage.classList.add('activePage');reelsPage.innerHTML='<iframe id="pufflogReelsFrame" src="./reels.html" title="PUFFLOG Reels" allow="autoplay; fullscreen; picture-in-picture" style="display:block;position:fixed;inset:0;z-index:30;width:100%;height:100dvh;min-height:100dvh;border:0;border-radius:0;background:#123a1c"></iframe>';bridgeReelsFrame(document.getElementById('pufflogReelsFrame'))}}else if(page==='search'){searchPage?.classList.remove('navPage');searchPage?.classList.add('activePage');refreshSocial();setTimeout(()=>{$('globalPeopleSearch')?.focus()},120)}else if(page==='dms'){dmsPage?.classList.remove('navPage');dmsPage?.classList.add('activePage');refreshSocial()}else{homeItems.forEach(el=>{el.classList.remove('navPage');el.classList.add('activePage')});try{update()}catch(e){}}nav?.querySelectorAll('button[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===page));window.scrollTo(0,0)};
+window.showPUFFLOGPage=function(page){if(!['home','game','stats','dms','search','profile'].includes(page))page='home';hideAll();if(page==='profile'){if(window.PUFFLOG_InstagramProfile?.show)window.PUFFLOG_InstagramProfile.show();else if(typeof window.openProfileModal==='function')window.openProfileModal();else profileModal?.classList.add('show')}else if(page==='game'){gamePage?.classList.remove('navPage');gamePage?.classList.add('activePage');refreshGame()}else if(page==='stats'){statsItems.forEach(el=>{el.classList.remove('navPage');el.classList.add('activePage')});try{update()}catch(e){}}else if(page==='search'){searchPage?.classList.remove('navPage');searchPage?.classList.add('activePage');refreshSocial();setTimeout(()=>{$('globalPeopleSearch')?.focus()},120)}else if(page==='dms'){dmsPage?.classList.remove('navPage');dmsPage?.classList.add('activePage');refreshSocial()}else{homeItems.forEach(el=>{el.classList.remove('navPage');el.classList.add('activePage')});try{update()}catch(e){}}nav?.querySelectorAll('button[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===page));window.scrollTo(0,0)};
 window.addEventListener('message',e=>{
   const d=e.data||{};
   if(d.type==='pufflog-nav'){
-    if(['home','reels','dms','search','profile'].includes(d.page)) window.showPUFFLOGPage(d.page);
+    if(['home','dms','search','profile'].includes(d.page)) window.showPUFFLOGPage(d.page);
   }else if(d.type==='pufflog-person' && d.userId){
     window.showPUFFLOGPage('dms');
     setTimeout(()=>{try{window.PUFFLOG_SOCIAL?.openDM?.(d.userId)}catch(err){console.error(err)}},150);
