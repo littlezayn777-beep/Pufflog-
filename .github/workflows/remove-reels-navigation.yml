@@ -14,21 +14,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Remove Reels button and Home Reel rendering
+      - name: Remove Reels from Home and fix four-button navigation
         shell: bash
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          p=Path('index.html')
-          s=p.read_text(encoding='utf-8')
-          old='<button data-page="reels"><span>▶</span>Reels</button>'
-          s=s.replace(old,'')
-          old2="if(!['home','game','stats','reels','dms','search','profile'].includes(page))page='home';"
-          s=s.replace(old2,"if(!['home','game','stats','dms','search','profile'].includes(page))page='home';")
-          old3="else if(page==='reels'){if(reelsPage){reelsPage.classList.remove('navPage');reelsPage.classList.add('activePage');reelsPage.innerHTML='<iframe id=\"pufflogReelsFrame\" src=\"./reels.html\" title=\"PUFFLOG Reels\" allow=\"autoplay; fullscreen; picture-in-picture\" style=\"display:block;position:fixed;inset:0;z-index:30;width:100%;height:100dvh;min-height:100dvh;border:0;border-radius:0;background:#123a1c\"></iframe>';bridgeReelsFrame(document.getElementById('pufflogReelsFrame'))}}"
-          s=s.replace(old3,'')
-          s=s.replace("if(['home','reels','dms','search','profile'].includes(d.page)) window.showPUFFLOGPage(d.page);","if(['home','dms','search','profile'].includes(d.page)) window.showPUFFLOGPage(d.page);")
-          p.write_text(s,encoding='utf-8')
+          import re
+
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+
+          # Remove a Reels navigation button if one is present.
+          s = re.sub(r'<button[^>]*data-page=["\']reels["\'][^>]*>.*?</button>', '', s, flags=re.I | re.S)
+
+          # Keep the four-button navigation evenly distributed.
+          s = re.sub(r'\.appNav\{[^}]*grid-template-columns:repeat\(5[^}]*\}',
+                     '.appNav{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:0!important;width:100%!important;left:0!important;right:0!important}', s)
+          s = re.sub(r'\.appNav\{grid-template-columns:repeat\(5,minmax\(0,1fr\)\)!important;gap:2px!important;width:100%!important;left:0!important;right:0!important;padding-left:5px!important;padding-right:5px!important\}',
+                     '.appNav{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:0!important;width:100%!important;left:0!important;right:0!important;padding-left:5px!important;padding-right:5px!important}', s)
+
+          # Remove all Reel cards/sections from the Home presentation only.
+          marker = '<style id="pufflog-home-no-reels">'
+          if marker not in s:
+              s += '''\n<style id="pufflog-home-no-reels">\n/* PUFFLOG: Home is posts/tools only — no Reels surface. */\n#pufflogSocialHome .pshHeroReel,\n#pufflogSocialHome .pshHomeFeed,\n#pufflogSocialHome .pshTrending,\n#pshHomeFeed,\n#pshTrending,\n.pshFeedReel,\n.pshHeroReel{display:none!important}\n.appNav{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:0!important;width:100%!important;left:0!important;right:0!important}\n.appNav button{width:100%!important;min-width:0!important}\n</style>\n'''
+
+          p.write_text(s, encoding='utf-8')
           PY
       - name: Commit if changed
         shell: bash
@@ -37,5 +47,5 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html
           if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'Remove Reels from app navigation and home feed'
+          git commit -m 'Fix four-button navigation and remove home reels'
           git push
