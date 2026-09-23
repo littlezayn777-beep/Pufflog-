@@ -1,0 +1,27 @@
+name: Diagnose PUFFLOG profile
+on:
+  push:
+    paths:
+      - '.github/workflows/pufflog-diagnose.yml'
+  workflow_dispatch:
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect profile/upload code
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('index.html').read_text()
+          keys=['Profile','profile','Upload Post','posts','localStorage','renderProfile','profileGrid']
+          for k in keys:
+              print('\n===== KEY:',k,'=====')
+              pos=0; n=0
+              while True:
+                  p=s.find(k,pos)
+                  if p<0 or n>=8: break
+                  print('---',p,'---')
+                  print(s[max(0,p-700):p+1200].replace('\\n','\\n'))
+                  pos=p+len(k); n+=1
+          PY
