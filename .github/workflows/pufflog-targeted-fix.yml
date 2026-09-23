@@ -1,0 +1,41 @@
+name: PUFFLOG targeted UI fix
+on:
+  push:
+    paths:
+      - '.github/workflows/pufflog-targeted-fix.yml'
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply targeted fixes
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          old = '.pufflogSocialHome{display:block;min-height:calc(100dvh - 8px);padding:14px 14px 118px;background:'
+          new = '.pufflogSocialHome{display:block;min-height:0!important;padding:14px 14px 118px;background:'
+          if old in s:
+              s = s.replace(old, new, 1)
+          old_root = "if(home?.parentNode)home.parentNode.insertBefore(r,home.nextSibling);else document.querySelector('.app')?.appendChild(r);"
+          new_root = "if(home)home.appendChild(r);else document.querySelector('.app')?.appendChild(r);"
+          if old_root in s:
+              s = s.replace(old_root, new_root, 1)
+          marker = '<style id="pufflog-targeted-layout-fix">'
+          css = marker + '#pufflogHomePosts{margin:10px 0 110px!important;}#pufflogSocialHome{min-height:0!important;overflow:visible!important;}#gamePage #pufflogHomePosts,#gamePage~#pufflogHomePosts{display:none!important;}body.pufflog-cleanup-ready>\\n,body.pufflog-cleanup-ready>\\n\\n{display:none!important;}\n</style>'
+          if marker not in s:
+              s = s.replace('</head>', css + '</head>', 1)
+          p.write_text(s, encoding='utf-8')
+          PY
+      - name: Commit and remove one-time workflow
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git commit -m 'Fix PUFFLOG Home gap and Bong Runner posts' || true
+          git rm .github/workflows/pufflog-targeted-fix.yml || true
+          git commit -m 'Remove one-time PUFFLOG fix workflow' || true
+          git push
