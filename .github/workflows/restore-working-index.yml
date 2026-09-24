@@ -6,7 +6,7 @@ permissions:
   contents: write
 jobs:
   restore:
-    if: github.event.head_commit.message != 'Restore working PUFFLOG index from last known-good build'
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
