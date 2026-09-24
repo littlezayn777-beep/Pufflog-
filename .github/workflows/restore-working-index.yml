@@ -1,0 +1,22 @@
+name: Restore working PUFFLOG index
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  restore:
+    if: github.event.head_commit.message != 'Restore working PUFFLOG index from last known-good build'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Restore index
+        run: |
+          git checkout 8dde9c5b7b438afc1cf401e441e00a0892346650 -- index.html
+          git config user.name 'PUFFLOG Bot'
+          git config user.email 'actions@github.com'
+          git add index.html
+          git commit -m 'Restore working PUFFLOG index from last known-good build'
+          git push
