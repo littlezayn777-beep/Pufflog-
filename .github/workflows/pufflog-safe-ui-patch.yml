@@ -1,0 +1,28 @@
+name: PUFFLOG safe UI patch
+on:
+  push:
+    paths:
+      - '.github/workflows/pufflog-safe-ui-patch.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch UI safely
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          marker='<!-- PUFFLOG_SAFE_UI_PATCH_V1 -->'
+          if marker not in s:
+              patch=r'''\n<!-- PUFFLOG_SAFE_UI_PATCH_V1 -->\n<style id="pufflog-safe-ui-fix">.pufflog-posts-gap-clean{display:none!important}</style>\n<script>\n(function(){\nfunction cleanText(root){var w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),n;while(n=w.nextNode()){if(/(?:\\\\n|\\/n){2,}/.test(n.nodeValue))n.nodeValue=n.nodeValue.replace(/(?:\\\\n|\\/n)+/g,'')}}\nfunction fix(){\ncleanText(document.body);\n[].slice.call(document.querySelectorAll('h1,h2,h3,h4,h5,h6,div,section')).filter(function(e){return /^\\s*Posts\\s*$/i.test(e.textContent||'')}).forEach(function(h){var p=h.previousElementSibling;while(p&&!((p.textContent||'').trim())){if(p.getBoundingClientRect().height>40)p.classList.add('pufflog-posts-gap-clean');p=p.previousElementSibling}});\nvar r=[].slice.call(document.querySelectorAll('h1,h2,h3,h4,h5,h6,button,div,section')).find(function(e){return /^\\s*Bong Runner\\s*$/i.test(e.textContent||'')});\nif(r){var root=r.closest('.card,.hero,section')||r.parentElement;if(root)[].slice.call(root.querySelectorAll('*')).forEach(function(e){if(/^\\s*Posts\\s*$/i.test(e.textContent||''))e.style.display='none'})}}\nif(document.readyState==='loading')document.addEventListener('DOMContentLoaded',fix);else fix();new MutationObserver(fix).observe(document.body,{childList:true,subtree:true,characterData:true});\n})();\n</script>\n'''
+              p.write_text(s.rstrip()+patch+'\n',encoding='utf-8')
+          PY
+          git config user.name 'PUFFLOG Bot'
+          git config user.email 'actions@github.com'
+          git add index.html
+          git diff --cached --quiet || git commit -m 'Fix PUFFLOG stray newline text and Posts layout'
+          git push
